@@ -87,3 +87,7 @@ secrets.json
 
 .turbo/
 .next/
+/build.bat
+/unpack_asar.bat
+/unpackedcopy
+/app.asar
