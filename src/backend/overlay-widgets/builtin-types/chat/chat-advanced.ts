@@ -32,6 +32,10 @@ export type AdvancedChatWidgetSettings = {
     useSeparateTemplateForAnnouncements?: boolean;
     announcementHtmlTemplate?: string;
 
+    showGigantified: boolean;
+    useSeparateTemplateForGigantified?: boolean;
+    gigantifiedHtmlTemplate?: string;
+
     delayMessages: boolean;
     messageDelay?: number;
     newMessageEntryAnimation: Animation;
@@ -207,6 +211,40 @@ The same fields in the default message template are available here, plus these a
             },
             showBottomHr: true
         },
+        {
+            name: "showGigantified",
+            title: "Show Gigantified Emotes",
+            description: "Display gigantified emote messages",
+            type: "boolean",
+            default: false
+        },
+        {
+            name: "useSeparateTemplateForGigantified",
+            title: "Use Separate Template for Gigantified Emotes",
+            description: "Whether or not to use a different HTML template for gigantified emote messages.",
+            type: "boolean",
+            default: true,
+            showIf: {
+                showGigantified: true
+            }
+        },
+        {
+            name: "gigantifiedHtmlTemplate",
+            title: "Gigantified Emote HTML Template",
+            description: "HTML template to use for messages sent from other channels during a shared chat session.",
+            type: "codemirror",
+            default: "",
+            settings: {
+                mode: "htmlmixed",
+                theme: "blackboard"
+            },
+            showIf: {
+                showGigantified: true,
+                useSeparateTemplateForGigantified: true
+            },
+            showBottomHr: true
+        },
+
         {
             name: "delayMessages",
             title: "Add Message Delay",
@@ -515,6 +553,15 @@ The same fields in the default message template are available here, plus these a
                         templateBase = (config.settings.sharedChatMessageHtmlTemplate ?? "")
                             .replaceAll("{{sharedChatRoomChannel}}", chatMessage.sharedChatRoomDisplayName ?? chatMessage.sharedChatRoomUsername ?? "")
                             .replaceAll("{{sharedChatRoomAvatarUrl}}", chatMessage.sharedChatRoomProfilePicUrl ?? "");
+                    }
+                }
+
+                // Sara -- Gigantified Emotes
+                if (chatMessage.isGigantified === true) {
+                    if (config.settings.showGigantified !== true) {
+                        return;
+                    } else if (config.settings.useSeparateTemplateForGigantified === true) {
+                        templateBase = config.settings.gigantifiedHtmlTemplate ?? ""
                     }
                 }
 

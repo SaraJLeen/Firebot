@@ -91,3 +91,6 @@ secrets.json
 /unpack_asar.bat
 /unpackedcopy
 /app.asar
+/update_working.bat
+/asar_unpack.bat
+/build.bat
