@@ -526,6 +526,14 @@ The same fields in the default message template are available here, plus these a
                     return;
                 }
 
+                // Sara -- Ignore RoboWing's informational messages
+                if (chatMessage.username.toLowerCase() === "robowing")
+                {
+                  if(chatMessage.rawText.includes("ℹ️")) {
+                    return;
+                  }
+                }
+
                 // Check the ignore list
                 if (config.settings.hiddenUsers?.some(u =>
                     u.toLowerCase() === chatMessage.username.toLowerCase() || u.toLowerCase() === chatMessage.userDisplayName?.toLowerCase()
@@ -647,7 +655,12 @@ The same fields in the default message template are available here, plus these a
                             break;
 
                         case "link":
-                            chatMessagePartsHtml.push(part.url);
+                            var str1 = new String( "<span class=\"url\">" ); 
+                            var str2 = new String( part.url ); 
+                            var str3 = new String( "</span> " );
+			    var str4 = str1.concat(str2.toString());
+			    var str5 = str4.concat(str3.toString());
+                            chatMessagePartsHtml.push(str5);
                             break;
 
                         default:

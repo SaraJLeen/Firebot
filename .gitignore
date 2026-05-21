@@ -94,3 +94,4 @@ secrets.json
 /update_working.bat
 /asar_unpack.bat
 /build.bat
+/update_dependencies.bat
