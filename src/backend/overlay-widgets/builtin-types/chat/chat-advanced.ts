@@ -658,9 +658,8 @@ The same fields in the default message template are available here, plus these a
                             var str1 = new String( "<span class=\"url\">" ); 
                             var str2 = new String( part.url ); 
                             var str3 = new String( "</span> " );
-			    var str4 = str1.concat(str2.toString());
-			    var str5 = str4.concat(str3.toString());
-                            chatMessagePartsHtml.push(str5);
+			    var strb = str1.concat(str2.toString(), str3.toString());
+                            chatMessagePartsHtml.push(strb);
                             break;
 
                         default:
