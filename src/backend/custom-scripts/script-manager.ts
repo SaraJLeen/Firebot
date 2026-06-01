@@ -41,7 +41,7 @@ type AnyPluginExecutor = IPluginExecutor;
 interface IsolatedModule {
     filename: string;
     paths: string[];
-    exports: unknown;
+    exports: { default?: unknown };
     _compile(src: string, filename: string): void;
 }
 
@@ -141,7 +141,7 @@ class ScriptManager {
             return;
         }
 
-        apiInstance.setManifest((script as ScriptBase | undefined)?.manifest);
+        apiInstance.setManifest((script as ScriptBase)?.manifest);
 
         if (!(await this.scriptCanBePlugin(script))) {
             logger.warn(`Script ${pluginConfig.fileName} is not a valid plugin.`);
@@ -846,7 +846,9 @@ class ScriptManager {
                 delete require.cache[require.resolve(scriptFilePath)];
             }
 
-            return require(scriptFilePath) as LoadedScript;
+            const loadedScript = require(scriptFilePath) as { default: unknown };
+
+            return (loadedScript?.default ?? loadedScript) as LoadedScript;
         } catch (error) {
             frontendCommunicator.send("error", `Error loading the script '${scriptFilePath}' \n\n ${error}`);
             logger.error(error);
@@ -872,7 +874,7 @@ class ScriptManager {
             isolatedModule.filename = scriptFilePath;
             isolatedModule.paths = ModuleCtor._nodeModulePaths(path.dirname(scriptFilePath));
             isolatedModule._compile(src, scriptFilePath);
-            return isolatedModule.exports as LoadedScript;
+            return (isolatedModule.exports?.default ?? isolatedModule.exports) as LoadedScript;
         } catch (error) {
             frontendCommunicator.send("error", `Error loading the script '${scriptFilePath}' \n\n ${error}`);
             logger.error(error);
