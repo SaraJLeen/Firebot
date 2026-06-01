@@ -64,12 +64,26 @@ function getLogFormat(addMetadataToMessage = true) {
     return format.combine(
         format.timestamp({ format: DATE_FORMAT }),
         format.printf((info) => {
-            const scriptId = typeof info.script === "string" ? info.script : null;
-            const scriptTag = scriptId
-                ? ` [Script: ${getScriptLogName(scriptId) ?? scriptId}]`
-                : "";
+            const moduleName = typeof info.module === "string" ? info.module : null;
+            let moduleTag = "";
+            if (!!moduleName?.length) {
+                switch (moduleName) {
+                    case "Plugin":
+                        {
+                            const scriptId = typeof info.script === "string" ? info.script : null;
+                            moduleTag = scriptId
+                                ? ` [Plugin: ${getScriptLogName(scriptId) ?? scriptId}]`
+                                : ` [${moduleName}]`;
+                        }
+                        break;
+
+                    default:
+                        moduleTag = ` [${moduleName}]`;
+                        break;
+                }
+            }
             // eslint-disable-next-line @typescript-eslint/no-base-to-string, @typescript-eslint/restrict-template-expressions
-            return `[${info.timestamp}] [${info.level.toUpperCase()}]${scriptTag} ${info.message}${addMetadataToMessage === true ? formatMetadata(info) : ""}`;
+            return `[${info.timestamp}] [${info.level.toUpperCase()}]${moduleTag} ${info.message}${addMetadataToMessage === true ? formatMetadata(info) : ""}`;
         })
     );
 }

@@ -75,7 +75,7 @@ export function createScriptApiContext(source: ScriptApiContextSource): ScriptAp
             return manifest?.name ?? fileName;
         },
         scriptDataDir,
-        logger: logger.child({ script: scriptId }),
+        logger: logger.child({ module: "Plugin", script: scriptId }),
         onDispose: fn => disposeBag.add(fn)
     };
 
