@@ -10,6 +10,7 @@ import { FirebotParams, FirebotParameterArray } from "./parameters";
 import { FirebotGame } from "./games";
 import { Integration } from "./integrations";
 import { UIExtension } from "./ui-extensions";
+import { OverlayWidgetType } from "./overlay-widgets";
 
 type NoResult = Awaitable<void>;
 
@@ -100,18 +101,12 @@ export interface ScriptBase<Params extends FirebotParams = FirebotParams> {
     manifest: Manifest;
 
     parametersSchema?: FirebotParameterArray<Params>;
-
-    // if uninstalled is true, the script is being removed by the user, thus the script should remove related data files/assets
-    // otherwise the script should assume firebot is closing or the script is being reloaded
-    onUnload?: (context: ScriptContext<Params>, isUninstalling?: boolean) => NoResult;
 }
 
-// Supplants the "Run Script" effect script functionality
 export interface EffectScript<Params extends FirebotParams = FirebotParams> extends ScriptBase<Params> {
     run: (context: ScriptContext<Params>) => Awaitable<void | EffectScriptResult>;
 }
 
-// Supplants the "Start up" script functionality
 export interface Plugin<Params extends FirebotParams = FirebotParams> extends ScriptBase<Params> {
     /**
      * Automatically handles registration with appropriate managers for definitions
@@ -121,9 +116,6 @@ export interface Plugin<Params extends FirebotParams = FirebotParams> extends Sc
      * (or promises of definitions) for dynamic registration based on context (e.g. parameter values).
      */
     registers?: {
-
-        // If value within array is a function, call said function to get definition
-        // If definition is or evaluates to promise, await promise
         effects?: DynamicArray<EffectType<any, any>>;
         eventSources?: DynamicArray<EventSource>;
         variables?: DynamicArray<ReplaceVariable>;
@@ -133,15 +125,16 @@ export interface Plugin<Params extends FirebotParams = FirebotParams> extends Sc
         systemCommands?: DynamicArray<SystemCommand<any>>;
         games?: DynamicArray<FirebotGame>;
         uiExtensions?: DynamicArray<UIExtension>;
+        overlayWidgets?: DynamicArray<OverlayWidgetType<any, any>>;
     };
 
-    // Called when the script is loaded
+    /** Called when the plugin is loaded */
     onLoad?: (context: ScriptContext<Params>, isInstalling?: boolean) => NoResult;
 
-    // Called when firebot is closing or plugin is disabled / removed
+    /** Called when Firebot is closing or plugin is disabled / removed  */
     onUnload?: (context: ScriptContext<Params>, isUninstalling?: boolean) => NoResult;
 
-    // called when the user updates plugin-specific parameters
+    /** Called when the user updates plugin-specific parameters */
     onParameterUpdate?: (context: ScriptContext<Params>) => NoResult;
 }
 
@@ -153,7 +146,6 @@ export type InstalledPlugin = {
 };
 
 /* Legacy types */
-
 type LegacyScriptParameters = Record<
     string,
     {

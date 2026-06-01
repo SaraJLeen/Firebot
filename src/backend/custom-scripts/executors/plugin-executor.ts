@@ -21,6 +21,7 @@ import { GameManager } from "../../games/game-manager";
 import logger from "../../logwrapper";
 import IntegrationManager from "../../integrations/integration-manager";
 import UIExtensionManager from "../../ui-extensions/ui-extension-manager";
+import OverlayWidgetManager from "../../overlay-widgets/overlay-widgets-manager";
 import { resolvePluginManifestLinks } from "../plugin-manifest-utils";
 
 /**
@@ -245,6 +246,17 @@ export class PluginExecutor extends IPluginExecutor {
                 }
             }
         }
+
+        if (Array.isArray(r.overlayWidgets)) {
+            registrations.overlayWidgetIds = [];
+            for (const entry of r.overlayWidgets) {
+                const def = await resolve(entry);
+                if (def?.id) {
+                    OverlayWidgetManager.registerOverlayWidgetType(def);
+                    registrations.overlayWidgetIds.push(def.id);
+                }
+            }
+        }
     }
 
     private runUnregistrations(registrations: PluginRegistrations) {
@@ -304,7 +316,16 @@ export class PluginExecutor extends IPluginExecutor {
                 logger.warn(`Failed to unregister game ${id}`, e);
             }
         }
+
         // UI Extensions can't be dynamically unregistered. Users will need to restart Firebot to fully remove.
+
+        for (const id of registrations.overlayWidgetIds ?? []) {
+            try {
+                OverlayWidgetManager.unregisterOverlayWidgetType(id);
+            } catch (e) {
+                logger.warn(`Failed to unregister overlay widget ${id}`, e);
+            }
+        }
     }
 
     private buildParameters(script: Plugin, config: InstalledPluginConfig): Record<string, unknown> {

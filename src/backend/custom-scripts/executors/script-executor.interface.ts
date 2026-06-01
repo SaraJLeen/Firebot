@@ -25,6 +25,7 @@ export interface PluginRegistrations {
     integrationIds?: string[];
     gameIds?: string[];
     uiExtensionIds?: string[];
+    overlayWidgetIds?: string[];
 }
 
 export type PluginExecutionResult =

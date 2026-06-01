@@ -9,6 +9,7 @@ import { ResourceTokenManager } from "../resource-token-manager";
 
 type Events = {
     "overlay-widget-type-registered": (overlayWidgetType: OverlayWidgetType) => void;
+    "overlay-widget-type-unregistered": (id: string) => void;
 };
 
 class OverlayWidgetsManager extends TypedEmitter<Events> {
@@ -27,6 +28,16 @@ class OverlayWidgetsManager extends TypedEmitter<Events> {
         this.overlayWidgetTypes.set(overlayWidgetType.id, overlayWidgetType);
         this.emit("overlay-widget-type-registered", overlayWidgetType);
         frontendCommunicator.send("overlay-widgets:type-registered", this.formatForFrontend(overlayWidgetType));
+        websocketServerManager.refreshAllOverlays();
+    }
+
+    unregisterOverlayWidgetType(id: string) {
+        if (!this.overlayWidgetTypes.has(id)) {
+            throw new Error(`Overlay widget type with ID '${id}' is not registered.`);
+        }
+        this.overlayWidgetTypes.delete(id);
+        this.emit("overlay-widget-type-unregistered", id);
+        frontendCommunicator.send("overlay-widgets:type-unregistered", { id });
         websocketServerManager.refreshAllOverlays();
     }
 
