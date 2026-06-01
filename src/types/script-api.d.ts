@@ -8,6 +8,8 @@ import type { TriggeredEvent } from "./events";
 import type { RunEffectsContext } from "./effects";
 import type { TwitchApi } from "../backend/streaming-platforms/twitch/api";
 import type { Notification } from "./notifications";
+import type { FirebotAccount } from "./accounts";
+import type { FirebotSettingsTypes } from "./settings";
 
 export type ScriptLogMethod = (message: string, ...meta: unknown[]) => void;
 
@@ -178,11 +180,30 @@ export interface ScriptFrontendCommunicatorApi {
     ): () => void;
 }
 
+export interface ScriptSettingsApi {
+    /**
+     * Get a Firebot setting value or its default
+     *
+     * @param settingName Name of the setting to get
+     * @returns Setting value, or the default if one isn't explicitly set
+     */
+    getSetting<SettingName extends keyof FirebotSettingsTypes>(settingName: SettingName): FirebotSettingsTypes[SettingName];
+}
+
+export interface Accounts {
+    streamer: FirebotAccount;
+    bot: FirebotAccount;
+}
+
 export interface FirebotScriptApi {
-    /** Running Firebot version, e.g. `"5.65.0"`. */
+    /** Running Firebot version, e.g. `"5.67.0"`. */
     version: string;
+    /** The streamer and bot accounts currently in use. */
+    accounts: Accounts;
     /** Scoped logger. */
     logger: ScriptLoggerApi;
+    /** Access to Firebot settings. */
+    settings: ScriptSettingsApi;
     /** Webhooks owned by this script. */
     webhooks: ScriptWebhooksApi;
     /** Simple persistent storage rooted at this script's data directory. */
