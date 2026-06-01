@@ -7,6 +7,7 @@
 import type { TriggeredEvent } from "./events";
 import type { RunEffectsContext } from "./effects";
 import type { TwitchApi } from "../backend/streaming-platforms/twitch/api";
+import type { Notification } from "./notifications";
 
 export type ScriptLogMethod = (message: string, ...meta: unknown[]) => void;
 
@@ -129,6 +130,22 @@ export interface ScriptParametersApi {
     getAll<T extends Record<string, unknown> = Record<string, unknown>>(): T;
 }
 
+export interface ScriptNotificationsApi {
+    /**
+     * Create a new notification. Pass `permanentlySave` as `true` to persist it
+     * across restarts.
+     */
+    add(notification: Pick<Notification, "title" | "message" | "type" | "metadata">, permanentlySave?: boolean): Notification;
+    /** Look up one of this script's notifications by id. */
+    get(id: string): Notification | null;
+    /** All notifications owned by this script. */
+    getAll(): Notification[];
+    /** Delete one of this script's notifications by id. */
+    delete(id: string): void;
+    /** Delete all of this script's notifications. */
+    clearAll(): void;
+}
+
 export interface ScriptFrontendCommunicatorApi {
     /** Send a synchronous event to the frontend. */
     send<ExpectedArg = unknown>(eventName: string, data?: ExpectedArg): void;
@@ -180,4 +197,6 @@ export interface FirebotScriptApi {
     parameters: ScriptParametersApi;
     /** Two-way messaging between the script and the frontend. */
     frontendCommunicator: ScriptFrontendCommunicatorApi;
+    /** Notifications owned by this script. */
+    notifications: ScriptNotificationsApi;
 }
