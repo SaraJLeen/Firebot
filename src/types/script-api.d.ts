@@ -10,6 +10,7 @@ import type { TwitchApi } from "../backend/streaming-platforms/twitch/api";
 import type { Notification } from "./notifications";
 import type { FirebotAccount } from "./accounts";
 import type { FirebotSettingsTypes } from "./settings";
+import type { InstalledPlugin } from "./plugins";
 
 export type ScriptLogMethod = (message: string, ...meta: unknown[]) => void;
 
@@ -190,6 +191,13 @@ export interface ScriptSettingsApi {
     getSetting<SettingName extends keyof FirebotSettingsTypes>(settingName: SettingName): FirebotSettingsTypes[SettingName];
 }
 
+export interface ScriptPluginsApi {
+    /**
+     * Get a list of currently installed plugins installed by the user
+     */
+    getInstalledPlugins(): Promise<Array<InstalledPlugin>>;
+}
+
 export interface Accounts {
     streamer: FirebotAccount;
     bot: FirebotAccount;
@@ -220,4 +228,6 @@ export interface FirebotScriptApi {
     frontendCommunicator: ScriptFrontendCommunicatorApi;
     /** Notifications owned by this script. */
     notifications: ScriptNotificationsApi;
+    /** Access to installed plugins. */
+    plugins: ScriptPluginsApi;
 }

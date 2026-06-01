@@ -23,6 +23,7 @@ export interface ScriptApiContext {
     /** The on-disk filename of the script. */
 
     readonly fileName: string;
+
     /** Manifest, once known. Undefined during very-early loading. */
     readonly manifest: Manifest | undefined;
 
@@ -42,12 +43,11 @@ export interface ScriptApiContext {
 export interface ScriptApiContextHandle {
     readonly context: ScriptApiContext;
     readonly disposeBag: DisposeBag;
-    setManifest(manifest: Manifest | undefined): void;
 }
 
 export type ScriptApiContextSource =
-    | { kind: "plugin", config: InstalledPluginConfig }
-    | { kind: "effect-script", fileName: string };
+    | { kind: "plugin", config: InstalledPluginConfig, manifest: Manifest }
+    | { kind: "effect-script", fileName: string, manifest: Manifest };
 
 export function createScriptApiContext(source: ScriptApiContextSource): ScriptApiContextHandle {
     const fileName = source.kind === "plugin" ? source.config.fileName : source.fileName;
@@ -59,18 +59,19 @@ export function createScriptApiContext(source: ScriptApiContextSource): ScriptAp
 
     const disposeBag = new DisposeBag(`script:${fileName}`);
     const scriptDataDir = resolveScriptDataDir(scriptId);
-    let manifest: Manifest | undefined;
 
     registerScriptLogName(scriptId, fileName);
     disposeBag.add(() => unregisterScriptLogName(scriptId));
 
+    const manifest = source.manifest;
+
+    registerScriptLogName(scriptId, manifest.name ?? fileName);
+
     const context: ScriptApiContext = {
+        scriptId,
         pluginId,
         fileName,
-        get manifest() {
-            return manifest;
-        },
-        scriptId,
+        manifest,
         get displayName() {
             return manifest?.name ?? fileName;
         },
@@ -81,11 +82,7 @@ export function createScriptApiContext(source: ScriptApiContextSource): ScriptAp
 
     return {
         context,
-        disposeBag,
-        setManifest(next) {
-            manifest = next;
-            registerScriptLogName(scriptId, next?.name ?? fileName);
-        }
+        disposeBag
     };
 }
 

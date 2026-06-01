@@ -15,6 +15,7 @@ import { createParametersApi } from "./namespaces/parameters";
 import { createFrontendCommunicatorApi } from "./namespaces/frontend-communicator";
 import { createNotificationsApi } from "./namespaces/notifications";
 import { createSettingsApi } from "./namespaces/settings";
+import { createPluginsApi } from "./namespaces/plugins";
 
 /**
  * Composition root for the Firebot Script API
@@ -33,7 +34,8 @@ export function buildScriptApi(ctx: ScriptApiContext): FirebotScriptApi {
         twitch: createTwitchApi(ctx),
         parameters: createParametersApi(ctx),
         frontendCommunicator: createFrontendCommunicatorApi(ctx),
-        notifications: createNotificationsApi(ctx)
+        notifications: createNotificationsApi(ctx),
+        plugins: createPluginsApi(ctx)
     };
 }
 

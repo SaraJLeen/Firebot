@@ -50,6 +50,7 @@ interface ActivePluginEntry {
     config: InstalledPluginConfig;
     executor: AnyPluginExecutor;
     registrations: PluginRegistrations;
+    manifest: Manifest;
     fileName: string;
     apiInstance: ScriptApiInstance;
 }
@@ -58,7 +59,6 @@ interface ScriptApiInstance {
     context: ScriptApiContext;
     disposeBag: DisposeBag;
     api: FirebotScriptApi;
-    setManifest(manifest: Manifest | undefined): void;
 }
 
 type GetScriptDetailsResult = {
@@ -72,12 +72,11 @@ type GetScriptDetailsResult = {
 };
 
 class ScriptManager {
+    private startingPlugins: Map<string, Promise<void>> = new Map();
     private activePlugins: Record<string, ActivePluginEntry> = {};
 
     private pendingApiInstances: Map<string, ScriptApiInstance> = new Map();
     private effectScriptApiInstances: Map<string, ScriptApiInstance> = new Map();
-
-    private startingPlugins: Map<string, Promise<void>> = new Map();
 
     private requireInterceptorInstalled = false;
 
@@ -131,7 +130,13 @@ class ScriptManager {
 
         const scriptFilePath = this.getScriptFilePath(pluginConfig.fileName);
 
-        const apiInstance = this.createApiInstance({ kind: "plugin", config: pluginConfig });
+        const detailsResult = await this.getScriptDetailsByFileName(pluginConfig.fileName, "plugin");
+        if (detailsResult.success === false) {
+            logger.warn(`Could not get details for plugin ${pluginConfig.fileName}: ${detailsResult.error}`);
+            return;
+        }
+
+        const apiInstance = this.createApiInstance({ kind: "plugin", config: pluginConfig, manifest: detailsResult.details.manifest });
         this.pendingApiInstances.set(pluginConfig.fileName, apiInstance);
 
         const script = this.loadScript(scriptFilePath);
@@ -140,8 +145,6 @@ class ScriptManager {
             this.pendingApiInstances.delete(pluginConfig.fileName);
             return;
         }
-
-        apiInstance.setManifest((script as ScriptBase)?.manifest);
 
         if (!(await this.scriptCanBePlugin(script))) {
             logger.warn(`Script ${pluginConfig.fileName} is not a valid plugin.`);
@@ -174,7 +177,8 @@ class ScriptManager {
                 executor,
                 registrations: result.registrations ?? {},
                 fileName: pluginConfig.fileName,
-                apiInstance
+                apiInstance,
+                manifest: detailsResult.details.manifest
             };
             this.pendingApiInstances.delete(pluginConfig.fileName);
             logger.info(`Started plugin ${pluginConfig.fileName}`);
@@ -379,7 +383,7 @@ class ScriptManager {
             }
         }
 
-        return { success: false, error: "Script does not match any known custom-script format" };
+        return { success: false, error: "Script does not match any known script format" };
     }
 
     /**
@@ -665,6 +669,12 @@ class ScriptManager {
             return { success: false, error: "Script file not found" };
         }
 
+        const detailsResult = await this.getScriptDetailsByFileName(scriptName, "script");
+        if (detailsResult.success === false) {
+            logger.warn(`Could not get details for effect script ${scriptName}: ${detailsResult.error}`);
+            return { success: false, error: "Could not load script details" };
+        }
+
         const willReloadModule = SettingsManager.getSetting("ClearCustomScriptCache")
             || !require.cache[require.resolve(scriptFilePath)];
         if (willReloadModule) {
@@ -673,7 +683,7 @@ class ScriptManager {
 
         let pendingApi: ScriptApiInstance | undefined;
         if (!this.effectScriptApiInstances.has(scriptName)) {
-            pendingApi = this.createApiInstance({ kind: "effect-script", fileName: scriptName });
+            pendingApi = this.createApiInstance({ kind: "effect-script", fileName: scriptName, manifest: detailsResult.details.manifest });
             this.pendingApiInstances.set(scriptName, pendingApi);
         }
 
@@ -710,7 +720,6 @@ class ScriptManager {
             this.pendingApiInstances.delete(scriptName);
             if (chosen instanceof EffectScriptExecutor) {
                 // New-spec: keep the API and populate its manifest.
-                pendingApi.setManifest((script as ScriptBase).manifest);
                 this.effectScriptApiInstances.set(scriptName, pendingApi);
             } else {
                 // Legacy effect script: uses the old runRequest.modules shim
@@ -835,8 +844,7 @@ class ScriptManager {
         return {
             context: handle.context,
             disposeBag: handle.disposeBag,
-            api,
-            setManifest: handle.setManifest
+            api
         };
     }
 
