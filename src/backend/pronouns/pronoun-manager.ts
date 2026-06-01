@@ -16,6 +16,7 @@ type UserPronounResponse = {
 };
 
 class FirebotPronounManager {
+    private logger = logger.child({ module: "Pronouns" });
     private _appVersion = app.getVersion();
     private _pronounCache: Record<string, Pronoun> = { };
     private _userPronounCache = new NodeCache({
@@ -47,7 +48,7 @@ class FirebotPronounManager {
                 this._pronounCache = await response.json() as Record<string, Pronoun>;
             }
         } catch (error) {
-            logger.error("Unable to cache pronoun definitions", error);
+            this.logger.error("Unable to cache pronoun definitions", error);
         }
     }
 
@@ -74,11 +75,11 @@ class FirebotPronounManager {
                     });
                     return this._userPronounCache.get<UserPronoun>(username);
                 } else if (response.status === 404) {
-                    logger.debug(`No pronouns set for ${username}`);
+                    this.logger.debug(`No pronouns set for ${username}`);
                     this._userNoPronounCache.set(username, true);
                 }
             } catch (error) {
-                logger.warn(`Unable to get pronouns for ${username}`, error);
+                this.logger.warn(`Unable to get pronouns for ${username}`, error);
             }
         }
 

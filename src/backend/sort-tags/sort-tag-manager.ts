@@ -10,6 +10,7 @@ interface SortTagCache {
 }
 
 class SortTagManager {
+    private logger = logger.child({ module: "Sort Tags" });
     sortTags: SortTagCache = { };
 
     constructor() {
@@ -27,7 +28,7 @@ class SortTagManager {
     }
 
     loadSortTags() {
-        logger.debug("Attempting to load tags");
+        this.logger.debug("Attempting to load tags");
 
         try {
             const sortTagsData = this.getSortTagsDb().getData("/") as SortTagCache;
@@ -36,9 +37,9 @@ class SortTagManager {
                 this.sortTags = sortTagsData;
             }
 
-            logger.debug(`Loaded tags.`);
+            this.logger.debug(`Loaded tags.`);
         } catch (err) {
-            logger.warn(`There was an error reading tags file.`, err);
+            this.logger.warn(`There was an error reading tags file.`, err);
         }
 
         this.getLegacyEventAndCommandTags();
@@ -103,9 +104,9 @@ class SortTagManager {
             this.getSortTagsDb().push("/", this.sortTags);
 
             frontendCommunicator.send("sort-tags:updated-sort-tags", this.sortTags);
-            logger.debug("Saved tags");
+            this.logger.debug("Saved tags");
         } catch (error) {
-            logger.warn("There was an error saving tags", error);
+            this.logger.warn("There was an error saving tags", error);
         }
     }
 }

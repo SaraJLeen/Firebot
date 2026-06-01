@@ -1,4 +1,3 @@
-import { TypedEmitter } from "tiny-typed-emitter";
 import twitchRolesManager from "./twitch-roles-manager";
 import frontendCommunicator from "../common/frontend-communicator";
 import { AccountAccess } from "../common/account-access";
@@ -18,6 +17,7 @@ interface KnownBotServiceResponse {
 }
 
 class ChatRolesManager {
+    private logger = logger.child({ module: "Roles" });
     private _knownBots: KnownBot[] = [];
 
     setupListeners(): void {
@@ -107,7 +107,7 @@ class ChatRolesManager {
 
             return roles;
         } catch (err) {
-            logger.error("Failed to get user chat roles", err);
+            this.logger.error("Failed to get user chat roles", err);
             return [];
         }
     }

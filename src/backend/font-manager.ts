@@ -24,6 +24,7 @@ export type FirebotFont = {
 };
 
 class FontManager {
+    private logger = logger.child({ module: "Fonts" });
     cachedFonts: FirebotFont[] = [];
 
     constructor() {
@@ -122,13 +123,13 @@ class FontManager {
                 name: this.stripFontFileType(filename),
                 format: this.getFontFormatFromFilename(filename)
             });
-            logger.info(`Font ${filename} installed`);
+            this.logger.info(`Font ${filename} installed`);
 
             await this.generateAppFontCssFile();
 
             return true;
         } catch (error) {
-            logger.error(`Error installing font from ${filepath}`, error);
+            this.logger.error(`Error installing font from ${filepath}`, error);
             return false;
         }
     }
@@ -145,11 +146,11 @@ class FontManager {
             try {
                 await fsp.unlink(font.path);
                 this.cachedFonts.splice(this.cachedFonts.indexOf(font), 1);
-                logger.info(`Font ${name} removed`);
+                this.logger.info(`Font ${name} removed`);
 
                 await this.generateAppFontCssFile();
             } catch (error) {
-                logger.error(`Error removing font ${name}`, error);
+                this.logger.error(`Error removing font ${name}`, error);
             }
         }
     }
@@ -174,9 +175,9 @@ class FontManager {
             frontendCommunicator.send("fonts:reload-font-css");
             webServer.sendToOverlay("OVERLAY:RELOAD_FONTS");
 
-            logger.info("Font CSS file generated");
+            this.logger.info("Font CSS file generated");
         } catch (error) {
-            logger.error("Error generated font CSS file", error);
+            this.logger.error("Error generated font CSS file", error);
         }
     }
 }

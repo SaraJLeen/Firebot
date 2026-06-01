@@ -29,6 +29,7 @@ export interface LoadSetupResult {
 }
 
 class SetupManager {
+    private logger = logger.child({ module: "Firebot Setups" });
     constructor() { }
 
     // We need this because this class doesn't get instantiated otherwise
@@ -67,7 +68,7 @@ class SetupManager {
         try {
             setup = JSON.parse(await fsp.readFile(setupFilePath, { encoding: "utf8" })) as FirebotSetup;
         } catch (error) {
-            logger.error("Failed to load setup file", error);
+            this.logger.error("Failed to load setup file", error);
             result.error = "Failed to load setup file: cannot read file";
             return result;
         }
@@ -87,7 +88,7 @@ class SetupManager {
             await fsp.writeFile(setupFilePath, JSON.stringify(setup));
             return true;
         } catch (error) {
-            logger.error("Failed to create setup", error);
+            this.logger.error("Failed to create setup", error);
             return false;
         }
     }

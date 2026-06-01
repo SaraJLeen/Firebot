@@ -10,15 +10,17 @@ import logger from "../logwrapper";
 import { maskPII } from "../utils";
 
 type ExtraEvents = {
-    "webhook-received": (data: { 
-        config: WebhookConfig,
-        payload: unknown, 
-        rawPayload?: string, 
-        headers: Record<string, string> 
+    "webhook-received": (data: {
+        config: WebhookConfig;
+        payload: unknown;
+        rawPayload?: string;
+        headers: Record<string, string>;
     }) => void;
 };
 
 class WebhookConfigManager extends JsonDbManager<WebhookConfig, ExtraEvents> {
+    private logger = logger.child({ module: "Webhooks" });
+
     constructor() {
         super("Webhooks", "/webhooks");
 
@@ -39,14 +41,14 @@ class WebhookConfigManager extends JsonDbManager<WebhookConfig, ExtraEvents> {
             }
 
             if (SettingsManager.getSetting("WebhookDebugLogs")) {
-                logger.debug("Webhook received:", maskPII(msg.data));
+                this.logger.debug("Webhook received:", maskPII(msg.data));
             }
 
-            const data = msg.data as { 
-                webhookId: string, 
-                payload: unknown, 
-                rawPayload?: string, 
-                headers: Record<string, string> 
+            const data = msg.data as {
+                webhookId: string;
+                payload: unknown;
+                rawPayload?: string;
+                headers: Record<string, string>;
             };
 
             const webhookConfig = this.getItem(data.webhookId);

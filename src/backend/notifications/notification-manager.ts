@@ -10,6 +10,7 @@ import { Notification, ExternalNotification, NotificationBase, NotificationCache
 const EXTERNAL_NOTIFICATION_SOURCE_URL = "https://api.crowbar.tools/v1/notifications/v5";
 
 class NotificationManager {
+    private logger = logger.child({ module: "Notifications" });
     private _externalCheckInterval: NodeJS.Timeout;
     private _notificationCache: NotificationCache = {
         dbVersion: "2",
@@ -43,7 +44,7 @@ class NotificationManager {
         try {
             return this.getNotificationDb().getData("/dbVersion") === "2";
         } catch {
-            logger.debug("No notification dbVersion detected.");
+            this.logger.debug("No notification dbVersion detected.");
             return false;
         }
     }
@@ -149,7 +150,7 @@ class NotificationManager {
 
         } catch (err) {
             const error = err as Error;
-            logger.error("Error loading external notifications", error.message);
+            this.logger.error("Error loading external notifications", error.message);
         }
     }
 

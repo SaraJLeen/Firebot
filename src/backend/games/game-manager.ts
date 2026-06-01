@@ -4,6 +4,7 @@ import frontendCommunicator from "../common/frontend-communicator";
 import logger from "../logwrapper";
 
 class GameManager {
+    private logger = logger.child({ module: "Games" });
     private _registeredGames: FirebotGame[] = [];
     private _allGamesSettings: Record<string, GameSettings> = {};
 
@@ -74,7 +75,7 @@ class GameManager {
 
         this._registeredGames.push(game);
 
-        logger.debug(`Registered game ${game.id}`);
+        this.logger.debug(`Registered game ${game.id}`);
     }
 
     /**
@@ -91,13 +92,13 @@ class GameManager {
             try {
                 game.onUnload(this.buildGameSettings(game, this._allGamesSettings[game.id]));
             } catch (error) {
-                logger.error(`Error invoking onUnload for game ${gameId} during unregister`, error);
+                this.logger.error(`Error invoking onUnload for game ${gameId} during unregister`, error);
             }
         }
 
         this._registeredGames = this._registeredGames.filter(g => g.id !== gameId);
 
-        logger.debug(`Unregistered game ${gameId}`);
+        this.logger.debug(`Unregistered game ${gameId}`);
     }
 
     /**

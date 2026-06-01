@@ -27,18 +27,19 @@ class EventManager extends TypedEmitter<{
     "eventSourceUnregistered": (id: string) => void;
     "event-triggered": (event: TriggeredEvent) => void;
 }> implements EventManagerModule {
+    private logger = logger.child({ module: "Events" });
     private _registeredEventSources: RegisteredEventSource[] = [];
 
     constructor() {
         super();
 
         frontendCommunicator.on("events:get-all-event-sources", () => {
-            logger.info("got 'get all event sources' request");
+            this.logger.info("got 'get all event sources' request");
             return simpleClone(this.getAllEventSources());
         });
 
         frontendCommunicator.on("events:get-all-events", () => {
-            logger.info("got 'get all events' request");
+            this.logger.info("got 'get all events' request");
             return simpleClone(this.getAllEvents());
         });
 
@@ -115,7 +116,7 @@ class EventManager extends TypedEmitter<{
 
         this._registeredEventSources.push(eventSource);
 
-        logger.debug(`Registered Event Source ${eventSource.id}`);
+        this.logger.debug(`Registered Event Source ${eventSource.id}`);
 
         this.emit("eventSourceRegistered", eventSource);
     }
@@ -126,7 +127,7 @@ class EventManager extends TypedEmitter<{
         );
 
         if (!existing) {
-            logger.debug(`Cannot unregister event source ${id}. Event source does not exist.`);
+            this.logger.debug(`Cannot unregister event source ${id}. Event source does not exist.`);
             return;
         }
 
