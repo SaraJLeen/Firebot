@@ -9,7 +9,7 @@ import { AccountAccess } from "../common/account-access";
 import connectionManager from "../common/connection-manager";
 import effectRunner from "../common/effect-runner";
 import frontendCommunicator from "../common/frontend-communicator";
-import logger from "../logwrapper";
+import { LoggerCache } from "../logger-cache";
 
 interface ScheduledTaskRunner {
     taskDefinition: ScheduledTask;
@@ -17,7 +17,7 @@ interface ScheduledTaskRunner {
 }
 
 class ScheduledTaskManager extends JsonDbManager<ScheduledTask> {
-    private logger = logger.child({ module: "Scheduled Tasks" });
+    private logger = LoggerCache.getLogger("Scheduled Tasks");
     taskCache: Map<string, ScheduledTaskRunner> = new Map();
 
     constructor() {

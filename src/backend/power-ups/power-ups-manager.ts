@@ -11,10 +11,10 @@ import { ProfileManager } from "../common/profile-manager";
 import { TwitchApi } from "../streaming-platforms/twitch/api";
 import effectRunner from "../common/effect-runner";
 import frontendCommunicator from "../common/frontend-communicator";
-import logger from "../logwrapper";
+import { LoggerCache } from "../logger-cache";
 
 class PowerUpsManager {
-    private logger = logger.child({ module: "Power-Ups" });
+    private logger = LoggerCache.getLogger("Power-Ups");
     powerUps: Record<string, SavedPowerUp> = {};
 
     constructor() {

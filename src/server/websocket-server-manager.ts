@@ -9,7 +9,7 @@ import { WebSocketClient } from "./websocket-client";
 import { EffectManager } from "../backend/effects/effect-manager";
 import { EventManager } from "../backend/events/event-manager";
 import frontendCommunicator from "../backend/common/frontend-communicator";
-import logger from "../backend/logwrapper";
+import { LoggerCache } from "../backend/logger-cache";
 
 function sendResponse(ws: WebSocketClient, messageId: string | number, data: unknown = null) {
     const response: ResponseMessage = {
@@ -32,7 +32,7 @@ function sendError(ws: WebSocketClient, messageId: string | number, errorMessage
 }
 
 class WebSocketServerManager extends EventEmitter {
-    private logger = logger.child({ module: "WebSocket Server" });
+    private logger = LoggerCache.getLogger("WebSocket Server");
     overlayHasClients = false;
 
     private server: WebSocket.Server<typeof WebSocketClient>;

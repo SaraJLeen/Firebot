@@ -8,10 +8,10 @@ import { AccountAccess } from "../common/account-access";
 import connectionManager from "../common/connection-manager";
 import effectRunner from "../common/effect-runner";
 import frontendCommunicator from "../common/frontend-communicator";
-import logger from "../logwrapper";
+import { LoggerCache } from "../logger-cache";
 
 class TimerManager extends JsonDbManager<Timer> {
-    private logger = logger.child({ module: "Timers" });
+    private logger = LoggerCache.getLogger("Timers");
     private timerIntervalCache: Record<string, TimerIntervalTracker> = {};
 
     constructor() {

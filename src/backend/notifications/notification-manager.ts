@@ -3,14 +3,14 @@ import { randomUUID } from "crypto";
 
 import { ProfileManager } from "../common/profile-manager";
 import frontendCommunicator from "../common/frontend-communicator";
-import logger from "../logwrapper";
+import { LoggerCache } from "../logger-cache";
 import { deepClone } from "../utils";
 import { Notification, ExternalNotification, NotificationBase, NotificationCache } from "../../types";
 
 const EXTERNAL_NOTIFICATION_SOURCE_URL = "https://api.crowbar.tools/v1/notifications/v5";
 
 class NotificationManager {
-    private logger = logger.child({ module: "Notifications" });
+    private logger = LoggerCache.getLogger("Notifications");
     private _externalCheckInterval: NodeJS.Timeout;
     private _notificationCache: NotificationCache = {
         dbVersion: "2",

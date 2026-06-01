@@ -6,11 +6,11 @@ import { Trigger } from "../../types/triggers";
 import { AccountAccess } from "../common/account-access";
 import effectRunner from "../common/effect-runner";
 import frontendCommunicator from "../common/frontend-communicator";
-import logger from "../logwrapper";
+import { LoggerCache } from "../logger-cache";
 import JsonDbManager from "../database/json-db-manager";
 
 class HotkeyManager extends JsonDbManager<FirebotHotkey> {
-    private logger = logger.child({ module: "Hotkeys" });
+    private logger = LoggerCache.getLogger("Hotkeys");
     hotkeys: FirebotHotkey[] = [];
 
     constructor() {

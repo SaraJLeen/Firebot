@@ -1,7 +1,7 @@
 import ReconnectingWebSocket from '../reconnecting-websocket';
 import { AccountAccess } from "../common/account-access";
 import { TypedEmitter } from "tiny-typed-emitter";
-import logger from "../logwrapper";
+import { LoggerCache } from '../logger-cache';
 
 class CrowbarRelayWebSocket extends TypedEmitter<{
     "ready": () => void;
@@ -10,8 +10,8 @@ class CrowbarRelayWebSocket extends TypedEmitter<{
         data: unknown;
     }) => void;
 }> {
+    private logger = LoggerCache.getLogger("Crowbar Relay");
     private ws: ReconnectingWebSocket | null = null;
-    private logger = logger.child({ module: "Crowbar Relay" });
 
     constructor() {
         super();

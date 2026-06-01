@@ -8,7 +8,7 @@ import archiver from "archiver";
 import { SettingsManager } from "./common/settings-manager";
 import * as dataAccess from "./common/data-access";
 import frontendCommunicator from "./common/frontend-communicator";
-import logger from "./logwrapper";
+import { LoggerCache } from "./logger-cache";
 import { emptyFolder, wait } from "./utils";
 
 interface ZipEntry {
@@ -32,7 +32,7 @@ export type FirebotBackup = {
 
 class BackupManager {
     private _backupFolderPath: string = undefined;
-    private logger = logger.child({ module: "Backups" });
+    private logger = LoggerCache.getLogger("Backups");
 
     constructor() {
         this.updateBackupFolderPath();

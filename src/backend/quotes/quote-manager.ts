@@ -6,7 +6,7 @@ import type { Quote, QuoteAutoid } from "../../types/quotes";
 
 import { ProfileManager } from "../common/profile-manager";
 import frontendCommunicator from "../common/frontend-communicator";
-import logger from "../logwrapper";
+import { LoggerCache } from "../logger-cache";
 
 interface QuoteEventData {
     quote: Partial<Quote>;
@@ -19,7 +19,7 @@ interface DateConfig {
 }
 
 class QuoteManager {
-    private logger = logger.child({ module: "Quotes" });
+    private logger = LoggerCache.getLogger("Quotes");
     private db: Datastore<Quote | QuoteAutoid>;
 
     events = new TypedEmitter<{

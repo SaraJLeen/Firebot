@@ -4,7 +4,7 @@ import { CommandManager } from "../chat/commands/command-manager";
 import { TwitchApi } from "../streaming-platforms/twitch/api";
 import rankManager from "./rank-manager";
 import viewerDatabase from "../viewers/viewer-database";
-import logger from "../logwrapper";
+import { LoggerCache } from "../logger-cache";
 
 type RankCommandRefreshRequestAction = "create" | "update" | "delete";
 
@@ -19,7 +19,7 @@ type RankCommandOptions = {
 };
 
 class RankCommandManager {
-    private logger = logger.child({ module: "Ranks" });
+    private logger = LoggerCache.getLogger("Ranks");
 
     constructor() {
         rankManager.on("created-item", (rankLadder: RankLadder) => {

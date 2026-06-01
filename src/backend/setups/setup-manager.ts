@@ -19,7 +19,7 @@ import overlayWidgetConfigManager from "../overlay-widgets/overlay-widget-config
 import rankManager from "../ranks/rank-manager";
 import variableMacroManager from "../variables/macro-manager";
 import frontendCommunicator from "../common/frontend-communicator";
-import logger from "../logwrapper";
+import { LoggerCache } from "../logger-cache";
 import { escapeRegExp } from "../utils";
 
 export interface LoadSetupResult {
@@ -29,7 +29,7 @@ export interface LoadSetupResult {
 }
 
 class SetupManager {
-    private logger = logger.child({ module: "Firebot Setups" });
+    private logger = LoggerCache.getLogger("Firebot Setups");
     constructor() { }
 
     // We need this because this class doesn't get instantiated otherwise

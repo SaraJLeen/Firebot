@@ -11,7 +11,7 @@ import { AccountAccess } from "../common/account-access";
 import { EventsAccess } from "./events-access";
 import eventsRouter from "./events-router";
 import frontendCommunicator from "../common/frontend-communicator";
-import logger from "../logwrapper";
+import { LoggerCache } from "../logger-cache";
 import { flattenArray, simpleClone } from "../utils";
 
 type RegisteredEventDefinition = EventDefinition & {
@@ -27,7 +27,7 @@ class EventManager extends TypedEmitter<{
     "eventSourceUnregistered": (id: string) => void;
     "event-triggered": (event: TriggeredEvent) => void;
 }> implements EventManagerModule {
-    private logger = logger.child({ module: "Events" });
+    private logger = LoggerCache.getLogger("Events");
     private _registeredEventSources: RegisteredEventSource[] = [];
 
     constructor() {
