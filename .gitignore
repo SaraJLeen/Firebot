@@ -70,7 +70,6 @@ dist
 build
 user-settings
 app-settings
-scripts
 *.css
 !/*/*/effect-queue-monitor/styles/*.css
 *.scssc
