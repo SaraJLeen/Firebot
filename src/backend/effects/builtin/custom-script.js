@@ -35,7 +35,7 @@ const effect = {
 
             logger.debug("Processing script...");
 
-            const scriptManager = require("../../custom-scripts/script-manager").default;
+            const scriptManager = require("../../scripts/script-manager").default;
 
             scriptManager
                 .runEffectScript(event.effect, event.trigger)

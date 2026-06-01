@@ -626,7 +626,7 @@ async function createMainWindow() {
             splashscreenWindow.destroy();
         }
 
-        const scriptRunner = require("../../custom-scripts/script-manager").default;
+        const scriptRunner = require("../../scripts/script-manager").default;
         await scriptRunner.startPlugins();
 
         const { EventManager } = require("../../events/event-manager");

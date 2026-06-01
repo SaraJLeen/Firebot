@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import scriptManager from "../../../../backend/custom-scripts/script-manager";
+import scriptManager from "../../../../backend/scripts/script-manager";
 
 /**
  * Convenience endpoint used for plugin hot-reloading. A plugin's dev tooling can

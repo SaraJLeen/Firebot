@@ -7,7 +7,7 @@ import ConnectionManager from "./connection-manager";
 import { AccountAccess } from "./account-access";
 import HttpServerManager from "../../server/http-server-manager";
 import WebsocketServerManager from "../../server/websocket-server-manager";
-import scriptManager from "../custom-scripts/script-manager";
+import scriptManager from "../scripts/script-manager";
 import { isConnected } from "../integrations/builtin/obs/obs-remote";
 
 function getOsName(platform: NodeJS.Platform): string {

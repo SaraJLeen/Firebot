@@ -22,7 +22,7 @@ export async function willQuit(event: Event) {
     const { HotkeyManager } = await import("../../../hotkeys/hotkey-manager");
     const { ScheduledTaskManager } = await import("../../../timers/scheduled-task-manager");
     const { SettingsManager } = await import("../../../common/settings-manager");
-    const scriptManager = (await import("../../../custom-scripts/script-manager")).default;
+    const scriptManager = (await import("../../../scripts/script-manager")).default;
     const viewerOnlineStatusManager = (await import("../../../viewers/viewer-online-status-manager")).default;
 
     // Stop all scheduled tasks

@@ -176,7 +176,7 @@ export async function whenReady() {
     overlayWidgetConfigManager.loadItems();
 
     windowManagement.updateSplashScreenStatus("Loading plugins...");
-    const { PluginConfigManager } = await import("../../../custom-scripts/plugin-config-manager");
+    const { PluginConfigManager } = await import("../../../scripts/plugin-config-manager");
     PluginConfigManager.loadItems();
 
     windowManagement.updateSplashScreenStatus("Starting chat moderation manager...");
