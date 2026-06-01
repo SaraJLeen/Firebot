@@ -45,6 +45,8 @@ interface CustomRoute {
 }
 
 class HttpServerManager extends EventEmitter {
+    private logger = logger.child({ module: "HTTP Server" });
+
     serverInstances: ServerInstance[];
     defaultServerInstance: Express;
     defaultHttpServer: http.Server;
@@ -73,7 +75,7 @@ class HttpServerManager extends EventEmitter {
     start(): void {
         // Default overlay server is already running.
         if (this.overlayServer != null) {
-            logger.error("Overlay server is already running... is another instance running?");
+            this.logger.error("Overlay server is already running... is another instance running?");
             return;
         }
 
@@ -249,10 +251,10 @@ class HttpServerManager extends EventEmitter {
                 });
 
                 const addressInfo = this.overlayServer.address();
-                logger.info(`Default web server started, listening on port ${typeof addressInfo === 'string' ? addressInfo : addressInfo.port}`);
+                this.logger.info(`Default web server started, listening on port ${typeof addressInfo === 'string' ? addressInfo : addressInfo.port}`);
             });
         } catch (error) {
-            logger.error(`Unable to start default web server on port ${port}: ${error}`);
+            this.logger.error(`Unable to start default web server on port ${port}: ${error}`);
         }
     }
 
@@ -285,7 +287,7 @@ class HttpServerManager extends EventEmitter {
     startHttpServer(name: string, port: number, instance: Express): http.Server {
         try {
             if (this.serverInstances.some(si => si.name === name)) {
-                logger.error(`Web server instance named "${name}" is already running`);
+                this.logger.error(`Web server instance named "${name}" is already running`);
                 return;
             }
 
@@ -301,10 +303,10 @@ class HttpServerManager extends EventEmitter {
             });
 
             const addressInfo = this.overlayServer.address();
-            logger.info(`Default web server started, listening on port ${typeof addressInfo === 'string' ? addressInfo : addressInfo.port}`);
+            this.logger.info(`Default web server started, listening on port ${typeof addressInfo === 'string' ? addressInfo : addressInfo.port}`);
             return newHttpServer;
         } catch (error) {
-            logger.error(`Unable to start web server instance "${name}" on port ${port}: ${error}`);
+            this.logger.error(`Unable to start web server instance "${name}" on port ${port}: ${error}`);
             return;
         }
     }
@@ -312,14 +314,14 @@ class HttpServerManager extends EventEmitter {
     stopHttpServer(name): boolean {
         try {
             if (name === "Default") {
-                logger.error("Default web server instance cannot be stopped");
+                this.logger.error("Default web server instance cannot be stopped");
                 return false;
             }
 
             const instanceIndex = this.serverInstances.findIndex(si => si.name === name);
 
             if (instanceIndex === -1) {
-                logger.warn(`No web server instance found with name "${name}"`);
+                this.logger.warn(`No web server instance found with name "${name}"`);
                 return true;
             }
 
@@ -329,11 +331,11 @@ class HttpServerManager extends EventEmitter {
                     return true;
                 }
 
-                logger.error(`Error stopping web server instance "${name}": ${error.message}`);
+                this.logger.error(`Error stopping web server instance "${name}": ${error.message}`);
                 return false;
             });
         } catch (error) {
-            logger.error(`Unable to stop web server instance "${name}": ${error}`);
+            this.logger.error(`Unable to stop web server instance "${name}": ${error}`);
             return false;
         }
     }
@@ -345,17 +347,17 @@ class HttpServerManager extends EventEmitter {
         callback: CustomRoute["callback"]
     ): boolean {
         if (prefix == null || prefix === "") {
-            logger.error(`Failed to register custom route: No custom route prefix specified`);
+            this.logger.error(`Failed to register custom route: No custom route prefix specified`);
             return false;
         }
 
         if (method == null || method === "") {
-            logger.error(`Failed to register custom route: No custom route HTTP method specified`);
+            this.logger.error(`Failed to register custom route: No custom route HTTP method specified`);
             return false;
         }
 
         if (callback == null || !(callback instanceof Function)) {
-            logger.error(`Failed to register custom route: No/invalid callback function specified`);
+            this.logger.error(`Failed to register custom route: No/invalid callback function specified`);
             return false;
         }
 
@@ -369,7 +371,7 @@ class HttpServerManager extends EventEmitter {
         } = this.buildCustomRouteParameters(prefix, route, method);
 
         if (this.customRoutes.findIndex(cr => cr.fullRoute === fullRoute && cr.method === normalizedMethod) > -1) {
-            logger.error(`Failed to register custom route: Custom route already registered at "${fullRoute}"`);
+            this.logger.error(`Failed to register custom route: Custom route already registered at "${fullRoute}"`);
             return false;
         }
 
@@ -438,7 +440,7 @@ class HttpServerManager extends EventEmitter {
                 break;
 
             default:
-                logger.error(`Failed to register custom route "${normalizedMethod} ${fullRoute}": ${normalizedMethod} is not a recognzied HTTP method.`);
+                this.logger.error(`Failed to register custom route "${normalizedMethod} ${fullRoute}": ${normalizedMethod} is not a recognzied HTTP method.`);
                 return false;
         }
 
@@ -450,18 +452,18 @@ class HttpServerManager extends EventEmitter {
             callback: callback
         });
 
-        logger.info(`Registered custom route "${normalizedMethod} ${this.getCustomRoutePathFromRoot(fullRoute)}"`);
+        this.logger.info(`Registered custom route "${normalizedMethod} ${this.getCustomRoutePathFromRoot(fullRoute)}"`);
         return true;
     }
 
     unregisterCustomRoute(prefix: string, route: string, method: string): boolean {
         if (prefix == null || prefix === "") {
-            logger.error(`Failed to unregister custom route: No custom route prefix specified`);
+            this.logger.error(`Failed to unregister custom route: No custom route prefix specified`);
             return false;
         }
 
         if (method == null || method === "") {
-            logger.error(`Failed to unregister custom route: No custom route HTTP method specified`);
+            this.logger.error(`Failed to unregister custom route: No custom route HTTP method specified`);
             return false;
         }
 
@@ -482,7 +484,7 @@ class HttpServerManager extends EventEmitter {
         );
 
         if (customRouteIndex === -1) {
-            logger.warn(`No custom route found with prefix "${normalizedPrefix}", route "${normalizedRoute}", and method "${normalizedMethod}"`);
+            this.logger.warn(`No custom route found with prefix "${normalizedPrefix}", route "${normalizedRoute}", and method "${normalizedMethod}"`);
             return false;
         }
 
@@ -493,7 +495,7 @@ class HttpServerManager extends EventEmitter {
             normalizedMethod.toLowerCase()
         );
 
-        logger.info(`Unegistered custom route "${normalizedMethod} ${this.getCustomRoutePathFromRoot(fullRoute)}"`);
+        this.logger.info(`Unegistered custom route "${normalizedMethod} ${this.getCustomRoutePathFromRoot(fullRoute)}"`);
         return true;
     }
 

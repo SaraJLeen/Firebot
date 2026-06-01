@@ -3,7 +3,7 @@ import http from "http";
 import WebSocket from "ws";
 
 import type { OverlayConnectedData, Message, ResponseMessage, EventMessage, InvokePluginMessage, CustomWebSocketHandler } from "../types/websocket";
-import type { EffectType } from "../types/effects";
+import type { EffectType, WidgetOverlayEvent } from "../types";
 
 import { WebSocketClient } from "./websocket-client";
 import { EffectManager } from "../backend/effects/effect-manager";
@@ -32,6 +32,7 @@ function sendError(ws: WebSocketClient, messageId: string | number, errorMessage
 }
 
 class WebSocketServerManager extends EventEmitter {
+    private logger = logger.child({ module: "WebSocket Server" });
     overlayHasClients = false;
 
     private server: WebSocket.Server<typeof WebSocketClient>;
@@ -49,12 +50,12 @@ class WebSocketServerManager extends EventEmitter {
 
         this.server.on('connection', (ws, req) => {
             ws.registrationTimeout = setTimeout(() => {
-                logger.info(`Unknown Websocket connection timed out from ${req.socket.remoteAddress}`);
+                this.logger.info(`Unknown Websocket connection timed out from ${req.socket.remoteAddress}`);
                 ws.close(4000, "Registration timed out");
             }, 5000);
 
             ws.on('message', (data) => {
-                logger.debug(`Incoming WebSocket message from: ${req.socket.remoteAddress}, message data: ${data.toString().replace(/(\n|\s+)/g, " ")}`);
+                this.logger.debug(`Incoming WebSocket message from: ${req.socket.remoteAddress}, message data: ${data.toString().replace(/(\n|\s+)/g, " ")}`);
 
                 try {
                     const message = JSON.parse(data.toString()) as Message;
@@ -71,7 +72,7 @@ class WebSocketServerManager extends EventEmitter {
                                     clearTimeout(ws.registrationTimeout);
                                     ws.type = "events";
 
-                                    logger.info(`Websocket Event Connection from ${req.socket.remoteAddress}`);
+                                    this.logger.info(`Websocket Event Connection from ${req.socket.remoteAddress}`);
 
                                     sendResponse(ws, message.id);
 
@@ -86,7 +87,7 @@ class WebSocketServerManager extends EventEmitter {
                                     clearTimeout(ws.registrationTimeout);
                                     ws.type = "overlay";
 
-                                    logger.info(`Websocket Overlay Connection from ${req.socket.remoteAddress}`);
+                                    this.logger.info(`Websocket Overlay Connection from ${req.socket.remoteAddress}`);
 
                                     sendResponse(ws, message.id);
 
@@ -181,7 +182,7 @@ class WebSocketServerManager extends EventEmitter {
 
             client.send(dataRaw, (err) => {
                 if (err) {
-                    logger.error(err.message);
+                    this.logger.error(err.message);
                 }
             });
         });
@@ -215,7 +216,7 @@ class WebSocketServerManager extends EventEmitter {
 
             client.send(dataRaw, (err) => {
                 if (err) {
-                    logger.error(err.message);
+                    this.logger.error(err.message);
                 }
             });
         });
@@ -249,11 +250,11 @@ class WebSocketServerManager extends EventEmitter {
                 pluginName,
                 callback
             });
-            logger.info(`Registered custom WebSocket listener for plugin "${pluginName}"`);
+            this.logger.info(`Registered custom WebSocket listener for plugin "${pluginName}"`);
             return true;
         }
 
-        logger.error(`Custom WebSocket listener "${pluginName}" already registered`);
+        this.logger.error(`Custom WebSocket listener "${pluginName}" already registered`);
         return false;
     }
 
@@ -262,11 +263,11 @@ class WebSocketServerManager extends EventEmitter {
 
         if (pluginHandlerIndex !== -1) {
             this.customHandlers.splice(pluginHandlerIndex, 1);
-            logger.info(`Unregistered custom WebSocket listener for plugin "${pluginName}"`);
+            this.logger.info(`Unregistered custom WebSocket listener for plugin "${pluginName}"`);
             return true;
         }
 
-        logger.error(`Custom WebSocket listener "${pluginName}" is not registered`);
+        this.logger.error(`Custom WebSocket listener "${pluginName}" is not registered`);
         return false;
     }
 }

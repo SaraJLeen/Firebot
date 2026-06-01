@@ -5,53 +5,12 @@ import { ProfileManager } from "../common/profile-manager";
 import frontendCommunicator from "../common/frontend-communicator";
 import logger from "../logwrapper";
 import { deepClone } from "../utils";
-
-export enum NotificationSource {
-    EXTERNAL = "external",
-    INTERNAL = "internal",
-    SCRIPT = "script"
-}
-
-export enum NotificationType {
-    INFO = "info",
-    TIP = "tip",
-    UPDATE = "update",
-    ALERT = "alert"
-}
-
-type ExternalNotification = {
-    id: string;
-    title: string;
-    message: string;
-    type: NotificationType;
-};
-
-export type NotificationBase = {
-    title: string;
-    message: string;
-    type: NotificationType;
-    source?: NotificationSource;
-    scriptName?: string;
-    externalId?: string;
-    metadata?: Record<string, unknown>;
-};
-
-export type Notification = NotificationBase & {
-    id: string;
-    timestamp: Date;
-    saved: boolean;
-    read: boolean;
-};
-
-interface NotificationCache {
-    dbVersion?: string;
-    notifications: Notification[];
-    knownExternalIds: string[];
-}
+import { Notification, ExternalNotification, NotificationBase, NotificationCache } from "../../types";
 
 const EXTERNAL_NOTIFICATION_SOURCE_URL = "https://api.crowbar.tools/v1/notifications/v5";
 
 class NotificationManager {
+    private logger = logger.child({ module: "Notifications" });
     private _externalCheckInterval: NodeJS.Timeout;
     private _notificationCache: NotificationCache = {
         dbVersion: "2",
@@ -85,7 +44,7 @@ class NotificationManager {
         try {
             return this.getNotificationDb().getData("/dbVersion") === "2";
         } catch {
-            logger.debug("No notification dbVersion detected.");
+            this.logger.debug("No notification dbVersion detected.");
             return false;
         }
     }
@@ -111,8 +70,8 @@ class NotificationManager {
             timestamp: new Date(),
             read: false,
             saved: permanentlySave ?? false,
-            source: notification.source ?? NotificationSource.INTERNAL,
-            type: notification.type ?? NotificationType.INFO
+            source: notification.source ?? "internal",
+            type: notification.type ?? "info"
         };
 
         this. _notificationCache.notifications.push(newNotification);
@@ -181,7 +140,7 @@ class NotificationManager {
                         title: n.title,
                         message: n.message,
                         type: n.type,
-                        source: NotificationSource.EXTERNAL,
+                        source: "external",
                         externalId: n.id
                     }, true);
                 }
@@ -191,7 +150,7 @@ class NotificationManager {
 
         } catch (err) {
             const error = err as Error;
-            logger.error("Error loading external notifications", error.message);
+            this.logger.error("Error loading external notifications", error.message);
         }
     }
 

@@ -11,6 +11,7 @@ import frontendCommunicator from "../common/frontend-communicator";
 import logger from "../logwrapper";
 
 class TimerManager extends JsonDbManager<Timer> {
+    private logger = logger.child({ module: "Timers" });
     private timerIntervalCache: Record<string, TimerIntervalTracker> = {};
 
     constructor() {
@@ -35,14 +36,14 @@ class TimerManager extends JsonDbManager<Timer> {
         // restart timers when the Streamer goes offline/online
         connectionManager.on("streamerOnlineChange", (isOnline: boolean) => {
             if (isOnline) {
-                logger.debug("Streamer has gone live. Starting live timers.");
+                this.logger.debug("Streamer has gone live. Starting live timers.");
 
                 // streamer went live, spool up intervals for only when live timers
                 const timers = this.getAllItems().filter(t => t.active && t.onlyWhenLive);
 
                 this.buildIntervalsForTimers(timers, true);
             } else {
-                logger.debug("Streamer has gone offline. Stopping live timers.");
+                this.logger.debug("Streamer has gone offline. Stopping live timers.");
 
                 // streamer went offline
                 // cancel intervals with timers set for only when live
@@ -117,7 +118,7 @@ class TimerManager extends JsonDbManager<Timer> {
     }
 
     runTimer(timer: Timer): void {
-        logger.debug(`Running timer ${timer.name}`);
+        this.logger.debug(`Running timer ${timer.name}`);
         // if the passed timer is null, stop
         if (timer == null) {
             return;
@@ -134,7 +135,7 @@ class TimerManager extends JsonDbManager<Timer> {
             // check if enough chat lines have happened
             if (interval.chatLinesSinceLastRunCount < timer.requiredChatLines) {
                 // set timer to waiting for chat lines
-                logger.debug(`Not enough chat lines have happened since last time the timer "${timer.name}" has ran. Waiting for enough lines.`);
+                this.logger.debug(`Not enough chat lines have happened since last time the timer "${timer.name}" has ran. Waiting for enough lines.`);
                 interval.waitingForChatLines = true;
                 clearInterval(interval.intervalId);
                 return;
@@ -151,7 +152,7 @@ class TimerManager extends JsonDbManager<Timer> {
                 );
                 interval.intervalId = intervalId;
                 interval.waitingForChatLines = false;
-                logger.debug(`Chat line requirement has been met for timer "${timer.name}". Running effects and restarting interval.`);
+                this.logger.debug(`Chat line requirement has been met for timer "${timer.name}". Running effects and restarting interval.`);
             }
         }
 
@@ -240,7 +241,7 @@ class TimerManager extends JsonDbManager<Timer> {
     }
 
     incrementChatLineCounters(): void {
-        logger.debug("Incrementing timer chat line counters...");
+        this.logger.debug("Incrementing timer chat line counters...");
 
         const currentIntervals: TimerIntervalTracker[] = Object.values(this.timerIntervalCache);
         for (const interval of currentIntervals) {

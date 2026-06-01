@@ -7,10 +7,11 @@ interface ResourceToken {
 }
 
 class ResourceTokenManager {
+    private logger = logger.child({ module: "Resource Tokens" });
     tokens: Record<string, ResourceToken> = {};
 
     private deleteToken(token: string) {
-        logger.debug(`Deleting token: ${token}`);
+        this.logger.debug(`Deleting token: ${token}`);
         if (this.tokens[token] !== undefined) {
             delete this.tokens[token];
         }

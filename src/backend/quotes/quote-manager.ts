@@ -19,6 +19,7 @@ interface DateConfig {
 }
 
 class QuoteManager {
+    private logger = logger.child({ module: "Quotes" });
     private db: Datastore<Quote | QuoteAutoid>;
 
     events = new TypedEmitter<{
@@ -65,8 +66,8 @@ class QuoteManager {
             await this.db.loadDatabaseAsync();
         } catch (error) {
             const err = error as Error;
-            logger.error("Error Loading Database: ", err.message);
-            logger.debug("Failed Database Path: ", path);
+            this.logger.error("Error Loading Database: ", err.message);
+            this.logger.debug("Failed Database Path: ", path);
         }
     }
 
@@ -113,7 +114,7 @@ class QuoteManager {
             if (!quote._id || isNaN(quote._id)) {
                 const newQuoteId = await this.getNextQuoteId();
                 if (newQuoteId == null) {
-                    logger.error("Unable to add quote as we could not generate a new ID");
+                    this.logger.error("Unable to add quote as we could not generate a new ID");
                     return null;
                 }
 
@@ -136,7 +137,7 @@ class QuoteManager {
             return newQuote._id as number;
         } catch (error) {
             const err = error as Error;
-            logger.error("QuoteDB: Error adding quote: ", err.message);
+            this.logger.error("QuoteDB: Error adding quote: ", err.message);
             return null;
         }
     }
@@ -147,7 +148,7 @@ class QuoteManager {
                 const newQuoteId = await this.getNextQuoteId();
 
                 if (newQuoteId == null) {
-                    logger.error("Unable to add quote as we could not generate a new ID");
+                    this.logger.error("Unable to add quote as we could not generate a new ID");
                     return;
                 }
 
@@ -163,7 +164,7 @@ class QuoteManager {
             frontendCommunicator.send("quotes-update");
         } catch (error) {
             const err = error as Error;
-            logger.error("QuoteDB: Error adding quotes: ", err.message);
+            this.logger.error("QuoteDB: Error adding quotes: ", err.message);
             throw error;
         }
     }
@@ -186,7 +187,7 @@ class QuoteManager {
             return updatedQuote;
         } catch (error) {
             const err = error as Error;
-            logger.error("QuoteDB: Error updating quote: ", err.message);
+            this.logger.error("QuoteDB: Error updating quote: ", err.message);
             return null;
         }
     }
@@ -202,7 +203,7 @@ class QuoteManager {
             }
         } catch (error) {
             const err = error as Error;
-            logger.warn("Error while removing quote", err);
+            this.logger.warn("Error while removing quote", err);
         }
     }
 
@@ -345,7 +346,7 @@ class QuoteManager {
             return true;
         } catch (error) {
             const err = error as Error;
-            logger.error("QuoteDB: Error adding quote: ", err.message);
+            this.logger.error("QuoteDB: Error adding quote: ", err.message);
             return false;
         }
     }
@@ -400,7 +401,7 @@ class QuoteManager {
             await fsp.writeFile(filepath, fileLines.join("\n"), { encoding: "utf8" });
             return true;
         } catch (error) {
-            logger.error("Error exporting quotes to file", error);
+            this.logger.error("Error exporting quotes to file", error);
         }
 
         return false;

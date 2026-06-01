@@ -14,6 +14,7 @@ import frontendCommunicator from "../common/frontend-communicator";
 import logger from "../logwrapper";
 
 class PowerUpsManager {
+    private logger = logger.child({ module: "Power-Ups" });
     powerUps: Record<string, SavedPowerUp> = {};
 
     constructor() {
@@ -64,7 +65,7 @@ class PowerUpsManager {
     }
 
     async loadPowerUps() {
-        logger.debug(`Attempting to load power-ups...`);
+        this.logger.debug(`Attempting to load power-ups...`);
 
         try {
             // Load existing power-up data
@@ -74,7 +75,7 @@ class PowerUpsManager {
             // Get all power-ups from Twitch
             const twitchPowerUps: CustomPowerUp[] = await TwitchApi.powerUps.getCustomPowerUps();
             if (twitchPowerUps == null) {
-                logger.error("Twitch power-ups returned null!");
+                this.logger.error("Twitch power-ups returned null!");
                 this.powerUps = powerUpsData;
                 return;
             }
@@ -106,11 +107,11 @@ class PowerUpsManager {
 
             this.powerUps = syncedPowerUps;
 
-            logger.debug(`Loaded power-ups.`);
+            this.logger.debug(`Loaded power-ups.`);
 
             frontendCommunicator.send("power-ups:updated-all", Object.values(this.powerUps));
         } catch (err) {
-            logger.warn(`There was an error reading power-ups file.`, err);
+            this.logger.warn(`There was an error reading power-ups file.`, err);
         }
     }
 
@@ -133,7 +134,7 @@ class PowerUpsManager {
 
             db.push(`/${powerUp.id}`, powerUp);
 
-            logger.debug(`Saved power-up ${powerUp.id} to file.`);
+            this.logger.debug(`Saved power-up ${powerUp.id} to file.`);
 
             if (emitUpdateEvent) {
                 frontendCommunicator.send("power-ups:updated", powerUp);
@@ -141,7 +142,7 @@ class PowerUpsManager {
 
             return powerUp;
         } catch (err) {
-            logger.warn(`There was an error saving a power-up.`, err);
+            this.logger.warn(`There was an error saving a power-up.`, err);
             return null;
         }
     }
@@ -159,9 +160,9 @@ class PowerUpsManager {
 
             db.push("/", this.powerUps);
 
-            logger.debug(`Saved all power-ups to file.`);
+            this.logger.debug(`Saved all power-ups to file.`);
         } catch (err) {
-            logger.warn(`There was an error saving all power-ups.`, err);
+            this.logger.warn(`There was an error saving all power-ups.`, err);
         }
     }
 
@@ -203,7 +204,7 @@ class PowerUpsManager {
         try {
             await effectRunner.processEffects(processEffectsRequest);
         } catch (reason) {
-            logger.error(`error when running effects: ${reason}`);
+            this.logger.error(`error when running effects: ${reason}`);
         }
     }
 

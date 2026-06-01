@@ -64,6 +64,10 @@
                 }
             });
 
+            backendCommunicator.on("overlay-widgets:type-unregistered", ({ id }) => {
+                service.overlayWidgetTypes = service.overlayWidgetTypes.filter(t => t.id !== id);
+            });
+
             backendCommunicator.on("overlay-widgets:state-display-updated", ({ widgetId, stateDisplay }) => {
                 service.overlayWidgetStateDisplays[widgetId] = stateDisplay;
             });

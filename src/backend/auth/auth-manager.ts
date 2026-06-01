@@ -19,6 +19,7 @@ interface AuthSuccessEventArgs {
 }
 
 class AuthManager extends TypedEmitter<Events> {
+    private logger = logger.child({ module: "Auth" });
     private readonly _httpPort: number;
     private _authProviders: AuthProvider[];
 
@@ -69,7 +70,7 @@ class AuthManager extends TypedEmitter<Events> {
 
         this._authProviders.push(authProvider);
 
-        logger.debug(`Registered Auth Provider ${provider.name}`);
+        this.logger.debug(`Registered Auth Provider ${provider.name}`);
     }
 
     getAuthProvider(providerId: string): AuthProvider {
@@ -114,7 +115,7 @@ class AuthManager extends TypedEmitter<Events> {
 
                 accessToken = await accessToken.refresh(params);
             } catch (error) {
-                logger.warn("Error refreshing access token: ", error);
+                this.logger.warn("Error refreshing access token: ", error);
                 return null;
             }
         }
@@ -131,7 +132,7 @@ class AuthManager extends TypedEmitter<Events> {
             // Revokes both tokens, refresh token is only revoked if the access_token is properly revoked
             // TODO
         } catch (error) {
-            logger.error("Error revoking token: ", (error as Error).message);
+            this.logger.error("Error revoking token: ", (error as Error).message);
         }
     }
 

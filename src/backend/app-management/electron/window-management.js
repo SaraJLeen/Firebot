@@ -409,6 +409,18 @@ async function createAppMenu() {
                     type: 'separator'
                 },
                 {
+                    label: "Plugin Manager",
+                    toolTip: "Install and manage Plugins & Scripts",
+                    sublabel: "Install and manage Plugins & Scripts",
+                    click: () => {
+                        frontendCommunicator.send("open-modal", {
+                            component: "pluginManagerModal",
+                            size: "lg"
+                        });
+                    },
+                    icon: await createIconImage("../../../gui/images/icons/mdi/puzzle-outline.png")
+                },
+                {
                     role: 'toggledevtools',
                     icon: await createIconImage("../../../gui/images/icons/mdi/tools.png")
                 }
@@ -614,8 +626,8 @@ async function createMainWindow() {
             splashscreenWindow.destroy();
         }
 
-        const startupScriptsManager = require("../../common/handlers/custom-scripts/startup-scripts-manager");
-        await startupScriptsManager.runStartupScripts();
+        const scriptRunner = require("../../scripts/script-manager").default;
+        await scriptRunner.startPlugins();
 
         const { EventManager } = require("../../events/event-manager");
         EventManager.triggerEvent("firebot", "firebot-started", {
