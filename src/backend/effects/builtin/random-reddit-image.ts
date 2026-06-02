@@ -11,8 +11,10 @@ import { TwitchApi } from "../../streaming-platforms/twitch/api";
 import mediaProcessor from "../../common/handlers/mediaProcessor";
 import webServer from "../../../server/http-server-manager";
 import frontendCommunicator from "../../common/frontend-communicator";
-import logger from "../../logwrapper";
+import { LoggerCache } from "../../logger-cache";
 import { getRandomImage } from "../../common/handlers/reddit-processor";
+
+const logger = LoggerCache.getLogger("Effects");
 
 const model: EffectType<{
     reddit: string;

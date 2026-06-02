@@ -3,7 +3,9 @@ import { BasicViewer } from "../../../types/viewers";
 import { TwitchApi } from "../../streaming-platforms/twitch/api";
 import customRolesManager from "../../roles/custom-roles-manager";
 import viewerDatabase from "../../viewers/viewer-database";
-import logger from "../../logwrapper";
+import { LoggerCache } from "../../logger-cache";
+
+const logger = LoggerCache.getLogger("Effects");
 
 /**
  * The 'Update Role' effect

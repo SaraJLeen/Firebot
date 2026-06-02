@@ -1,5 +1,7 @@
 import { EffectType } from "../../../types/effects";
-import logger from "../../logwrapper";
+import { LoggerCache } from "../../logger-cache";
+
+const logger = LoggerCache.getLogger("Effects");
 
 const effect: EffectType<{
     logLevel: "Info" | "Warning" | "Error" | "Debug";

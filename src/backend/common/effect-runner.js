@@ -13,7 +13,7 @@ const {
 } = require("./effect-abort-helpers");
 const { checkEffectDependencies } = require("../effects/effect-helpers");
 const frontendCommunicator = require('./frontend-communicator');
-const logger = require('../logwrapper');
+const logger = require('../logger-cache').LoggerCache.getLogger("Effects");
 const { getEventIdFromTriggerData } = require("../utils");
 
 const SKIP_VARIABLE_PROPERTIES = ["list", "leftSideValue", "rightSideValue", "effectLabel", 'effectListLabel'];

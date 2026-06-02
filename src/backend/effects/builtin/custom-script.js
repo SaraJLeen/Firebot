@@ -1,6 +1,6 @@
 "use strict";
 
-const logger = require("../../logwrapper");
+const logger = require("../../logger-cache").LoggerCache.getLogger("Effects");
 const { EffectCategory } = require('../../../shared/effect-constants');
 const frontendCommunicator = require("../../common/frontend-communicator");
 

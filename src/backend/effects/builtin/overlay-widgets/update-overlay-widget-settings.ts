@@ -2,7 +2,9 @@ import { EffectType } from "../../../../types/effects";
 import { OverlayWidgetConfig, Position } from "../../../../types/overlay-widgets";
 import overlayWidgetConfigManager from "../../../overlay-widgets/overlay-widget-config-manager";
 import overlayWidgetsManager from "../../../overlay-widgets/overlay-widgets-manager";
-import logger from "../../../logwrapper";
+import { LoggerCache } from "../../../logger-cache";
+
+const logger = LoggerCache.getLogger("Effects");
 
 const model: EffectType<{
     widgetConfigId: string;

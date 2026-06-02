@@ -3,7 +3,7 @@
 const { SettingsManager } = require("../settings-manager");
 const { ResourceTokenManager } = require("../../resource-token-manager");
 const { getRandomInt } = require("../../utils");
-const logger = require("../../logwrapper");
+const logger = require("../../logger-cache").LoggerCache.getLogger("Media Processor");
 const { ReplaceVariableManager } = require("../../variables/replace-variable-manager");
 const webServer = require("../../../server/http-server-manager");
 

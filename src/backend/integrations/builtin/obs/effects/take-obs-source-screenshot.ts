@@ -1,8 +1,10 @@
 import { EffectType } from "../../../../../types/effects";
-import {CustomEmbed, EmbedType} from "../../../../../types/discord";
-import {getCurrentSceneName, OBSSource, OBSSourceScreenshotSettings, takeSourceScreenshot} from "../obs-remote";
-import logger from "../../../../logwrapper";
+import { CustomEmbed, EmbedType } from "../../../../../types/discord";
+import { getCurrentSceneName, OBSSource, OBSSourceScreenshotSettings, takeSourceScreenshot } from "../obs-remote";
+import { LoggerCache } from "../../../../logger-cache";
 import * as screenshotHelpers from "../../../../common/screenshot-helpers";
+
+const logger = LoggerCache.getLogger("Integration: OBS");
 
 export const TakeOBSSourceScreenshotEffectType: EffectType<{
     source: string;

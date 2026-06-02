@@ -1,6 +1,8 @@
 import { EffectType } from "../../../types/effects";
 import { CounterManager } from "../../counters/counter-manager";
-import logger from "../../logwrapper";
+import { LoggerCache } from "../../logger-cache";
+
+const logger = LoggerCache.getLogger("Effects");
 
 const effect: EffectType<{
     counterId: string;

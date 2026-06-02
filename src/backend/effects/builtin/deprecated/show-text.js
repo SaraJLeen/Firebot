@@ -4,7 +4,7 @@ const escapeHTML = require("escape-html");
 const { ReplaceVariableManager } = require("../../../variables/replace-variable-manager");
 const { SettingsManager } = require("../../../common/settings-manager");
 const webServer = require("../../../../server/http-server-manager");
-const logger = require("../../../logwrapper");
+const logger = require("../../../logger-cache").LoggerCache.getLogger("Effects");
 const mediaProcessor = require("../../../common/handlers/mediaProcessor");
 
 /**

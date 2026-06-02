@@ -5,8 +5,10 @@ import { CommandManager } from "../../chat/commands/command-manager";
 import chatHelpers from "../../chat/chat-helpers";
 import chatCommandHandler from "../../chat/commands/chat-command-handler";
 import commandRunner from "../../chat/commands/command-runner";
-import logger from "../../logwrapper";
+import { LoggerCache } from "../../logger-cache";
 import { simpleClone } from '../../utils';
+
+const logger = LoggerCache.getLogger("Effects");
 
 const effect: EffectType<{
     commandType: "system" | "custom";

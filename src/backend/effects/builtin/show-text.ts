@@ -9,7 +9,9 @@ import type {
 import { SettingsManager } from "../../common/settings-manager";
 import mediaProcessor from "../../common/handlers/mediaProcessor";
 import webServer from "../../../server/http-server-manager";
-import logger from "../../logwrapper";
+import { LoggerCache } from "../../logger-cache";
+
+const logger = LoggerCache.getLogger("Effects");
 
 type ShowTextEffectModel = {
     text: string;

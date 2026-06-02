@@ -1,8 +1,10 @@
 import { EffectType } from "../../../../types/effects";
 import overlayWidgetConfigManager from "../../../overlay-widgets/overlay-widget-config-manager";
-import logger from "../../../logwrapper";
+import { LoggerCache } from "../../../logger-cache";
 import type { DynamicCountdownWidgetConfig } from "../../../overlay-widgets/builtin-types/countdown/countdown-dynamic";
 import countdownManager from "../../../overlay-widgets/builtin-types/countdown/countdown-manager";
+
+const logger = LoggerCache.getLogger("Effects");
 
 const model: EffectType<{
     countdownWidgetId: string;
