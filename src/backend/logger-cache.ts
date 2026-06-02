@@ -1,6 +1,9 @@
 import type { Logger } from "winston";
 import logger from "./logwrapper";
 
+/**
+ * A utility class for the built-in Firebot {@link logger} that provides child loggers with module metadata included
+ */
 class LoggerCache {
     private _loggerCache: Record<string, Logger> = { };
 

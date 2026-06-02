@@ -14,7 +14,7 @@ import { promises as fsp, existsSync, readFileSync } from "fs";
 import Module from "module";
 
 import { ProfileManager } from "../common/profile-manager";
-import logger from "../logwrapper";
+import { LoggerCache } from "../logger-cache";
 import frontendCommunicator from "../common/frontend-communicator";
 import { SettingsManager } from "../common/settings-manager";
 import { PluginConfigManager } from "./plugin-config-manager";
@@ -34,6 +34,8 @@ import { buildScriptApi, createScriptApiContext } from "./script-api";
 import type { ScriptApiContext, ScriptApiContextSource } from "./script-api";
 import type { DisposeBag } from "./script-api/internal/dispose-bag";
 import type { FirebotScriptApi } from "../../types/script-api";
+
+const logger = LoggerCache.getLogger("Plugins");
 
 type LoadedScript = ScriptBase | LegacyCustomScript;
 type AnyPluginExecutor = IPluginExecutor;

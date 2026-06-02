@@ -1,4 +1,6 @@
-import logger from "../../../logwrapper";
+import { LoggerCache } from "../../../logger-cache";
+
+const logger = LoggerCache.getLogger("Plugins");
 
 export type DisposeFn = () => void | Promise<void>;
 

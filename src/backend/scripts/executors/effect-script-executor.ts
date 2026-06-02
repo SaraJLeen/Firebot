@@ -3,11 +3,12 @@ import {
     IEffectScriptExecutor,
     EffectScriptExecutionResult
 } from "./script-executor.interface";
-import logger from "../../logwrapper";
+import { LoggerCache } from "../../logger-cache";
 import { wait, simpleClone } from "../../utils";
 import { randomUUID } from "crypto";
 import * as effectRunner from "../../common/effect-runner";
 
+const logger = LoggerCache.getLogger("Plugins");
 
 /**
  * Executor for new-spec EffectScripts (manifest.type === "script")

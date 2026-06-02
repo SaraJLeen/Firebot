@@ -15,8 +15,10 @@ import {
     mapParameters
 } from "../../common/handlers/custom-scripts/custom-script-helpers";
 import { runEffectsResult } from "./effect-script-executor";
-import logger from "../../logwrapper";
+import { LoggerCache } from "../../logger-cache";
 import { wait } from "../../utils";
+
+const logger = LoggerCache.getLogger("Plugins");
 
 /**
  * Executor for legacy effect scripts (run function with no manifest or startupOnly !== true)

@@ -11,7 +11,9 @@ import discord from "../integrations/builtin/discord/discord-message-sender";
 import discordEmbedBuilder from "../integrations/builtin/discord/discord-embed-builder";
 import mediaProcessor from "../common/handlers/mediaProcessor";
 import webServer from "../../server/http-server-manager";
-import logger from "../logwrapper";
+import { LoggerCache } from "../logger-cache";
+
+const logger = LoggerCache.getLogger("Core");
 
 export async function saveScreenshotToFolder(base64ImageData: string, folderPath: string, fileName?: string) {
     try {

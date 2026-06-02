@@ -18,11 +18,13 @@ import { FilterManager } from "../../events/filters/filter-manager";
 import { CommandManager } from "../../chat/commands/command-manager";
 import { RestrictionsManager } from "../../restrictions/restriction-manager";
 import { GameManager } from "../../games/game-manager";
-import logger from "../../logwrapper";
+import { LoggerCache } from "../../logger-cache";
 import IntegrationManager from "../../integrations/integration-manager";
 import UIExtensionManager from "../../ui-extensions/ui-extension-manager";
 import OverlayWidgetManager from "../../overlay-widgets/overlay-widgets-manager";
 import { resolvePluginManifestLinks } from "../plugin-manifest-utils";
+
+const logger = LoggerCache.getLogger("Plugins");
 
 /**
  * Executor for new-spec Plugins (manifest.type === "plugin")

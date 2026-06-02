@@ -4,8 +4,10 @@ import frontendCommunicator from "../common/frontend-communicator";
 import overlayWidgetConfigManager from "./overlay-widget-config-manager";
 import websocketServerManager from "../../server/websocket-server-manager";
 import { wait } from "../utils";
-import logger from "../logwrapper";
+import { LoggerCache } from "../logger-cache";
 import { ResourceTokenManager } from "../resource-token-manager";
+
+const logger = LoggerCache.getLogger("Overlay Widgets");
 
 type Events = {
     "overlay-widget-type-registered": (overlayWidgetType: OverlayWidgetType) => void;
