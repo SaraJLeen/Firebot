@@ -2,7 +2,7 @@ import { TypedEmitter } from "tiny-typed-emitter";
 import type { Restriction, RestrictionData, RestrictionType } from "../../types/restrictions";
 import type { Trigger, TriggerMeta, TriggerType } from "../../types/triggers";
 import frontendCommunicator from "../common/frontend-communicator";
-import logger from "../logwrapper";
+import { LoggerCache } from "../logger-cache";
 
 type Events = {
     "restriction-registered": (restriction: RestrictionType) => void;
@@ -10,7 +10,7 @@ type Events = {
 };
 
 class RestrictionsManager extends TypedEmitter<Events> {
-    private logger = logger.child({ module: "Restrictions" });
+    private logger = LoggerCache.getLogger("Restrictions");
     private _registeredRestrictions: RestrictionType[] = [];
 
     constructor() {

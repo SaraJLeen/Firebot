@@ -14,10 +14,12 @@ import customRolesManager from "../../../roles/custom-roles-manager";
 import teamRolesManager from "../../../roles/team-roles-manager";
 import twitchListeners from "../../../chat/chat-listeners/twitch-chat-listeners";
 import twitchRolesManager from "../../../../shared/twitch-roles";
-import logger from "../../../logwrapper";
+import { LoggerCache } from "../../../logger-cache";
 import { commafy, humanizeTime } from "../../../utils";
 
 import triviaHelper from "./trivia-helper";
+
+const logger = LoggerCache.getLogger("Games");
 
 interface TriviaQuestion {
     username: string;

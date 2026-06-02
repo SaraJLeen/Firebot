@@ -1,5 +1,5 @@
 import { randomUUID } from "crypto";
-import logger from "./logwrapper";
+import { LoggerCache } from "./logger-cache";
 
 interface ResourceToken {
     path: string;
@@ -7,7 +7,7 @@ interface ResourceToken {
 }
 
 class ResourceTokenManager {
-    private logger = logger.child({ module: "Resource Tokens" });
+    private logger = LoggerCache.getLogger("Resource Tokens");
     tokens: Record<string, ResourceToken> = {};
 
     private deleteToken(token: string) {

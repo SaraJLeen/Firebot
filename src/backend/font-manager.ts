@@ -7,7 +7,7 @@ import { ProfileManager } from "./common/profile-manager";
 import { SettingsManager } from "./common/settings-manager";
 import webServer from "../server/http-server-manager";
 import frontendCommunicator from "./common/frontend-communicator";
-import logger from "./logwrapper";
+import { LoggerCache } from "./logger-cache";
 
 export enum FontFormat {
     TrueType = "truetype",
@@ -24,7 +24,7 @@ export type FirebotFont = {
 };
 
 class FontManager {
-    private logger = logger.child({ module: "Fonts" });
+    private logger = LoggerCache.getLogger("Fonts");
     cachedFonts: FirebotFont[] = [];
 
     constructor() {

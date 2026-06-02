@@ -9,7 +9,9 @@ import {
 import { IPluginExecutor, PluginExecutionResult } from "./script-executor.interface";
 import { buildRunRequest } from "../../common/handlers/custom-scripts/custom-script-helpers";
 import { wait } from "../../utils";
-import logger from "../../logwrapper";
+import { LoggerCache } from "../../logger-cache";
+
+const logger = LoggerCache.getLogger("Plugins");
 
 /**
  * Executor for legacy startup scripts (scripts that export a getScriptManifest function that returns an object with startupOnly: true)

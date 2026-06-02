@@ -5,7 +5,7 @@ import frontendCommunicator from "../common/frontend-communicator";
 
 class RankManager extends JsonDbManager<RankLadder> {
     constructor() {
-        super("Ranks", "/ranks");
+        super("Rank", "/ranks", "Ranks");
     }
 
     getRankFromLadder(ladder: RankLadder, rankId: string): Rank | undefined {

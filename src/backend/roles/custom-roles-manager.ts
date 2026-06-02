@@ -10,7 +10,7 @@ import { ProfileManager } from "../common/profile-manager";
 import { AccountAccess } from "../common/account-access";
 import twitchRoleManager from "../../shared/twitch-roles";
 import frontendCommunicator from "../common/frontend-communicator";
-import logger from "../logwrapper";
+import { LoggerCache } from "../logger-cache";
 import { findIndexIgnoreCase } from "../utils";
 
 type Events = {
@@ -23,7 +23,7 @@ type Events = {
 const ROLES_FOLDER = "roles";
 
 class CustomRolesManager extends TypedEmitter<Events> {
-    private logger = logger.child({ module: "Roles" });
+    private logger = LoggerCache.getLogger("Roles");
     private _customRoles: Record<string, CustomRole> = {};
 
     constructor() {

@@ -1,16 +1,15 @@
-import { InstalledPluginConfig } from "../../types/plugins.js";
-import frontendCommunicator from "../common/frontend-communicator.js";
-import JsonDbManager from "../database/json-db-manager.js";
-import { ProfileManager } from "../common/profile-manager.js";
-import { SettingsManager } from "../common/settings-manager.js";
-import logger from "../logwrapper.js";
+import { InstalledPluginConfig } from "../../types/plugins";
+import frontendCommunicator from "../common/frontend-communicator";
+import JsonDbManager from "../database/json-db-manager";
+import { ProfileManager } from "../common/profile-manager";
+import { SettingsManager } from "../common/settings-manager";
 
 /**
  * Manages installed plugins (previously known as "start up scripts")
  */
 class PluginConfigManager extends JsonDbManager<InstalledPluginConfig> {
     constructor() {
-        super("Plugin", "/plugins");
+        super("Plugin", "/plugins", "Plugins");
     }
 
     loadItems(): void {
@@ -42,7 +41,7 @@ class PluginConfigManager extends JsonDbManager<InstalledPluginConfig> {
 
         const startupScriptsData: StartUpScriptData | undefined = startUpScriptsDb.getData("/") as unknown as StartUpScriptData;
 
-        logger.info("Migrating start up scripts to plugins");
+        this.logger.info("Migrating start up scripts to plugins");
 
         if (startupScriptsData) {
             for (const script of Object.values(startupScriptsData)) {
@@ -58,7 +57,7 @@ class PluginConfigManager extends JsonDbManager<InstalledPluginConfig> {
                         }, {})
                     });
                 } catch (error) {
-                    logger.error(`Failed to migrate start up script ${script.id}: ${error}`);
+                    this.logger.error(`Failed to migrate start up script ${script.id}: ${error}`);
                 }
             }
         }
@@ -66,12 +65,12 @@ class PluginConfigManager extends JsonDbManager<InstalledPluginConfig> {
         // eslint-disable-next-line no-warning-comments
         // TODO: in a future version we can uncomment the following to clean up old start up script data after migration has been out for a while
 
-        // logger.info("Deleting start up scripts database");
+        // this.logger.info("Deleting start up scripts database");
         // ProfileManager.deletePathInProfile("startup-scripts-config.json");
 
         SettingsManager.saveSetting("MigratedLegacyStartUpScriptsToPlugins", true);
 
-        logger.info("Start up scripts migration complete");
+        this.logger.info("Start up scripts migration complete");
     }
 }
 

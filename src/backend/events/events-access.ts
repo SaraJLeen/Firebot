@@ -9,7 +9,7 @@ import type {
 import { ProfileManager } from "../common/profile-manager";
 import { SettingsManager } from "../common/settings-manager";
 import frontendCommunicator from "../common/frontend-communicator";
-import logger from "../logwrapper";
+import { LoggerCache } from "../logger-cache";
 
 const EVENTS_FOLDER = "events";
 
@@ -21,7 +21,7 @@ interface EventData {
 }
 
 class EventsAccess {
-    private logger = logger.child({ module: "Events" });
+    private logger = LoggerCache.getLogger("Events");
     private _mainEvents: EventSettings[] = [];
     private _groups: Record<string, EventGroup> = {};
     private _sortTags: SortTag[] = [];

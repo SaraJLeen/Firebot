@@ -8,7 +8,7 @@ import { CommandDefinition, SystemCommand, SystemCommandDefinition } from "../..
 import { AccountAccess } from "../../common/account-access";
 import { ProfileManager } from "../../common/profile-manager";
 import frontendCommunicator from "../../common/frontend-communicator";
-import logger from "../../logwrapper";
+import { LoggerCache } from "../../logger-cache";
 import { deepClone } from "../../utils";
 
 type Events = {
@@ -32,7 +32,7 @@ interface CommandCache {
  * The class for the manager object that maintains Firebot system/custom chat commands
  */
 class CommandManager extends TypedEmitter<Events> {
-    private logger = logger.child({ module: "Commands" });
+    private logger = LoggerCache.getLogger("Commands");
     private _registeredSysCommands: SystemCommand[] = [];
     private _commandCache: CommandCache = {
         systemCommandOverrides: {},

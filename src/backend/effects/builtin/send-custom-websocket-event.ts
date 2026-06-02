@@ -1,6 +1,8 @@
 import { EffectType } from "../../../types/effects";
 import HttpServerManager from "../../../server/http-server-manager";
-import logger from "../../logwrapper";
+import { LoggerCache } from "../../logger-cache";
+
+const logger = LoggerCache.getLogger("Effects");
 
 const effect: EffectType<{
     eventName: string;

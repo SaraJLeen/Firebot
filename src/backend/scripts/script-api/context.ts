@@ -1,9 +1,11 @@
 import type { Manifest, InstalledPluginConfig } from "../../../types/plugins";
-import logger from "../../logwrapper";
+import { LoggerCache } from "../../logger-cache";
 import { registerScriptLogName, unregisterScriptLogName } from "../../script-log-names";
 import { DisposeBag, DisposeFn } from "./internal/dispose-bag";
 import { normalizeName } from "./internal/name-normalizer";
 import { resolveScriptDataDir } from "./internal/script-data-dir";
+
+const logger = LoggerCache.getLogger("Plugins");
 
 /**
  * The per-script context handed to every namespace factory.

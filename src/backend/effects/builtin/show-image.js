@@ -6,7 +6,7 @@ const mediaProcessor = require("../../common/handlers/mediaProcessor");
 const webServer = require("../../../server/http-server-manager");
 const fs = require("fs/promises");
 const { EffectCategory } = require("../../../shared/effect-constants");
-const logger = require("../../logwrapper");
+const logger = require("../../logger-cache").LoggerCache.getLogger("Effects");
 const path = require("path");
 
 /**

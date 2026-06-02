@@ -12,9 +12,11 @@ import { ReplaceVariableManager } from "../../variables/replace-variable-manager
 import { ResourceTokenManager } from "../../resource-token-manager";
 import { SettingsManager } from "../../common/settings-manager";
 import webServer from "../../../server/http-server-manager";
-import logger from "../../logwrapper";
+import { LoggerCache } from "../../logger-cache";
 import { wait } from "../../utils";
 import { playSound } from "../../common/handlers/sound-handler";
+
+const logger = LoggerCache.getLogger("Effects");
 
 interface OverlayAlertEffect {
     mediaType: "image" | "video" | "none";

@@ -3,10 +3,10 @@ import EventEmitter from "events";
 import { EventData, EventFilter, EventFilterData, EventSourceAndId } from "../../../types/events";
 
 import frontendCommunicator from "../../common/frontend-communicator";
-import logger from "../../logwrapper";
+import { LoggerCache } from "../../logger-cache";
 
 class FilterManager extends EventEmitter {
-    private logger = logger.child({ module: "Filters" });
+    private logger = LoggerCache.getLogger("Filters");
     private _registeredFilters: EventFilter[] = [];
     private _additionalFilterEvents: Record<string, EventSourceAndId[]> = {};
 

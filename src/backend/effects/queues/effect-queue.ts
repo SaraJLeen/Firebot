@@ -9,9 +9,11 @@ import type {
 
 import { EventManager } from "../../events/event-manager";
 import effectRunner from "../../common/effect-runner";
-import logger from "../../logwrapper";
+import { LoggerCache } from "../../logger-cache";
 import { abortEffectList } from "../../common/effect-abort-helpers";
 import { simpleClone, wait } from "../../utils";
+
+const logger = LoggerCache.getLogger("Effects");
 
 type Events = {
     "queue-state-updated": (newState: QueueState, changedState: Partial<QueueState>) => void;

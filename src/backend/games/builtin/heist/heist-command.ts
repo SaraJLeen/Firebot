@@ -11,9 +11,11 @@ import currencyManager from "../../../currency/currency-manager";
 import customRolesManager from "../../../roles/custom-roles-manager";
 import teamRolesManager from "../../../roles/team-roles-manager";
 import twitchRolesManager from "../../../../shared/twitch-roles";
-import logger from "../../../logwrapper";
+import { LoggerCache } from "../../../logger-cache";
 import { commafy, humanizeTime } from "../../../utils";
 import heistRunner from "./heist-runner";
+
+const logger = LoggerCache.getLogger("Games");
 
 const HEIST_COMMAND_ID = "firebot:heist";
 

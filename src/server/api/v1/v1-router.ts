@@ -1,5 +1,7 @@
 import express from "express";
-import logger from "../../../backend/logwrapper";
+import { LoggerCache } from "../../../backend/logger-cache";
+
+const logger = LoggerCache.getLogger("HTTP Server");
 
 const router = express.Router(); //eslint-disable-line new-cap
 

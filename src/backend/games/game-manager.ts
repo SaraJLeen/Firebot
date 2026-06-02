@@ -1,10 +1,10 @@
 import type { FirebotGame, GameDefinition, GameSettings } from "../../types/games";
 import { ProfileManager } from "../common/profile-manager";
 import frontendCommunicator from "../common/frontend-communicator";
-import logger from "../logwrapper";
+import { LoggerCache } from "../logger-cache";
 
 class GameManager {
-    private logger = logger.child({ module: "Games" });
+    private logger = LoggerCache.getLogger("Games");
     private _registeredGames: FirebotGame[] = [];
     private _allGamesSettings: Record<string, GameSettings> = {};
 

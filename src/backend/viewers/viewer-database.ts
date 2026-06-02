@@ -18,7 +18,7 @@ import rankManager from "../ranks/rank-manager";
 import roleHelpers from "../roles/role-helpers";
 import teamRolesManager from "../roles/team-roles-manager";
 import frontendCommunicator from "../common/frontend-communicator";
-import logger from "../logwrapper";
+import { LoggerCache } from "../logger-cache";
 import { commafy, wait } from "../utils";
 
 interface ViewerDbChangePacket {
@@ -62,6 +62,8 @@ class ViewerDatabase extends TypedEmitter<{
     "viewer-database-loaded": () => void;
     "updated-viewer-avatar": (event: { userId: string, url: string }) => void;
 }> {
+    private logger = LoggerCache.getLogger("Viewers");
+
     private _db: Datastore<FirebotViewer>;
     private _dbCompactionInterval = 30000;
 
@@ -76,7 +78,7 @@ class ViewerDatabase extends TypedEmitter<{
                 return;
             }
             await this.connectViewerDatabase();
-            logger.debug("Connecting to viewer database.");
+            this.logger.debug("Connecting to viewer database.");
         });
 
         frontendCommunicator.onAsync("viewer-db-change", async (data: ViewerDbChangePacket) => {
@@ -110,10 +112,10 @@ class ViewerDatabase extends TypedEmitter<{
 
         frontendCommunicator.onAsync("create-firebot-viewer-data", async (viewer: BasicViewer) => {
             return this.createNewViewer({
-                id: viewer.id, 
-                username: viewer.username, 
-                displayName: viewer.displayName, 
-                profilePicUrl: viewer.profilePicUrl, 
+                id: viewer.id,
+                username: viewer.username,
+                displayName: viewer.displayName,
+                profilePicUrl: viewer.profilePicUrl,
                 twitchRoles: viewer.twitchRoles
             });
         });
@@ -164,7 +166,7 @@ class ViewerDatabase extends TypedEmitter<{
     }
 
     async connectViewerDatabase(): Promise<void> {
-        logger.info('ViewerDB: Trying to connect to viewer database...');
+        this.logger.info('ViewerDB: Trying to connect to viewer database...');
         if (this.isViewerDBOn() !== true) {
             return;
         }
@@ -174,17 +176,17 @@ class ViewerDatabase extends TypedEmitter<{
         try {
             await this._db.loadDatabaseAsync();
         } catch (error) {
-            logger.info("ViewerDB: Error Loading Database: ", (error as Error).message);
-            logger.info("ViewerDB: Failed Database Path: ", path);
+            this.logger.info("ViewerDB: Error Loading Database: ", (error as Error).message);
+            this.logger.info("ViewerDB: Failed Database Path: ", path);
         }
 
         // Setup our automatic compaction interval to shrink filesize.
         this._db.setAutocompactionInterval(this._dbCompactionInterval);
         setInterval(() => {
-            logger.debug(`ViewerDB: Compaction should be happening now. Compaction Interval: ${this._dbCompactionInterval}`);
+            this.logger.debug(`ViewerDB: Compaction should be happening now. Compaction Interval: ${this._dbCompactionInterval}`);
         }, this._dbCompactionInterval);
 
-        logger.info("ViewerDB: Viewer Database Loaded: ", path);
+        this.logger.info("ViewerDB: Viewer Database Loaded: ", path);
         this.emit("viewer-database-loaded");
     }
 
@@ -245,7 +247,7 @@ class ViewerDatabase extends TypedEmitter<{
 
             return newViewer;
         } catch (error) {
-            logger.error("ViewerDB: Error adding viewer", error);
+            this.logger.error("ViewerDB: Error adding viewer", error);
         }
     }
 
@@ -268,7 +270,7 @@ class ViewerDatabase extends TypedEmitter<{
         try {
             return await this._db.findOneAsync({ _id: id });
         } catch (error) {
-            logger.error("Error getting viewer by ID", error);
+            this.logger.error("Error getting viewer by ID", error);
         }
     }
 
@@ -309,7 +311,7 @@ class ViewerDatabase extends TypedEmitter<{
 
             return viewers?.map(u => u.displayName) ?? [];
         } catch (error) {
-            logger.error("Error getting all viewers: ", error);
+            this.logger.error("Error getting all viewers: ", error);
             return [];
         }
     }
@@ -330,7 +332,7 @@ class ViewerDatabase extends TypedEmitter<{
 
             return viewers?.map(u => ({ id: u._id, username: u.username, displayName: u.displayName })) ?? [];
         } catch (error) {
-            logger.error("Error getting all viewers: ", error);
+            this.logger.error("Error getting all viewers: ", error);
             return [];
         }
     }
@@ -353,7 +355,7 @@ class ViewerDatabase extends TypedEmitter<{
                 frontendCommunicator.send("viewer-database:viewer-updated", affectedDocuments as FirebotViewer);
             }
         } catch (error) {
-            logger.error("incrementDbField error", error);
+            this.logger.error("incrementDbField error", error);
         }
     }
 
@@ -396,7 +398,7 @@ class ViewerDatabase extends TypedEmitter<{
                 frontendCommunicator.send("viewer-database:viewer-updated", affectedDocuments as FirebotViewer);
             }
         } catch (error) {
-            logger.error("Error adding currency to viewer.", error);
+            this.logger.error("Error adding currency to viewer.", error);
         }
     }
 
@@ -414,7 +416,7 @@ class ViewerDatabase extends TypedEmitter<{
 
             return true;
         } catch (error) {
-            logger.warn("Failed to update viewer in DB", error);
+            this.logger.warn("Failed to update viewer in DB", error);
             return false;
         }
     }
@@ -430,7 +432,7 @@ class ViewerDatabase extends TypedEmitter<{
                 frontendCommunicator.send("viewer-database:viewer-updated", affectedDocuments as FirebotViewer);
             }
         } catch (error) {
-            logger.error("Error updating viewer.", error);
+            this.logger.error("Error updating viewer.", error);
         }
     }
 
@@ -446,7 +448,7 @@ class ViewerDatabase extends TypedEmitter<{
 
             return true;
         } catch (error) {
-            logger.warn("Failed to remove viewer from DB", error);
+            this.logger.warn("Failed to remove viewer from DB", error);
             return false;
         }
     }
@@ -740,7 +742,7 @@ class ViewerDatabase extends TypedEmitter<{
                     await wait(5);
                 }
             } catch (error) {
-                logger.error("Error recalculating ranks for viewer", viewer._id, error);
+                this.logger.error("Error recalculating ranks for viewer", viewer._id, error);
             }
         }
 
@@ -837,7 +839,7 @@ class ViewerDatabase extends TypedEmitter<{
         try {
             isBanned = await client.moderation.checkUserBan(streamerData.userId, twitchUser.id);
         } catch (error) {
-            logger.warn("Unable to get banned status", error);
+            this.logger.warn("Unable to get banned status", error);
         }
 
         const teamRoles = await teamRolesManager.getAllTeamRolesForViewer(twitchUser.name);

@@ -1,6 +1,8 @@
 import { EffectType } from "../../../../types/effects";
 import overlayWidgetConfigManager from "../../../overlay-widgets/overlay-widget-config-manager";
-import logger from "../../../logwrapper";
+import { LoggerCache } from "../../../logger-cache";
+
+const logger = LoggerCache.getLogger("Effects");
 
 const model: EffectType<{
     progressBarWidgetId: string;

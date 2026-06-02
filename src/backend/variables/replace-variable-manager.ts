@@ -14,7 +14,7 @@ import { SettingsManager } from "../common/settings-manager";
 import macroManager from "./macro-manager";
 import { CustomVariableManager } from "../common/custom-variable-manager";
 import frontendCommunicator from "../common/frontend-communicator";
-import logger from "../logwrapper";
+import { LoggerCache } from "../logger-cache";
 import { getEventIdFromTriggerData } from "../utils";
 
 type Evaluator = {
@@ -45,7 +45,7 @@ type VariableError = {
 };
 
 class ReplaceVariableManager extends EventEmitter {
-    private logger = logger.child({ module: "Variables" });
+    private logger = LoggerCache.getLogger("Variables");
     private registeredVariableHandlers: Map<string, RegisteredVariable> = new Map();
     private variableAndAliasHandlers: Map<string, RegisteredVariable> = new Map();
     private registeredLookupHandlers: Map<

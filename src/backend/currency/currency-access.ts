@@ -7,7 +7,7 @@ import { FirebotViewer } from "../../types/viewers";
 import { SettingsManager } from "../common/settings-manager";
 import { ProfileManager } from "../common/profile-manager";
 import frontendCommunicator from "../common/frontend-communicator";
-import logger from "../logwrapper";
+import { LoggerCache } from "../logger-cache";
 import { simpleClone } from "../utils";
 
 type CurrencyCache = {
@@ -15,6 +15,8 @@ type CurrencyCache = {
 };
 
 class CurrencyAccess extends EventEmitter {
+    private logger = LoggerCache.getLogger("Currency");
+
     private _currencyCache: CurrencyCache = {};
 
     constructor() {
@@ -58,7 +60,7 @@ class CurrencyAccess extends EventEmitter {
             return;
         }
 
-        logger.debug("Refreshing currency cache");
+        this.logger.debug("Refreshing currency cache");
         const db = this.getCurrencyDb();
 
         let resaveCurrencies = false;
@@ -150,7 +152,7 @@ class CurrencyAccess extends EventEmitter {
         }
 
         if (Object.values(this._currencyCache).some(c => c.name === currency.name)) {
-            logger.error(`User tried to create currency with the same name as another currency: ${currency.name}.`);
+            this.logger.error(`User tried to create currency with the same name as another currency: ${currency.name}.`);
             return false;
         }
 
@@ -158,7 +160,7 @@ class CurrencyAccess extends EventEmitter {
         this.saveAllCurrencies();
         this.emit("currencies:currency-created", currency);
 
-        logger.debug(`Currency created with name: ${currency.name}`);
+        this.logger.debug(`Currency created with name: ${currency.name}`);
         return true;
     }
 

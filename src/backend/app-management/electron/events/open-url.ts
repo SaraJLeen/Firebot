@@ -1,6 +1,8 @@
 import type { Event } from "electron";
 import frontendCommunicator from "../../../common/frontend-communicator";
-import logger from "../../../logwrapper";
+import { LoggerCache } from "../../../logger-cache";
+
+const logger = LoggerCache.getLogger("Core");
 
 export async function openUrl(_: Event, url: string) {
     const { TwitchApi } = await import("../../../streaming-platforms/twitch/api");

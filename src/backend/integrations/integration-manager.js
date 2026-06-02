@@ -6,7 +6,7 @@ const { ProfileManager } = require("../common/profile-manager");
 const { SettingsManager } = require('../common/settings-manager');
 const authManager = require("../auth/auth-manager");
 const frontendCommunicator = require('../common/frontend-communicator');
-const logger = require("../logwrapper");
+const logger = require("../logger-cache").LoggerCache.getLogger("Integration");
 const { setValuesForFrontEnd, buildSaveDataFromSettingValues } = require("../common/firebot-setting-helpers");
 
 /**@extends {NodeJS.EventEmitter} */

@@ -5,8 +5,10 @@ import { ResourceTokenManager } from "../../resource-token-manager";
 import { SettingsManager } from "../settings-manager";
 import webServer from "../../../server/http-server-manager";
 import frontendCommunicator from "../frontend-communicator";
-import logger from "../../logwrapper";
+import { LoggerCache } from "../../logger-cache";
 import { wait, convertByteArrayJsonToByteArray } from "../../utils";
+
+const logger = LoggerCache.getLogger("Sounds");
 
 export type SoundType = "url" | "rawData" | "folderRandom" | "local";
 

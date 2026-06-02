@@ -6,7 +6,6 @@ import { crowbarRelayWebSocket } from "../crowbar-relay/crowbar-relay-websocket"
 import { EventManager } from "../events/event-manager";
 import { SettingsManager } from "../common/settings-manager";
 import frontendCommunicator from "../common/frontend-communicator";
-import logger from "../logwrapper";
 import { maskPII } from "../utils";
 
 type ExtraEvents = {
@@ -19,10 +18,8 @@ type ExtraEvents = {
 };
 
 class WebhookConfigManager extends JsonDbManager<WebhookConfig, ExtraEvents> {
-    private logger = logger.child({ module: "Webhooks" });
-
     constructor() {
-        super("Webhooks", "/webhooks");
+        super("Webhook", "/webhooks", "Webhooks");
 
         const sendWebhookIds = () => {
             crowbarRelayWebSocket.send("update-webhooks", {

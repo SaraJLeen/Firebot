@@ -1,8 +1,11 @@
 import { checkForFirebotSetupPathInArgs } from "../../file-open-helpers";
 import frontendCommunicator from "../../../common/frontend-communicator";
-import logger from "../../../logwrapper";
+import { LoggerCache } from "../../../logger-cache";
+
 
 export async function whenReady() {
+    const logger = LoggerCache.getLogger("Init");
+
     logger.debug("...Applying IPC events");
     const { setupIpcEvents } = await import("./ipc-events");
     setupIpcEvents();
@@ -299,6 +302,6 @@ export async function whenReady() {
 
     // Receive log messages from frontend
     frontendCommunicator.on("logging", (data: { level: string, message: string, meta?: unknown[] }) => {
-        logger.log(data.level, data.message, ...(data.meta ?? []));
+        LoggerCache.getLogger("Renderer").log(data.level, data.message, ...(data.meta ?? []));
     });
 }

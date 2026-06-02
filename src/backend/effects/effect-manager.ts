@@ -6,7 +6,7 @@ import type { TriggerMeta, TriggersObject, TriggerType } from "../../types/trigg
 import * as cloudSync from "../cloud-sync";
 import { checkEffectDependencies } from "./effect-helpers";
 import frontendCommunicator from "../common/frontend-communicator";
-import logger from "../logwrapper";
+import { LoggerCache } from "../logger-cache";
 
 interface FullEventId {
     eventSourceId: string;
@@ -17,7 +17,7 @@ class EffectManager extends TypedEmitter<{
     "effectRegistered": (effect: EffectType<any>) => void;
     "effectUnregistered": (event: { effectId: string, hasOverlayEffect: boolean }) => void;
 }> {
-    private logger = logger.child({ module: "Effects" });
+    private logger = LoggerCache.getLogger("Effects");
     private _registeredEffects: EffectType<any>[] = [];
     private _additionalEffectEvents: Record<string, FullEventId[]> = {};
 

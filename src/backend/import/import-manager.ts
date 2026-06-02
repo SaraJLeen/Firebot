@@ -11,14 +11,14 @@ import type { Quote } from "../../types/quotes";
 
 import { QuoteManager } from "../quotes/quote-manager";
 import frontendCommunicator from "../common/frontend-communicator";
-import logger from "../logwrapper";
+import { LoggerCache } from "../logger-cache";
 
 import { StreamlabsChatbotImporter } from "./third-party/streamlabs-chatbot-importer";
 import { MixItUpImporter } from "./third-party/mix-it-up-importer";
 import { FirebotImporter } from "./third-party/firebot-importer";
 
 class ImportManager {
-    private logger = logger.child({ module: "Import" });
+    private logger = LoggerCache.getLogger("Import");
     private _registeredImporters: Record<string, ThirdPartyImporter> = {};
     private _abortController: AbortController;
 

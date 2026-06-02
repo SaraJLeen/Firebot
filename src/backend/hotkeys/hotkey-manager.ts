@@ -6,15 +6,13 @@ import { Trigger } from "../../types/triggers";
 import { AccountAccess } from "../common/account-access";
 import effectRunner from "../common/effect-runner";
 import frontendCommunicator from "../common/frontend-communicator";
-import logger from "../logwrapper";
 import JsonDbManager from "../database/json-db-manager";
 
 class HotkeyManager extends JsonDbManager<FirebotHotkey> {
-    private logger = logger.child({ module: "Hotkeys" });
     hotkeys: FirebotHotkey[] = [];
 
     constructor() {
-        super("Hotkey", "hotkeys");
+        super("Hotkey", "hotkeys", "Hotkeys");
 
         // Enable usage of Portal's globalShortcuts which improves capability with Wayland on Linux
         app.commandLine.appendSwitch('enable-features', 'GlobalShortcutsPortal');

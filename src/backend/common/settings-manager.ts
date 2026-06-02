@@ -13,9 +13,10 @@ import {
 
 import * as dataAccess from "./data-access";
 import frontendCommunicator from "./frontend-communicator";
-import logger from "../logwrapper";
+import { LoggerCache } from "../logger-cache";
 
 class SettingsManager extends EventEmitter {
+    private logger = LoggerCache.getLogger("Settings");
     settingsCache: Partial<Record<keyof FirebotSettingsTypes, unknown>> = {};
 
     constructor() {
@@ -58,7 +59,7 @@ class SettingsManager extends EventEmitter {
     }
 
     private handleCorruptSettingsFile() {
-        logger.warn("settings.json file appears to be corrupt. Resetting file...");
+        this.logger.warn("settings.json file appears to be corrupt. Resetting file...");
 
         const settingsPath = path.join(dataAccess.getUserDataPath(), this.getLoggedInProfilePath("settings.json"));
         fs.writeFileSync(settingsPath, JSON.stringify({
@@ -116,7 +117,7 @@ class SettingsManager extends EventEmitter {
                 this.settingsCache[settingPath] = defaultValue;
             }
             if (err.name !== "DataError") {
-                logger.warn(err);
+                this.logger.warn(err);
                 if (
                     err.name === "DatabaseError" &&
                 err["inner"] instanceof SyntaxError &&
@@ -140,9 +141,9 @@ class SettingsManager extends EventEmitter {
                 this.settingsCache[settingPath] = defaultValue;
             }
             if ((err as Error).name === "DatabaseError") {
-                logger.error(`Failed to read "${settingPath}" in global settings file. File may be corrupt.`, err?.inner?.message ?? err.stack);
+                this.logger.error(`Failed to read "${settingPath}" in global settings file. File may be corrupt.`, err?.inner?.message ?? err.stack);
             } else if ((err as Error).name !== "DataError") {
-                logger.warn(err);
+                this.logger.warn(err);
             }
         }
         return this.settingsCache[settingPath] as T;
@@ -154,7 +155,7 @@ class SettingsManager extends EventEmitter {
             this.settingsCache[settingPath] = data;
             frontendCommunicator.send("settings:setting-updated", { settingPath, data });
         } catch (err) {
-            logger.debug((err as Error).message);
+            this.logger.debug((err as Error).message);
         }
     }
 
@@ -164,7 +165,7 @@ class SettingsManager extends EventEmitter {
             this.settingsCache[settingPath] = data;
             frontendCommunicator.send("settings:setting-updated", { settingPath, data });
         } catch (err) {
-            logger.debug((err as Error).message);
+            this.logger.debug((err as Error).message);
         }
     }
 

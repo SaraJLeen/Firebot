@@ -11,7 +11,7 @@ const { createTray } = require('./tray-creation.js');
 const fileOpenHelpers = require("../file-open-helpers");
 const screenHelpers = require("./screen-helpers");
 const frontendCommunicator = require("../../common/frontend-communicator");
-const logger = require("../../logwrapper");
+const logger = require("../../logger-cache").LoggerCache.getLogger("Window Management");
 
 const EventEmitter = require("events");
 

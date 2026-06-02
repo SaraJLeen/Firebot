@@ -5,8 +5,9 @@ import type { Quote } from "../../../types/quotes";
 
 import { QuoteManager } from "../../quotes/quote-manager";
 
-import logger from "../../logwrapper";
+import { LoggerCache } from "../../logger-cache";
 
+const logger = LoggerCache.getLogger("Import");
 
 export const FirebotImporter: ThirdPartyImporter = {
     id: "firebot",

@@ -2,7 +2,7 @@
 
 const { app, dialog, shell, autoUpdater } = require("electron");
 const os = require('os');
-const logger = require("../logwrapper");
+const logger = require("../logger-cache").LoggerCache.getLogger("Core");
 const { restartApp } = require("../app-management/electron/app-helpers");
 const { copyDebugInfoToClipboard } = require("../common/debug-info");
 

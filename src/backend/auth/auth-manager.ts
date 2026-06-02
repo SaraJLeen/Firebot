@@ -7,7 +7,7 @@ import type { AuthDetails, AuthProvider, AuthProviderDefinition } from "../../ty
 import { SettingsManager } from "../common/settings-manager";
 import windowManagement from "../app-management/electron/window-management";
 import frontendCommunicator from "../common/frontend-communicator";
-import logger from "../logwrapper";
+import { LoggerCache } from "../logger-cache";
 
 type Events = {
     "auth-success": (event: AuthSuccessEventArgs) => void;
@@ -19,7 +19,7 @@ interface AuthSuccessEventArgs {
 }
 
 class AuthManager extends TypedEmitter<Events> {
-    private logger = logger.child({ module: "Auth" });
+    private logger = LoggerCache.getLogger("Auth");
     private readonly _httpPort: number;
     private _authProviders: AuthProvider[];
 

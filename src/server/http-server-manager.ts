@@ -12,7 +12,7 @@ import { ResourceTokenManager } from "../backend/resource-token-manager";
 import websocketServerManager from "./websocket-server-manager";
 import { CustomWebSocketHandler } from "../types/websocket";
 import overlayWidgetManager from "../backend/overlay-widgets/overlay-widgets-manager";
-import logger from "../backend/logwrapper";
+import { LoggerCache } from "../backend/logger-cache";
 
 import * as dataAccess from "../backend/common/data-access";
 import frontendCommunicator from "../backend/common/frontend-communicator";
@@ -45,7 +45,7 @@ interface CustomRoute {
 }
 
 class HttpServerManager extends EventEmitter {
-    private logger = logger.child({ module: "HTTP Server" });
+    private logger = LoggerCache.getLogger("HTTP Server");
 
     serverInstances: ServerInstance[];
     defaultServerInstance: Express;

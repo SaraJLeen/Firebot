@@ -1,7 +1,9 @@
 import type { EffectType, EffectQueueConfig } from "../../../types/effects";
 import { EffectQueueConfigManager } from "../queues/effect-queue-config-manager";
 import queueRunner from "../queues/effect-queue-runner";
-import logger from "../../logwrapper";
+import { LoggerCache } from "../../logger-cache";
+
+const logger = LoggerCache.getLogger("Effects");
 
 const effect: EffectType<{
     effectQueueId: string;

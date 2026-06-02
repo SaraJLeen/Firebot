@@ -4,7 +4,7 @@ import NodeCache from "node-cache";
 import { Pronoun, UserPronoun } from "../../types";
 
 import frontendCommunicator from "../common/frontend-communicator";
-import logger from "../logwrapper";
+import { LoggerCache } from "../logger-cache";
 
 const PRONOUN_SERVICE_BASE_URL = "https://api.pronouns.alejo.io/v1/";
 
@@ -16,7 +16,7 @@ type UserPronounResponse = {
 };
 
 class FirebotPronounManager {
-    private logger = logger.child({ module: "Pronouns" });
+    private logger = LoggerCache.getLogger("Pronouns");
     private _appVersion = app.getVersion();
     private _pronounCache: Record<string, Pronoun> = { };
     private _userPronounCache = new NodeCache({

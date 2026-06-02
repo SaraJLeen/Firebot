@@ -7,7 +7,7 @@ import { simpleClone } from "../../utils";
 
 class EffectQueueConfigManager extends JsonDbManager<EffectQueueConfig> {
     constructor() {
-        super("Effect Queue", "/effects/effectqueues");
+        super("Effect Queue", "/effects/effectqueues", "Effect Queues");
 
         frontendCommunicator.on("effect-queues:get-effect-queues",
             () => this.getAllItems()

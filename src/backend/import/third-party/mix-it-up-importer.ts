@@ -3,7 +3,9 @@ import fsp from "fs/promises";
 import type { ThirdPartyImporter } from "../../../types/import";
 import type { Quote } from "../../../types/quotes";
 
-import logger from "../../logwrapper";
+import { LoggerCache } from "../../logger-cache";
+
+const logger = LoggerCache.getLogger("Import");
 
 export const MixItUpImporter: ThirdPartyImporter = {
     id: "mixitup",
