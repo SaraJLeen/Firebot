@@ -8,14 +8,12 @@ import { AccountAccess } from "../common/account-access";
 import connectionManager from "../common/connection-manager";
 import effectRunner from "../common/effect-runner";
 import frontendCommunicator from "../common/frontend-communicator";
-import { LoggerCache } from "../logger-cache";
 
 class TimerManager extends JsonDbManager<Timer> {
-    private logger = LoggerCache.getLogger("Timers");
     private timerIntervalCache: Record<string, TimerIntervalTracker> = {};
 
     constructor() {
-        super("Timer", "timers");
+        super("Timer", "timers", "Timers");
 
         frontendCommunicator.on("timers:get-timers",
             () => this.getAllItems()

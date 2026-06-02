@@ -24,7 +24,7 @@ class QuickActionManager extends JsonDbManager<QuickActionDefinition> {
     ];
 
     constructor() {
-        super("Custom Quick Action", "/custom-quick-actions");
+        super("Quick Action", "/custom-quick-actions", "Quick Actions");
 
         frontendCommunicator.on("quick-actions:get-quick-actions",
             () => this.getAllItems()

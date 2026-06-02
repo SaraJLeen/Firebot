@@ -1,5 +1,7 @@
 import type { BrowserWindow, Event } from "electron";
-import logger from "../../../logwrapper";
+import { LoggerCache } from "../../../logger-cache";
+
+const logger = LoggerCache.getLogger("Core");
 
 export async function secondInstance(event: Event, argv: string[]) {
     const { openUrl } = await import("./open-url");

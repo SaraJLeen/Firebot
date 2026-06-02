@@ -1,5 +1,7 @@
 import { app, type Event } from "electron";
-import logger from "../../../logwrapper";
+import { LoggerCache } from "../../../logger-cache";
+
+const logger = LoggerCache.getLogger("Core");
 
 async function cleanup() {
     const { handleProfileDeletion, handleProfileRename } = await import("../../../app-management/profile-tasks");
