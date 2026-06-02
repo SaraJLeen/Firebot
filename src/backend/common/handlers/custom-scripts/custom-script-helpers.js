@@ -105,7 +105,7 @@ function buildModules(scriptManifest) {
         path: require("path"),
         JsonDb: require("node-json-db").JsonDB,
         moment: require("moment"),
-        logger: logger.child({ module: "Plugin", script: scriptNameNormalized }),
+        logger: logger.child({ module: "Plugin", script: scriptManifest.name }),
         // thin chat shim for basic backwards compatibility
         chat: {
             /**
