@@ -4,7 +4,9 @@ import { Options, Token } from 'client-oauth2';
 import { AuthDetails } from '../../../../types/auth';
 
 import authManager from '../../../../backend/auth/auth-manager';
-import logger from '../../../../backend/logwrapper';
+import { LoggerCache } from '../../../../backend/logger-cache';
+
+const logger = LoggerCache.getLogger("HTTP Server");
 
 export function getAuth(req: Request, res: Response): void {
     const providerId = req.query.providerId as string;
