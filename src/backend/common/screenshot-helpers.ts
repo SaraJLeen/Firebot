@@ -3,7 +3,7 @@ import fs from "fs/promises";
 import path from "path";
 import moment from "moment";
 
-import type { CustomEmbed, EmbedType } from "../../types";
+import type { DiscordCustomEmbed, DiscordEmbedType } from "../../types";
 
 import { HttpServerManager } from "../../server/http-server-manager";
 import { SettingsManager } from "../common/settings-manager";
@@ -49,7 +49,7 @@ export async function sendScreenshotToDiscord(base64ImageData: string, message: 
     await discord.sendDiscordMessage(discordChannelId, message, screenshotEmbed, files);
 }
 
-export async function sendEmbedToDiscord(base64ImageData: string, embedType: EmbedType, message: string, embed: CustomEmbed, discordChannelId: string, color: string) {
+export async function sendEmbedToDiscord(base64ImageData: string, embedType: DiscordEmbedType, message: string, embed: DiscordCustomEmbed, discordChannelId: string, color: string) {
     const filename = "screenshot.png";
     const files = [
         {

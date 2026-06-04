@@ -1,4 +1,4 @@
-export type CustomEmbed = {
+export type DiscordCustomEmbed = {
     title?: string;
     url?: string;
     description?: string;
@@ -7,4 +7,4 @@ export type CustomEmbed = {
     imageUrl?: string;
 };
 
-export type EmbedType = "channel" | "stream" | "custom";
+export type DiscordEmbedType = "channel" | "stream" | "custom";
