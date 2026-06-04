@@ -45,7 +45,8 @@ async function getDebugInfoString(): Promise<string> {
     const httpServerStatus = HttpServerManager.isDefaultServerStarted ? "Running" : "Stopped";
     const websocketClients = WebSocketServerManager.getNumberOfOverlayClients();
 
-    const startupScripts = await scriptManager.getInstalledPlugins();
+    const startupScripts = (await scriptManager.getInstalledPlugins())
+        .toSorted((a, b) => a.details.manifest.name.localeCompare(b.details.manifest.name));
 
     return [
         "Firebot Debug Info",
