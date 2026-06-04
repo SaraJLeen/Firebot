@@ -1,8 +1,7 @@
 import EventEmitter from "events";
 import { JsonDB } from "node-json-db";
 
-import { Currency } from "../../types/currency";
-import { FirebotViewer } from "../../types/viewers";
+import type { Currency, FirebotViewer } from "../../types";
 
 import { SettingsManager } from "../common/settings-manager";
 import { ProfileManager } from "../common/profile-manager";

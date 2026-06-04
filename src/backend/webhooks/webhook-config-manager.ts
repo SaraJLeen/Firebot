@@ -1,4 +1,4 @@
-import { WebhookConfig } from "../../types/webhooks";
+import type { WebhookConfig } from "../../types";
 
 import JsonDbManager from "../database/json-db-manager";
 import { AccountAccess } from "../common/account-access";

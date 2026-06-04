@@ -1,7 +1,10 @@
 import moment from "moment";
 
-import type { SystemCommand } from "../../../../types/commands";
-import type { RoleNumberParameterValue, RolePercentageParameterValue } from "../../../../types/parameters";
+import type {
+    RoleNumberParameterValue,
+    RolePercentageParameterValue,
+    SystemCommand
+} from "../../../../types";
 
 import { GameManager } from "../../game-manager";
 import { TwitchApi } from "../../../streaming-platforms/twitch/api";

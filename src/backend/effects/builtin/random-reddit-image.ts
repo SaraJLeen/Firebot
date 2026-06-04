@@ -5,7 +5,8 @@ import type {
     OverlayInstance,
     OverlayPosition,
     OverlayRotation
-} from '../../../types';
+} from "../../../types";
+
 import { HttpServerManager } from "../../../server/http-server-manager";
 import { SettingsManager } from "../../common/settings-manager";
 import { TwitchApi } from "../../streaming-platforms/twitch/api";

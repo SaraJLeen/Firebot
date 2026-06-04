@@ -3,7 +3,7 @@ import { JsonDB } from "node-json-db";
 import { DateTime } from "luxon";
 import { randomUUID } from "crypto";
 
-import { CommandDefinition, SystemCommand, SystemCommandDefinition } from "../../../types/commands";
+import type { CommandDefinition, SystemCommand, SystemCommandDefinition } from "../../../types";
 
 import { AccountAccess } from "../../common/account-access";
 import { ProfileManager } from "../../common/profile-manager";

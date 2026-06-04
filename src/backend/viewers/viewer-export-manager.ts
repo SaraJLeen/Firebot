@@ -1,13 +1,13 @@
+import { DateTime } from "luxon";
+import fsp from "fs/promises";
+
+import type { FirebotViewer } from "../../types";
+
 import frontendCommunicator from "../common/frontend-communicator";
 import currencyAccess from "../currency/currency-access";
 import rankManager from "../ranks/rank-manager";
 import viewerDatabase from "./viewer-database";
 import { LoggerCache } from "../logger-cache";
-
-import { DateTime } from "luxon";
-import fsp from "fs/promises";
-
-import type { FirebotViewer } from "../../types/viewers";
 
 interface ViewerExportOptions {
     viewers: boolean;

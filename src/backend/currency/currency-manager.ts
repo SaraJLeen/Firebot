@@ -1,7 +1,6 @@
 import { DateTime, Duration } from "luxon";
 
-import { FirebotViewer } from "../../types/viewers";
-import { Currency } from "../../types/currency";
+import type { Currency, FirebotViewer } from "../../types";
 
 import { commafy } from "../utils";
 import currencyAccess from "./currency-access";

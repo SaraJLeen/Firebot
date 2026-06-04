@@ -1,4 +1,4 @@
-import { PresetEffectList } from "../../../types/effects";
+import type { PresetEffectList } from "../../../types";
 
 import JsonDbManager from "../../database/json-db-manager";
 import frontendCommunicator from "../../common/frontend-communicator";

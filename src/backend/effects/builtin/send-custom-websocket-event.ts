@@ -1,4 +1,5 @@
-import { EffectType } from "../../../types/effects";
+import type { EffectType } from "../../../types";
+
 import { HttpServerManager } from "../../../server/http-server-manager";
 import { LoggerCache } from "../../logger-cache";
 

@@ -1,4 +1,5 @@
-import { EffectType } from "../../../types/effects";
+import type { EffectType } from "../../../types";
+
 import { evalSandboxedJs } from "../../common/handlers/js-sandbox/sandbox-eval";
 import { LoggerCache } from "../../logger-cache";
 

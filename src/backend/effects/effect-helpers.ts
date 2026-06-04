@@ -1,4 +1,4 @@
-import type { EffectType } from "../../types/effects";
+import type { EffectType } from "../../types";
 
 import { AccountAccess } from "../common/account-access";
 import integrationManager from "../integrations/integration-manager";

@@ -1,9 +1,12 @@
 import { JsonDB } from "node-json-db";
 
-import { PowerUpRedemptionMetadata, SavedPowerUp } from "../../types/power-ups";
-import { EffectList } from "../../types/effects";
-import { Trigger } from "../../types/triggers";
-import { CustomPowerUp } from "../streaming-platforms/twitch/api/resource/power-ups";
+import type {
+    EffectList,
+    PowerUpRedemptionMetadata,
+    SavedPowerUp,
+    Trigger
+} from "../../types";
+import type { CustomPowerUp } from "../streaming-platforms/twitch/api/resource/power-ups";
 
 import { AccountAccess } from "../common/account-access";
 import { ActiveUserHandler } from "../chat/active-user-handler";

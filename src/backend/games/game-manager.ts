@@ -1,4 +1,9 @@
-import type { FirebotGame, GameDefinition, GameSettings } from "../../types/games";
+import type {
+    FirebotGame,
+    GameDefinition,
+    GameSettings
+} from "../../types";
+
 import { ProfileManager } from "../common/profile-manager";
 import frontendCommunicator from "../common/frontend-communicator";
 import { LoggerCache } from "../logger-cache";

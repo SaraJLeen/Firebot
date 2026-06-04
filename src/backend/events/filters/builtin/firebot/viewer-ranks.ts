@@ -1,6 +1,7 @@
+import type { EventFilter } from "../../../../../types";
+
 import { TwitchApi } from "../../../../streaming-platforms/twitch/api";
 import viewerDatabase from "../../../../viewers/viewer-database";
-import { EventFilter } from "../../../../../types/events";
 
 const filter: EventFilter = {
     id: "firebot:viewerranks",

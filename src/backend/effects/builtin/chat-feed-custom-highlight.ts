@@ -1,5 +1,5 @@
-import { EffectType } from "../../../types/effects";
-import { TriggersObject } from '../../../types/triggers';
+import type { EffectType, TriggersObject } from "../../../types";
+
 import frontendCommunicator from "../../common/frontend-communicator";
 import { LoggerCache } from "../../logger-cache";
 

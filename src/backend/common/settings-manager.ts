@@ -4,11 +4,11 @@ import fs from "fs";
 import path from "path";
 
 import {
-    FirebotAutoUpdateLevel,
+    type FirebotAutoUpdateLevel,
     FirebotGlobalSettings,
     FirebotSettingsDefaults,
     FirebotSettingsPaths,
-    FirebotSettingsTypes
+    type FirebotSettingsTypes
 } from "../../types/settings";
 
 import * as dataAccess from "./data-access";

@@ -1,7 +1,6 @@
 import { app, globalShortcut } from "electron";
 
-import { FirebotHotkey } from "../../types/hotkeys";
-import { Trigger } from "../../types/triggers";
+import type { FirebotHotkey, Trigger } from "../../types";
 
 import { AccountAccess } from "../common/account-access";
 import effectRunner from "../common/effect-runner";

@@ -1,11 +1,12 @@
-import { FirebotViewer } from "../../types/viewers";
+import { TypedEmitter } from "tiny-typed-emitter";
+
+import type { FirebotViewer } from "../../types";
 
 import { LoggerCache } from "../logger-cache";
 import viewerDatabase from "./viewer-database";
 import jsonDataHelpers from "../common/json-data-helpers";
 import frontendCommunicator from "../common/frontend-communicator";
 import { EventManager } from "../events/event-manager";
-import { TypedEmitter } from "tiny-typed-emitter";
 
 type Events = {
     "created-item": (item: object) => void;

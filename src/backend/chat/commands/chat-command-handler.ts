@@ -1,6 +1,10 @@
-import { CommandDefinition, SystemCommandDefinition, UserCommand } from "../../../types/commands";
-import { FirebotChatMessage } from "../../../types/chat";
-import { Trigger } from "../../../types/triggers";
+import type {
+    CommandDefinition,
+    FirebotChatMessage,
+    SystemCommandDefinition,
+    Trigger,
+    UserCommand
+} from "../../../types";
 
 import { AccountAccess } from "../../common/account-access";
 import { CommandManager } from "./command-manager";

@@ -1,6 +1,6 @@
-import { AccessToken, getExpiryDateOfAccessToken } from "@twurple/auth";
+import { type AccessToken, getExpiryDateOfAccessToken } from "@twurple/auth";
 
-import { AuthDetails, AuthProviderDefinition } from "../../types/auth";
+import type { AuthDetails, AuthProviderDefinition } from "../../types";
 
 import { AccountAccess } from "../common/account-access";
 import { DeviceAuthProvider } from "../streaming-platforms/twitch/auth/twitch-device-auth-provider";

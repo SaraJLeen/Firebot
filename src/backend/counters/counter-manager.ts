@@ -2,9 +2,11 @@ import fsp from "fs/promises";
 import path from "path";
 import sanitizeFileName from "sanitize-filename";
 
-import type { Counter } from "../../types/counters";
-import type { EffectList } from "../../types/effects";
-import type { Trigger } from "../../types/triggers";
+import type {
+    Counter,
+    EffectList,
+    Trigger
+} from "../../types";
 import type { CounterDisplayWidgetConfig } from "../overlay-widgets/builtin-types/counter-display/counter-display-types";
 
 import { AccountAccess } from "../common/account-access";

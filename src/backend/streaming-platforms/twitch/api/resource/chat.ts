@@ -6,7 +6,9 @@ import {
     HelixUpdateChatSettingsParams,
     HelixUserEmote
 } from "@twurple/api";
-import type { SharedChatParticipant } from '../../../../../types';
+
+import type { SharedChatParticipant } from "../../../../../types";
+
 import { ApiResourceBase } from "./api-resource-base";
 import type { TwitchApi } from "../";
 import { TwitchSlashCommandHandler } from "../../chat/twitch-slash-command-handler";

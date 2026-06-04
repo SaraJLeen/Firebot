@@ -1,13 +1,13 @@
 import type {
-    ThirdPartyImporter,
+    ImportRequest,
+    ImportResult,
     LoadRequest,
     LoadResult,
     ParsedQuotes,
     ParsedViewers,
-    ImportRequest,
-    ImportResult
-} from "../../types/import";
-import type { Quote } from "../../types/quotes";
+    Quote,
+    ThirdPartyImporter
+} from "../../types";
 
 import { QuoteManager } from "../quotes/quote-manager";
 import frontendCommunicator from "../common/frontend-communicator";

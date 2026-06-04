@@ -1,5 +1,5 @@
-import type { SystemCommand } from "../../types/commands";
-import type { Currency } from "../../types/currency";
+import type { Currency, SystemCommand } from "../../types";
+
 import { CommandManager } from "../chat/commands/command-manager";
 import { TwitchApi } from "../streaming-platforms/twitch/api";
 import currencyAccess from "./currency-access";

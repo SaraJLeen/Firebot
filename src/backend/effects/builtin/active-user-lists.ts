@@ -1,4 +1,5 @@
-import { EffectType } from '../../../types/effects';
+import type { EffectType } from "../../../types";
+
 import { TwitchApi } from "../../streaming-platforms/twitch/api";
 import { ActiveUserHandler } from "../../chat/active-user-handler";
 import { LoggerCache } from "../../logger-cache";

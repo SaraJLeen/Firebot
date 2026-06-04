@@ -1,5 +1,5 @@
-import { SavedChannelReward } from "../../../types/channel-rewards";
-import { EffectType } from "../../../types/effects";
+import { EffectType, SavedChannelReward } from "../../../types";
+
 import channelRewardsManager from "../../channel-rewards/channel-reward-manager";
 import { LoggerCache } from "../../logger-cache";
 import { isValidUUID } from "../../utils";

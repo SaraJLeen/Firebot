@@ -1,5 +1,4 @@
-import { BasicViewer, FirebotViewer } from "../../types/viewers";
-import { LoggerCache } from "../logger-cache";
+import type { BasicViewer, FirebotViewer } from "../../types";
 
 import { SettingsManager } from "../common/settings-manager";
 import viewerDatabase from "./viewer-database";
@@ -10,6 +9,7 @@ import twitchChat from "../chat/twitch-chat";
 import twitchChatterPoll from "../streaming-platforms/twitch/chatter-poll";
 import frontendCommunicator from "../common/frontend-communicator";
 import { ActiveUserHandler } from "../chat/active-user-handler";
+import { LoggerCache } from "../logger-cache";
 
 class ViewerOnlineStatusManager {
     private logger = LoggerCache.getLogger("Viewers");

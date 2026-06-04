@@ -1,8 +1,7 @@
 import { CronJob } from "cron";
 import { DateTime } from "luxon";
 
-import type { ScheduledTask } from "../../types/timers";
-import type { Trigger } from "../../types/triggers";
+import type { ScheduledTask, Trigger } from "../../types";
 
 import JsonDbManager from "../database/json-db-manager";
 import { AccountAccess } from "../common/account-access";

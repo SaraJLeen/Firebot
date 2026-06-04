@@ -1,5 +1,8 @@
-import type { EffectType } from "../../../types/effects";
-import type { CommandDefinition, SystemCommandDefinition } from "../../../types/commands";
+import type {
+    CommandDefinition,
+    EffectType,
+    SystemCommandDefinition
+} from "../../../types";
 
 import { CommandManager } from "../../chat/commands/command-manager";
 import chatHelpers from "../../chat/chat-helpers";

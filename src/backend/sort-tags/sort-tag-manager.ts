@@ -1,4 +1,4 @@
-import type { SortTag } from "../../types/sort-tags";
+import type { SortTag } from "../../types";
 
 import { SettingsManager } from "../common/settings-manager";
 import { ProfileManager } from "../common/profile-manager";

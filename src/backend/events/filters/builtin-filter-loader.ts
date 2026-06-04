@@ -1,4 +1,5 @@
-import { EventFilter } from "../../../types/events";
+import type { EventFilter } from "../../../types";
+
 import { FilterManager } from "./filter-manager";
 import filters from "./builtin";
 

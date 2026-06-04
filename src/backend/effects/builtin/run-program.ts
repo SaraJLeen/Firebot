@@ -2,7 +2,7 @@ import nodeProcess from "process";
 import path from "path";
 import { ChildProcess, spawn } from "child_process";
 
-import type { EffectType } from "../../../types/effects";
+import type { EffectType } from "../../../types";
 
 import { LoggerCache } from "../../logger-cache";
 

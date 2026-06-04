@@ -1,7 +1,10 @@
 import fsp from "fs/promises";
 
-import type { FirebotSetup, SetupImportQuestion } from "../../types/setups";
-import type { Currency } from "../../types/currency";
+import type {
+    Currency,
+    FirebotSetup,
+    SetupImportQuestion
+} from "../../types";
 
 import { CommandManager } from "../chat/commands/command-manager";
 import { CounterManager } from "../counters/counter-manager";

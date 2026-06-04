@@ -1,5 +1,9 @@
-import { EffectType } from "../../../../types/effects";
-import { OverlayWidgetConfig, Position } from "../../../../types/overlay-widgets";
+import type {
+    EffectType,
+    OverlayWidgetConfig,
+    Position
+} from "../../../../types";
+
 import overlayWidgetConfigManager from "../../../overlay-widgets/overlay-widget-config-manager";
 import overlayWidgetsManager from "../../../overlay-widgets/overlay-widgets-manager";
 import { LoggerCache } from "../../../logger-cache";

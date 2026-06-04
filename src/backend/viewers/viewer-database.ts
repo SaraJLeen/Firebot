@@ -3,8 +3,13 @@ import Datastore from "@seald-io/nedb";
 import { DateTime } from "luxon";
 import type { HelixUser, HelixBan } from "@twurple/api";
 
-import type { BasicViewer, FirebotViewer, NewFirebotViewer } from "../../types/viewers";
-import type { Rank, RankLadder } from "../../types/ranks";
+import type {
+    BasicViewer,
+    FirebotViewer,
+    NewFirebotViewer,
+    Rank,
+    RankLadder
+} from "../../types";
 
 import { AccountAccess } from "../common/account-access";
 import { BackupManager } from "../backup-manager";

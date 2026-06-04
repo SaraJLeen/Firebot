@@ -1,4 +1,4 @@
-import type { SystemCommand } from "../../../types/commands";
+import type { SystemCommand } from "../../../types";
 import { CommandManager } from "../commands/command-manager";
 import { TwitchApi } from "../../streaming-platforms/twitch/api";
 import frontendCommunicator from "../../common/frontend-communicator";

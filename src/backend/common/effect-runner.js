@@ -332,7 +332,7 @@ function runEffects(runEffectsContext) {
 
 /**
  *
- * @param {import("../../types/effects").RunEffectsContext} runEffectsContext
+ * @param {import("../../types").RunEffectsContext} runEffectsContext
  * @returns
  */
 async function processEffects(runEffectsContext) {

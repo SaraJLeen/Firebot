@@ -1,4 +1,5 @@
-import type { EffectType, EffectQueueConfig } from "../../../types/effects";
+import type { EffectType, EffectQueueConfig } from "../../../types";
+
 import { EffectQueueConfigManager } from "../queues/effect-queue-config-manager";
 import queueRunner from "../queues/effect-queue-runner";
 import { LoggerCache } from "../../logger-cache";
