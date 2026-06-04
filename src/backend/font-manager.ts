@@ -1,8 +1,6 @@
 import fsp from "fs/promises";
 import path from "path";
 
-import { FirebotSettingsDefaults } from "../types/settings";
-
 import { HttpServerManager } from "../server/http-server-manager";
 import { ProfileManager } from "./common/profile-manager";
 import { SettingsManager } from "./common/settings-manager";
@@ -139,7 +137,7 @@ class FontManager {
 
         if (font != null) {
             if (SettingsManager.getSetting("ChatCustomFontFamily") === name) {
-                SettingsManager.saveSetting("ChatCustomFontFamily", FirebotSettingsDefaults.ChatCustomFontFamily);
+                SettingsManager.deleteSetting("ChatCustomFontFamily");
                 SettingsManager.saveSetting("ChatCustomFontFamilyEnabled", false);
             }
 
