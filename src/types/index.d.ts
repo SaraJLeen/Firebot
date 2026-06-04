@@ -12,6 +12,7 @@ export * from "./expressionish";
 export * from "./games";
 export * from "./goals";
 export * from "./hotkeys";
+export * from "./http-server";
 export * from "./icons";
 export * from "./import";
 export * from "./integrations";

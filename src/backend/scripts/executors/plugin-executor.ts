@@ -22,6 +22,7 @@ import { LoggerCache } from "../../logger-cache";
 import IntegrationManager from "../../integrations/integration-manager";
 import UIExtensionManager from "../../ui-extensions/ui-extension-manager";
 import OverlayWidgetManager from "../../overlay-widgets/overlay-widgets-manager";
+import httpServer from "../../../server/http-server-manager";
 import { resolvePluginManifestLinks } from "../plugin-manifest-utils";
 
 const logger = LoggerCache.getLogger("Plugins");
@@ -259,6 +260,18 @@ export class PluginExecutor extends IPluginExecutor {
                 }
             }
         }
+
+        if (r.customHttpRoutes != null) {
+            const def = await resolve(r.customHttpRoutes);
+            if (def != null) {
+                if (httpServer.registerPlugin({
+                    name: script.manifest.name,
+                    definition: def
+                })) {
+                    registrations.customHttpRoutePrefix = def.prefix;
+                }
+            }
+        }
     }
 
     private runUnregistrations(registrations: PluginRegistrations) {
@@ -326,6 +339,14 @@ export class PluginExecutor extends IPluginExecutor {
                 OverlayWidgetManager.unregisterOverlayWidgetType(id);
             } catch (e) {
                 logger.warn(`Failed to unregister overlay widget ${id}`, e);
+            }
+        }
+
+        if (!!registrations.customHttpRoutePrefix?.length) {
+            try {
+                httpServer.unregisterPlugin(registrations.customHttpRoutePrefix);
+            } catch (e) {
+                logger.warn(`Failed to unregister HTTP server plugin ${registrations.customHttpRoutePrefix}`, e);
             }
         }
     }

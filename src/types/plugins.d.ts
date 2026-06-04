@@ -11,6 +11,7 @@ import { FirebotGame } from "./games";
 import { Integration } from "./integrations";
 import { UIExtension } from "./ui-extensions";
 import { OverlayWidgetType } from "./overlay-widgets";
+import { PluginHttpRouteDefinition } from "./http-server";
 
 type NoResult = Awaitable<void>;
 
@@ -29,6 +30,7 @@ export type ScriptContext<Params extends FirebotParams = FirebotParams> = {
     parameters: Params;
 };
 
+type DynamicObject<T> = T | ((context: ScriptContext) => Awaitable<T>);
 type DynamicArray<T> = Array<T | ((context: ScriptContext) => Awaitable<T>)>;
 
 export type ScriptType = "script" | "plugin";
@@ -126,6 +128,7 @@ export interface Plugin<Params extends FirebotParams = FirebotParams> extends Sc
         games?: DynamicArray<FirebotGame>;
         uiExtensions?: DynamicArray<UIExtension>;
         overlayWidgets?: DynamicArray<OverlayWidgetType<any, any>>;
+        customHttpRoutes?: DynamicObject<PluginHttpRouteDefinition>;
     };
 
     /** Called when the plugin is loaded */

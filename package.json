@@ -27,6 +27,7 @@
         "@stylistic/eslint-plugin": "^5.4.0",
         "@types/angular": "^1.8.4",
         "@types/archiver": "^6.0.3",
+        "@types/cors": "^2.8.5",
         "@types/escape-html": "^1.0.4",
         "@types/express": "^5.0.5",
         "@types/luxon": "^3.7.1",
