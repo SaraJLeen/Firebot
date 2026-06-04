@@ -1,6 +1,6 @@
 {
     "name": "firebotv5",
-    "version": "5.67.0-alpha9",
+    "version": "5.67.0-alpha10",
     "description": "Powerful all-in-one bot for Twitch streamers.",
     "main": "build/main.js",
     "scripts": {
@@ -27,6 +27,7 @@
         "@stylistic/eslint-plugin": "^5.4.0",
         "@types/angular": "^1.8.4",
         "@types/archiver": "^6.0.3",
+        "@types/cors": "^2.8.5",
         "@types/escape-html": "^1.0.4",
         "@types/express": "^5.0.5",
         "@types/luxon": "^3.7.1",

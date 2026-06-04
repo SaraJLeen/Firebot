@@ -4,7 +4,7 @@ import type {
     EffectQueueConfig,
     QueueState,
     RunEffectsContext
-} from "../../../types/effects";
+} from "../../../types";
 
 import { EffectQueue } from "./effect-queue";
 import { EffectManager } from "../effect-manager";

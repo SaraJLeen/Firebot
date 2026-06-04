@@ -5,7 +5,7 @@ import type {
     QueueItem,
     QueueState,
     RunEffectsContext
-} from "../../../types/effects";
+} from "../../../types";
 
 import { EventManager } from "../../events/event-manager";
 import effectRunner from "../../common/effect-runner";

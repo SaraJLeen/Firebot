@@ -257,8 +257,8 @@ export async function whenReady() {
 
     // start the REST api server
     windowManagement.updateSplashScreenStatus("Starting internal web server...");
-    const httpServerManager = (await import("../../../../server/http-server-manager")).default;
-    httpServerManager.start();
+    const { HttpServerManager } = (await import("../../../../server/http-server-manager"));
+    HttpServerManager.start();
 
     // register websocket event handlers
     const websocketEventsHandler = await import("../../../../server/websocket-events-handler");

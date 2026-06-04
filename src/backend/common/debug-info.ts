@@ -5,8 +5,8 @@ import os from "os";
 import frontendCommunicator from "./frontend-communicator";
 import ConnectionManager from "./connection-manager";
 import { AccountAccess } from "./account-access";
-import HttpServerManager from "../../server/http-server-manager";
-import WebsocketServerManager from "../../server/websocket-server-manager";
+import { HttpServerManager } from "../../server/http-server-manager";
+import { WebSocketServerManager } from "../../server/websocket-server-manager";
 import scriptManager from "../scripts/script-manager";
 import { isConnected } from "../integrations/builtin/obs/obs-remote";
 
@@ -32,6 +32,7 @@ async function getDebugInfoString(): Promise<string> {
     const osVersion = typeof process.getSystemVersion === "function" ? process.getSystemVersion() : os.release();
     const osArch = os.arch();
 
+    // eslint-disable-next-line new-cap
     const { locale } = Intl.DateTimeFormat().resolvedOptions();
 
     const accounts = AccountAccess.getAccounts();
@@ -42,9 +43,10 @@ async function getDebugInfoString(): Promise<string> {
     const connectedToOBS = isConnected() ? "Connected" : "Disconnected";
 
     const httpServerStatus = HttpServerManager.isDefaultServerStarted ? "Running" : "Stopped";
-    const websocketClients = WebsocketServerManager.getNumberOfOverlayClients();
+    const websocketClients = WebSocketServerManager.getNumberOfOverlayClients();
 
-    const startupScripts = await scriptManager.getInstalledPlugins();
+    const startupScripts = (await scriptManager.getInstalledPlugins())
+        .toSorted((a, b) => a.details.manifest.name.localeCompare(b.details.manifest.name));
 
     return [
         "Firebot Debug Info",

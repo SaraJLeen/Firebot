@@ -1,4 +1,5 @@
-import { EffectType } from "../../../../types/effects";
+import type { EffectType } from "../../../../types";
+
 import overlayWidgetConfigManager from "../../../overlay-widgets/overlay-widget-config-manager";
 import { LoggerCache } from "../../../logger-cache";
 import type { DynamicCountdownWidgetConfig } from "../../../overlay-widgets/builtin-types/countdown/countdown-dynamic";

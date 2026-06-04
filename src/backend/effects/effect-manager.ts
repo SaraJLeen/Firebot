@@ -1,7 +1,12 @@
 import { TypedEmitter } from "tiny-typed-emitter";
 
-import type { EffectDefinition, EffectType } from "../../types/effects";
-import type { TriggerMeta, TriggersObject, TriggerType } from "../../types/triggers";
+import type {
+    EffectDefinition,
+    EffectType,
+    TriggerMeta,
+    TriggersObject,
+    TriggerType
+} from "../../types";
 
 import * as cloudSync from "../cloud-sync";
 import { checkEffectDependencies } from "./effect-helpers";

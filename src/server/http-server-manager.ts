@@ -2,15 +2,21 @@ import { EventEmitter } from "events";
 import express, { Express, Request, Response, Router } from "express";
 import http from "http";
 import bodyParser from "body-parser";
-import cors from 'cors';
-import path from 'path';
+import cors from "cors";
+import path from "path";
 
-import { Awaitable } from "../types/util-types";
+import type {
+    HttpMethod,
+    CustomHttpRoute,
+    PluginHttpRouteDefinition,
+    CustomWebSocketHandler,
+    Awaitable
+} from "../types";
+
 import { SettingsManager } from "../backend/common/settings-manager";
 import { EffectManager } from "../backend/effects/effect-manager";
 import { ResourceTokenManager } from "../backend/resource-token-manager";
-import websocketServerManager from "./websocket-server-manager";
-import { CustomWebSocketHandler } from "../types/websocket";
+import { WebSocketServerManager } from "./websocket-server-manager";
 import overlayWidgetManager from "../backend/overlay-widgets/overlay-widgets-manager";
 import { LoggerCache } from "../backend/logger-cache";
 
@@ -25,16 +31,10 @@ interface ServerInstance {
     server: http.Server;
 }
 
-type HttpMethod =
-    | "GET"
-    | "POST"
-    | "PUT"
-    | "PATCH"
-    | "DELETE"
-    | "HEAD"
-    | "CONNECT"
-    | "OPTIONS"
-    | "TRACE";
+interface RegisteredPlugin {
+    name: string;
+    routes: Array<CustomHttpRoute>;
+}
 
 interface CustomRoute {
     prefix: string;
@@ -53,8 +53,11 @@ class HttpServerManager extends EventEmitter {
     overlayServer: http.Server;
     isDefaultServerStarted: boolean;
     overlayHasClients: boolean;
-    customRouteRouter: Router;
+    registeredPlugins: Record<string, RegisteredPlugin>;
+    pluginRootRouter: Router;
+    pluginRouters: Record<string, Router>;
     customRoutes: CustomRoute[];
+    customRouteRouter: Router;
 
     constructor() {
         super();
@@ -65,11 +68,25 @@ class HttpServerManager extends EventEmitter {
         this.overlayServer = null;
         this.isDefaultServerStarted = false;
         this.overlayHasClients = false;
+        this.registeredPlugins = {};
+        this.pluginRouters = {};
         this.customRoutes = [];
         this.setMaxListeners(0);
 
         // eslint-disable-next-line new-cap
+        this.pluginRootRouter = express.Router();
+
+        // eslint-disable-next-line new-cap
         this.customRouteRouter = express.Router();
+
+        setInterval(() => WebSocketServerManager.reportClientsToFrontend(this.isDefaultServerStarted), 3000);
+
+        frontendCommunicator.on("http-server:get-overlay-status", () => {
+            return {
+                clientsConnected: WebSocketServerManager.overlayHasClients,
+                serverStarted: this.isDefaultServerStarted
+            };
+        });
     }
 
     start(): void {
@@ -101,20 +118,20 @@ class HttpServerManager extends EventEmitter {
         app.set("view engine", "ejs");
 
         // Get our router for the current v1 api methods
-        const v1Router = require("./api/v1/v1-router");
+        const v1Router = require("./api/v1/v1-router") as Router;
         app.use("/api/v1", v1Router);
 
         app.get("/api/v1/auth/callback", (_, res) => {
             res.sendFile(path.join(`${__dirname}/authcallback.html`));
         });
 
-        app.get('/loginsuccess', (_, res) => {
+        app.get("/loginsuccess", (_, res) => {
             res.sendFile(path.join(`${__dirname}/loginsuccess.html`));
         });
 
 
         // Set up route to serve overlay
-        app.use("/overlay/", express.static(path.join(cwd, './resources/overlay/')));
+        app.use("/overlay/", express.static(path.join(cwd, "./resources/overlay/")));
         app.get("/overlay/", (req, res) => {
             const effectDefs = EffectManager.getEffectOverlayExtensions();
 
@@ -157,6 +174,7 @@ class HttpServerManager extends EventEmitter {
                     .map(we => we.dependencies.globalStyles)
             ];
 
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
             const widgetEvents: Array<{ name: string, callback: Function }> = [];
             for (const widgetExtension of widgetExtensions) {
                 if (widgetExtension.eventHandler) {
@@ -167,7 +185,7 @@ class HttpServerManager extends EventEmitter {
                 }
             }
 
-            const overlayTemplate = path.join(cwd, './resources/overlay');
+            const overlayTemplate = path.join(cwd, "./resources/overlay");
             res.render(overlayTemplate, {
                 effectEvents: effectDefs.map(ed => ed.event),
                 widgetEvents: widgetEvents,
@@ -198,8 +216,25 @@ class HttpServerManager extends EventEmitter {
                 .send({ status: "error", message: `${req.originalUrl} not found` });
         });
 
+        app.get("/plugins", (_, res) => {
+            const registeredPlugins = Object.keys(this.registeredPlugins).map((p) => {
+                return {
+                    name: this.registeredPlugins[p].name,
+                    prefix: p,
+                    routes: this.registeredPlugins[p].routes.map(r => ({
+                        route: r.path,
+                        method: r.method
+                    }))
+                };
+            });
+
+            res.json(registeredPlugins);
+        });
+
+        app.use(this.pluginRootRouter);
+
         // List custom routes
-        app.get("/integrations", (req, res) => {
+        app.get("/integrations", (_, res) => {
             const registeredCustomRoutes = this.customRoutes.map((cr) => {
                 return {
                     path: this.getCustomRoutePathFromRoot(cr.fullRoute),
@@ -226,15 +261,15 @@ class HttpServerManager extends EventEmitter {
     startDefaultHttpServer(): void {
         const port: number = SettingsManager.getSetting("WebServerPort");
 
-        websocketServerManager.createServer(this.defaultHttpServer);
+        WebSocketServerManager.createServer(this.defaultHttpServer);
 
         // Shim for any consumers of the EventEmitter
 
-        websocketServerManager.on("overlay-connected", (instanceName: string) => {
+        WebSocketServerManager.on("overlay-connected", (instanceName: string) => {
             this.emit("overlay-connected", instanceName);
         });
 
-        websocketServerManager.on("overlay-event", (event: unknown) => {
+        WebSocketServerManager.on("overlay-event", (event: unknown) => {
             this.emit("overlay-event", event);
         });
 
@@ -251,7 +286,7 @@ class HttpServerManager extends EventEmitter {
                 });
 
                 const addressInfo = this.overlayServer.address();
-                this.logger.info(`Default web server started, listening on port ${typeof addressInfo === 'string' ? addressInfo : addressInfo.port}`);
+                this.logger.info(`Default web server started, listening on port ${typeof addressInfo === "string" ? addressInfo : addressInfo.port}`);
             });
         } catch (error) {
             this.logger.error(`Unable to start default web server on port ${port}: ${error}`);
@@ -259,11 +294,11 @@ class HttpServerManager extends EventEmitter {
     }
 
     sendToOverlay(eventName: string, meta: Record<string, unknown> = {}, overlayInstance: string = null) {
-        websocketServerManager.sendToOverlay(eventName, meta, overlayInstance);
+        WebSocketServerManager.sendToOverlay(eventName, meta, overlayInstance);
     }
 
     refreshAllOverlays() {
-        websocketServerManager.refreshAllOverlays();
+        WebSocketServerManager.refreshAllOverlays();
     }
 
     /**
@@ -271,11 +306,11 @@ class HttpServerManager extends EventEmitter {
      * @param overlayInstance the instance to refresh, leave undefined to refresh default
      */
     refreshOverlayInstance(overlayInstance?: string) {
-        websocketServerManager.sendToOverlay("OVERLAY:REFRESH", undefined, overlayInstance);
+        WebSocketServerManager.sendToOverlay("OVERLAY:REFRESH", undefined, overlayInstance);
     }
 
     triggerCustomWebSocketEvent(eventType: string, payload: object) {
-        websocketServerManager.triggerEvent(`custom-event:${eventType}`, payload);
+        WebSocketServerManager.triggerEvent(`custom-event:${eventType}`, payload);
     }
 
     createServerInstance(): Express {
@@ -303,7 +338,7 @@ class HttpServerManager extends EventEmitter {
             });
 
             const addressInfo = this.overlayServer.address();
-            this.logger.info(`Default web server started, listening on port ${typeof addressInfo === 'string' ? addressInfo : addressInfo.port}`);
+            this.logger.info(`Default web server started, listening on port ${typeof addressInfo === "string" ? addressInfo : addressInfo.port}`);
             return newHttpServer;
         } catch (error) {
             this.logger.error(`Unable to start web server instance "${name}" on port ${port}: ${error}`);
@@ -338,6 +373,168 @@ class HttpServerManager extends EventEmitter {
             this.logger.error(`Unable to stop web server instance "${name}": ${error}`);
             return false;
         }
+    }
+
+    private getFullPluginRoute(prefix: string, route: string) {
+        return `/${path.posix.join("plugins", prefix, route)}`;
+    }
+
+    registerPlugin(plugin: {
+        name: string;
+        definition: PluginHttpRouteDefinition;
+    }): boolean {
+        if (!plugin?.name?.length) {
+            this.logger.error("Failed to register plugin. No name provided.");
+            return false;
+        }
+
+        if (plugin.definition == null) {
+            this.logger.error(`Failed to register plugin "${plugin.name}". No data provided.`);
+            return false;
+        }
+
+        const prefix = plugin.definition.prefix?.toLowerCase();
+
+        if (!prefix?.length) {
+            this.logger.error(`Failed to register plugin "${plugin.name}". No prefix provided.`);
+            return false;
+        }
+
+        if (!plugin.definition.routes?.length) {
+            this.logger.error(`Failed to register plugin "${plugin.name}". No routes provided.`);
+            return false;
+        }
+
+        this.logger.info(`Registering routes for plugin "${plugin.name}" with prefix "${prefix}"`);
+
+        try {
+            // eslint-disable-next-line new-cap
+            const pluginRouter = express.Router();
+
+            const registeredRoutes: PluginHttpRouteDefinition["routes"] = [];
+
+            for (const route of plugin.definition.routes ?? []) {
+                if (!route.path?.length
+                    || !route.method?.length
+                    || route.callback == null
+                ) {
+                    this.logger.warn(`Incomplete plugin route specified for ${prefix}; skipping route.`);
+                    continue;
+                }
+
+                const normalizedPath = route.path.toLowerCase().replace(/(^\/$)/, "");
+                route.path = normalizedPath;
+
+                const fullRoute = this.getFullPluginRoute(prefix, normalizedPath);
+
+                let routeRegistered = true;
+
+                switch (route.method) {
+                    case "GET":
+                        pluginRouter.get(fullRoute, route.callback);
+                        break;
+
+                    case "POST":
+                        pluginRouter.post(fullRoute, route.callback);
+                        break;
+
+                    case "PUT":
+                        pluginRouter.put(fullRoute, route.callback);
+                        break;
+
+                    case "PATCH":
+                        pluginRouter.patch(fullRoute, route.callback);
+                        break;
+
+                    case "DELETE":
+                        pluginRouter.delete(fullRoute, route.callback);
+                        break;
+
+                    case "HEAD":
+                        pluginRouter.head(fullRoute, route.callback);
+                        break;
+
+                    case "CONNECT":
+                        pluginRouter.connect(fullRoute, route.callback);
+                        break;
+
+                    case "OPTIONS":
+                        pluginRouter.options(fullRoute, route.callback);
+                        break;
+
+                    case "TRACE":
+                        pluginRouter.trace(fullRoute, route.callback);
+                        break;
+
+                    default:
+                        this.logger.warn(`Invalid method "${route.method as string}" specified for plugin ${prefix} path "${route.path}"; skipping.`);
+                        routeRegistered = false;
+                        break;
+                }
+
+                if (routeRegistered === true) {
+                    registeredRoutes.push(route);
+                    this.logger.info(`Registered plugin route "${route.method} ${fullRoute}"`);
+                }
+            }
+
+            this.pluginRouters[prefix] = pluginRouter;
+
+            this.pluginRootRouter.use(this.pluginRouters[prefix]);
+
+            this.registeredPlugins[prefix] = {
+                name: plugin.name,
+                routes: registeredRoutes
+            };
+
+            this.logger.info(`Registered ${registeredRoutes.length} route(s) for "${prefix}" prefix for plugin "${plugin.name}"`);
+            return true;
+        } catch (error) {
+            this.logger.error(`Failed to create ${prefix} plugin router.`, error);
+        }
+
+        return false;
+    }
+
+    unregisterPlugin(prefix: string): boolean {
+        if (!prefix?.length) {
+            this.logger.error("Failed to unregister plugin. No prefix specified.");
+            return false;
+        }
+
+        const pluginRouter = this.pluginRouters[prefix];
+
+        if (pluginRouter != null && !!this.registeredPlugins[prefix]?.routes.length) {
+            try {
+                const firstRoute = this.getFullPluginRoute(
+                    prefix,
+                    this.registeredPlugins[prefix].routes[0].path
+                );
+
+                // eslint-disable-next-line
+                const index = this.pluginRootRouter.stack.findIndex(l => {
+                    // @ts-ignore
+                    // eslint-disable-next-line
+                    return l.handle.stack.some(s => s.route?.path === firstRoute);
+                });
+
+                if (index > -1) {
+                    this.pluginRootRouter.stack.splice(index, 1);
+
+                    delete this.pluginRouters[prefix];
+                    delete this.registeredPlugins[prefix];
+
+                    this.logger.info(`Unregistered plugin ${prefix}`);
+                    return true;
+                }
+            } catch (error) {
+                this.logger.error(`Failed to unregister plugin ${prefix}`, error);
+            }
+        } else {
+            this.logger.error(`Failed to unregister plugin ${prefix}. Plugin prefix not registered.`);
+        }
+
+        return false;
     }
 
     registerCustomRoute(
@@ -501,7 +698,7 @@ class HttpServerManager extends EventEmitter {
 
     buildCustomRouteParameters(prefix: string, route: string, method: string) {
         const normalizedPrefix = prefix.toLowerCase();
-        const normalizedRoute = route.toLowerCase().replace(/\/$/, '');
+        const normalizedRoute = route.toLowerCase().replace(/\/$/, "");
         const normalizedMethod = method.toUpperCase() as HttpMethod;
 
         // Force POSIX paths because URL
@@ -522,7 +719,7 @@ class HttpServerManager extends EventEmitter {
     private removeCustomRoute(path: string, method: string): void {
         const stacksToRemove = [];
         this.customRouteRouter.stack.forEach((s) => {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
             if (s.route?.path === path && (s.route as any).methods[method] === true
             ) {
                 stacksToRemove.push(s);
@@ -530,29 +727,21 @@ class HttpServerManager extends EventEmitter {
         });
 
         for (const stack of stacksToRemove) {
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
             const i = this.customRouteRouter.stack.indexOf(stack);
             this.customRouteRouter.stack.splice(i, 1);
         }
     }
 
     registerCustomWebSocketListener(pluginName: string, callback: CustomWebSocketHandler["callback"]): boolean {
-        return websocketServerManager.registerCustomWebSocketListener(pluginName, callback);
+        return WebSocketServerManager.registerCustomWebSocketListener(pluginName, callback);
     }
 
     unregisterCustomWebSocketListener(pluginName: string): boolean {
-        return websocketServerManager.unregisterCustomWebSocketListener(pluginName);
+        return WebSocketServerManager.unregisterCustomWebSocketListener(pluginName);
     }
 }
 
 const manager = new HttpServerManager();
 
-setInterval(() => websocketServerManager.reportClientsToFrontend(manager.isDefaultServerStarted), 3000);
-
-frontendCommunicator.on("getOverlayStatus", () => {
-    return {
-        clientsConnected: websocketServerManager.overlayHasClients,
-        serverStarted: manager.isDefaultServerStarted
-    };
-});
-
-export = manager;
+export { manager as HttpServerManager };

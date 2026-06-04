@@ -3,17 +3,164 @@ import { JsonDB } from "node-json-db";
 import fs from "fs";
 import path from "path";
 
-import {
-    FirebotAutoUpdateLevel,
-    FirebotGlobalSettings,
-    FirebotSettingsDefaults,
-    FirebotSettingsPaths,
-    FirebotSettingsTypes
-} from "../../types/settings";
+import type { FirebotAutoUpdateLevel, FirebotSettingsTypes } from "../../types";
 
 import * as dataAccess from "./data-access";
 import frontendCommunicator from "./frontend-communicator";
 import { LoggerCache } from "../logger-cache";
+
+const FirebotGlobalSettings: Partial<Record<keyof FirebotSettingsTypes, boolean>> = {
+    ActiveProfiles: true,
+    BackupBeforeUpdates: true,
+    BackupIgnoreResources: true,
+    BackupKeepAll: true,
+    BackupLocation: true,
+    BackupLocationReset: true,
+    BackupOnceADay: true,
+    BackupOnExit: true,
+    DebugMode: true,
+    DeleteProfile: true,
+    LastBackupDate: true,
+    LoggedInProfile: true,
+    MaxBackupCount: true
+};
+
+const FirebotSettingsDefaults: FirebotSettingsTypes = {
+    ActiveChatUserListTimeout: 5,
+    ActiveProfiles: [],
+    AllowChatCreatedCommandsToRunEffects: false,
+    AllowCommandsInSharedChat: false,
+    AllowQuoteCSVDownloads: true,
+    AllowedActivityEvents: [
+        "twitch:raid",
+        "twitch:raid-sent-off",
+        "twitch:follow",
+        "twitch:sub",
+        "twitch:subs-gifted",
+        "twitch:community-subs-gifted",
+        "twitch:cheer",
+        "streamlabs:donation",
+        "streamlabs:eldonation",
+        'extralife:donation',
+        "tipeeestream:donation",
+        "streamelements:donation",
+        "twitch:channel-reward-redemption"
+    ],
+    AudioOutputDevice: { label: "System Default", deviceId: "default" },
+    AutoFlagBots: true,
+    AutoUpdateLevel: 2,
+    BackupBeforeUpdates: true,
+    BackupIgnoreResources: true,
+    BackupKeepAll: false,
+    BackupLocation: undefined,
+    BackupLocationReset: false,
+    BackupOnceADay: true,
+    BackupOnExit: true,
+    ChatAlternateBackgrounds: true,
+    ChatAvatars: true,
+    ChatCompactMode: false,
+    ChatCustomFontFamily: "Open Sans",
+    ChatCustomFontFamilyEnabled: false,
+    ChatCustomFontSize: 17,
+    ChatCustomFontSizeEnabled: false,
+    ChatGetAllEmotes: false,
+    ChatHideBotAccountMessages: false,
+    ChatHideDeletedMessages: false,
+    ChatHideWhispers: false,
+    ChatPronouns: true,
+    ChatReverseOrder: false,
+    ChatShowBttvEmotes: true,
+    ChatShowFfzEmotes: true,
+    ChatShowSevenTvEmotes: true,
+    ChatShowSharedChatInfo: true,
+    ChatTaggedNotificationSound: { name: "None" },
+    ChatTaggedNotificationVolume: 5,
+    ChatTimestamps: true,
+    ClearChatFeedMode: "onlyStreamer",
+    ClearCustomScriptCache: false,
+    ConnectOnLaunch: false,
+    CopiedOverlayVersion: "",
+    DashboardLayout: {
+        dashboardViewerList: "225px",
+        dashboardChatWindow: "100%",
+        dashboardActivityFeed: "275px"
+    },
+    DebugMode: false,
+    DefaultEffectLabelsEnabled: true,
+    DefaultModerationUser: "streamer",
+    DefaultRewardTab: "powerups",
+    DefaultToAdvancedCommandMode: false,
+    DefaultTtsVoiceId: undefined,
+    DeleteProfile: undefined,
+    EventSetSettings: {},
+    EventSettings: {},
+    FirstTimeUse: true,
+    ForceOverlayEffectsToContinueOnRefresh: true,
+    GlobalValues: [],
+    IgnoreSubsequentSubEventsAfterCommunitySub: true,
+    JustUpdated: false,
+    LegacySortTagsImported: false,
+    LastBackupDate: undefined,
+    LoggedInProfile: undefined,
+    MaxBackupCount: 25,
+    MigratedLegacyStartUpScriptsToPlugins: false,
+    MinimizeToTray: false,
+    NotifyOnBeta: false,
+    OpenEffectQueueMonitorOnLaunch: false,
+    OpenStreamPreviewOnLaunch: false,
+    OverlayInstances: [],
+    OverlayResolution: {
+        width: 1280,
+        height: 720
+    },
+    PersistCustomVariables: false,
+    PresetRecursionLimit: true,
+    QuickActions: {},
+    RunCustomScripts: false,
+    SeenAdvancedCommandModePopup: false,
+    ShowActivityFeed: true,
+    ShowActivityFeedEventsInChat: false,
+    ShowAdBreakIndicator: true,
+    ShowChatViewerList: true,
+    ShowHypeTrainIndicator: true,
+    ShowUptimeStat: true,
+    ShowViewerCountStat: true,
+    SidebarControlledServices: ["chat"],
+    SidebarExpanded: true,
+    SoundsEnabled: "On",
+    StreamerExemptFromCooldowns: false,
+    Theme: "Obsidian",
+    TriggerUpcomingAdBreakMinutes: 0,
+    TtsVoiceRate: 1,
+    TtsVoiceVolume: 0.5,
+    UseExperimentalTwitchClipUrlResolver: true,
+    UseOverlayInstances: false,
+    ViewerDB: true,
+    ViewerListPageSize: 10,
+    WebhookDebugLogs: false,
+    WebOnlineCheckin: false,
+    WebServerPort: 7472,
+    WhileLoopEnabled: false,
+    WysiwygBackground: "white"
+};
+
+/** Anything in `SettingsTypes` not listed here will resolve to "/settings/settingName" (e.g. "/settings/autoFlagBots") */
+const FirebotSettingsPaths: Partial<Record<keyof FirebotSettingsTypes, string>> = {
+    ActiveChatUserListTimeout: "/settings/activeChatUsers/inactiveTimer",
+    ActiveProfiles: "/profiles/activeProfiles",
+    ChatShowBttvEmotes: "/settings/chat/emotes/bttv",
+    ChatShowFfzEmotes: "/settings/chat/emotes/ffz",
+    ChatShowSevenTvEmotes: "/settings/chat/emotes/seventv",
+    ChatTaggedNotificationSound: "/settings/chat/tagged/sound",
+    ChatTaggedNotificationVolume: "/settings/chat/tagged/volume",
+    DashboardLayout: "/settings/dashboard/layout",
+    DeleteProfile: "/profiles/deleteProfile",
+    LoggedInProfile: "/profiles/loggedInProfile",
+    ShowActivityFeed: "/settings/activityFeed",
+    ShowChatViewerList: "/settings/chatUsersList",
+    SoundsEnabled: "/settings/sounds",
+    ViewerListPageSize: "/settings/viewerListDatabase/pageSize"
+};
 
 class SettingsManager extends EventEmitter {
     private logger = LoggerCache.getLogger("Settings");

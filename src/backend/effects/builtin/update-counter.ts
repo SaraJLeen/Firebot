@@ -1,4 +1,5 @@
-import { EffectType } from "../../../types/effects";
+import type { EffectType } from "../../../types";
+
 import { CounterManager } from "../../counters/counter-manager";
 import { LoggerCache } from "../../logger-cache";
 

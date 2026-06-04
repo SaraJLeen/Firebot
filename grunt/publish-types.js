@@ -105,7 +105,8 @@ throw new Error(
             author: rootPkg.author,
             license: rootPkg.license,
             peerDependencies: {
-                '@types/node': '*'
+                '@types/express': '^5.0.5',
+                '@types/node': '^24.1.0'
             },
             publishConfig: {
                 access: "public"
@@ -124,7 +125,9 @@ This package is **type-only**. At runtime the \`@crowbartools/firebot-types\` mo
 npm i -D @crowbartools/firebot-types
 \`\`\`
 
-A \`@types/node\` peer dependency is required.
+The following peer dependencies are required:
+- \`@types/express\`
+- \`@types/node\`
 
 ## Usage
 

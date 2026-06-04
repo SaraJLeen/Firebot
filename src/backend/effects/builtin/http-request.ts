@@ -1,5 +1,8 @@
-import { EffectType, EffectList } from "../../../types/effects";
-import { KeyValuePair } from "../../../types/util-types";
+import type {
+    EffectType,
+    EffectList,
+    KeyValuePair
+} from "../../../types";
 
 import { AccountAccess } from "../../common/account-access";
 import { CustomVariableManager } from "../../common/custom-variable-manager";

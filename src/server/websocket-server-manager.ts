@@ -2,8 +2,16 @@ import { EventEmitter } from "events";
 import http from "http";
 import WebSocket from "ws";
 
-import type { OverlayConnectedData, Message, ResponseMessage, EventMessage, InvokePluginMessage, CustomWebSocketHandler } from "../types/websocket";
-import type { EffectType, WidgetOverlayEvent } from "../types";
+import type {
+    CustomWebSocketHandler,
+    EffectType,
+    EventMessage,
+    InvokePluginMessage,
+    Message,
+    OverlayConnectedData,
+    ResponseMessage,
+    WidgetOverlayEvent
+} from "../types";
 
 import { WebSocketClient } from "./websocket-client";
 import { EffectManager } from "../backend/effects/effect-manager";
@@ -274,4 +282,4 @@ class WebSocketServerManager extends EventEmitter {
 
 const manager = new WebSocketServerManager();
 
-export = manager;
+export { manager as WebSocketServerManager };

@@ -26,6 +26,8 @@ export interface PluginRegistrations {
     gameIds?: string[];
     uiExtensionIds?: string[];
     overlayWidgetIds?: string[];
+    httpRoutePrefix?: string;
+    websocketListenerName?: string;
 }
 
 export type PluginExecutionResult =

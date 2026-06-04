@@ -3,7 +3,7 @@
 const { getPathInTmpDir } = require("../../../common/data-access");
 const { SettingsManager } = require("../../../common/settings-manager");
 const { ResourceTokenManager } = require("../../../resource-token-manager");
-const webServer = require("../../../../server/http-server-manager");
+const { HttpServerManager } = require("../../../../server/http-server-manager");
 const { randomUUID } = require("crypto");
 const fs = require('fs');
 const fsp = require('fs/promises');
@@ -604,7 +604,7 @@ const playSound = {
             data.resourceToken = resourceToken;
 
             // send event to the overlay
-            webServer.sendToOverlay("sound", data);
+            HttpServerManager.sendToOverlay("sound", data);
         } else {
             // Send data back to media.js in the gui.
             frontendCommunicator.send("playsound", data);

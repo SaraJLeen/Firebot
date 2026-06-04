@@ -1,5 +1,5 @@
-import type { SystemCommand } from "../../types/commands";
-import type { RankLadder } from "../../types/ranks";
+import type { RankLadder, SystemCommand } from "../../types";
+
 import { CommandManager } from "../chat/commands/command-manager";
 import { TwitchApi } from "../streaming-platforms/twitch/api";
 import rankManager from "./rank-manager";

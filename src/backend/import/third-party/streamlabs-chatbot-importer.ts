@@ -3,9 +3,14 @@ import xlsx from "node-xlsx";
 import { DateTime } from "luxon";
 
 import type { HelixUser } from "@twurple/api";
-import type { ParsedQuotes, ParsedViewers, ThirdPartyImporter } from "../../../types/import";
-import type { Quote } from "../../../types/quotes";
-import { FirebotViewer } from "../../../types/viewers";
+
+import type {
+    FirebotViewer,
+    ParsedQuotes,
+    ParsedViewers,
+    Quote,
+    ThirdPartyImporter
+} from "../../../types";
 
 import { TwitchApi } from "../../streaming-platforms/twitch/api";
 import chatRolesManager from "../../roles/chat-roles-manager";

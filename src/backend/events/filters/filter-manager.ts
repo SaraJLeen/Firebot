@@ -1,6 +1,11 @@
 import EventEmitter from "events";
 
-import { EventData, EventFilter, EventFilterData, EventSourceAndId } from "../../../types/events";
+import type {
+    EventData,
+    EventFilter,
+    EventFilterData,
+    EventSourceAndId
+} from "../../../types";
 
 import frontendCommunicator from "../../common/frontend-communicator";
 import { LoggerCache } from "../../logger-cache";

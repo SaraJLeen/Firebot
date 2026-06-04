@@ -1,8 +1,8 @@
 "use strict";
 
 (function() {
-    /** @typedef {import("../../../types/overlay-widgets").OverlayWidgetType} OverlayWidgetType */
-    /** @typedef {import("../../../types/overlay-widgets").OverlayWidgetConfig} OverlayWidgetConfig */
+    /** @typedef {import("../../../types").OverlayWidgetType} OverlayWidgetType */
+    /** @typedef {import("../../../types").OverlayWidgetConfig} OverlayWidgetConfig */
 
     angular
         .module("firebotApp")

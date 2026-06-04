@@ -1,4 +1,4 @@
-import { EffectQueueConfig } from "../../../types/effects";
+import type { EffectQueueConfig } from "../../../types";
 
 import JsonDbManager from "../../database/json-db-manager";
 import effectQueueRunner from "./effect-queue-runner";

@@ -1,9 +1,13 @@
 import { JsonDB } from "node-json-db";
 
-import { RewardRedemptionMetadata, SavedChannelReward } from "../../types/channel-rewards";
-import { EffectList } from "../../types/effects";
-import { Trigger } from "../../types/triggers";
-import { CustomReward, RewardRedemption, RewardRedemptionsApprovalRequest } from "../streaming-platforms/twitch/api/resource/channel-rewards";
+import type {
+    EffectList,
+    RewardRedemptionMetadata,
+    SavedChannelReward,
+    Trigger
+} from "../../types";
+
+import type { CustomReward, RewardRedemption, RewardRedemptionsApprovalRequest } from "../streaming-platforms/twitch/api/resource/channel-rewards";
 
 import { AccountAccess } from "../common/account-access";
 import { ActiveUserHandler } from "../chat/active-user-handler";

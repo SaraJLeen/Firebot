@@ -1,7 +1,6 @@
 import fsp from "fs/promises";
 
-import type { ThirdPartyImporter } from "../../../types/import";
-import type { Quote } from "../../../types/quotes";
+import type { ThirdPartyImporter, Quote } from "../../../types";
 
 import { LoggerCache } from "../../logger-cache";
 

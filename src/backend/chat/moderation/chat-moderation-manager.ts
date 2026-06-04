@@ -1,15 +1,15 @@
 import { JsonDB } from "node-json-db";
 import fsp from "fs/promises";
 
-import {
+import type {
     AllowList,
     BannedRegularExpressions,
     BannedWords,
     ChatModerationSettings,
+    FirebotChatMessage,
     ModerationImportRequest,
     ModerationUser
-} from "../../../types/moderation";
-import { FirebotChatMessage } from "../../../types/chat";
+} from "../../../types";
 
 import { TwitchApi } from "../../streaming-platforms/twitch/api";
 import { ProfileManager } from "../../common/profile-manager";

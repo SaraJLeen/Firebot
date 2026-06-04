@@ -1,4 +1,5 @@
-import { EffectType } from "../../../types/effects";
+import type { EffectType } from "../../../types";
+
 import { LoggerCache } from "../../logger-cache";
 
 const logger = LoggerCache.getLogger("Effects");

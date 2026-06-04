@@ -1,6 +1,6 @@
 import { TypedEmitter } from "tiny-typed-emitter";
 
-import type { FirebotAccount } from "../../types/accounts";
+import type { FirebotAccount } from "../../types";
 
 import { ProfileManager } from "./profile-manager";
 import frontendCommunicator from "./frontend-communicator";

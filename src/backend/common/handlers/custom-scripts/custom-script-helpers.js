@@ -123,7 +123,7 @@ function buildModules(scriptManifest) {
          */
         twitchChat: twitchChat,
         twitchApi: TwitchApi,
-        httpServer: require("../../../../server/http-server-manager"),
+        httpServer: require("../../../../server/http-server-manager").HttpServerManager,
         effectManager: require("../../../effects/effect-manager").EffectManager,
         effectRunner: require("../../effect-runner"),
         conditionManager: require("../../../effects/builtin/conditional-effects/conditions/condition-manager"),

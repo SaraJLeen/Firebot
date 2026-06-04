@@ -62,7 +62,7 @@ interface InvokePluginMessage extends InvokeMessage {
 
 interface CustomWebSocketHandler {
     pluginName: string;
-    callback: (data: unknown | unknown[]) => Awaitable<void>;
+    callback: (data: unknown) => Awaitable<void>;
 }
 
 export type OverlayConnectedData = {

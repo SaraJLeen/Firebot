@@ -1,7 +1,7 @@
 import NodeCache from "node-cache";
 import { DateTime } from "luxon";
 
-import { CommandDefinition, Cooldown, SubCommand } from "../../../types/commands";
+import type { CommandDefinition, Cooldown, SubCommand } from "../../../types";
 
 import { AccountAccess } from "../../common/account-access";
 import { SettingsManager } from "../../common/settings-manager";

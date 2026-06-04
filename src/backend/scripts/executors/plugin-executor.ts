@@ -22,6 +22,8 @@ import { LoggerCache } from "../../logger-cache";
 import IntegrationManager from "../../integrations/integration-manager";
 import UIExtensionManager from "../../ui-extensions/ui-extension-manager";
 import OverlayWidgetManager from "../../overlay-widgets/overlay-widgets-manager";
+import { HttpServerManager } from "../../../server/http-server-manager";
+import { WebSocketServerManager } from "../../../server/websocket-server-manager";
 import { resolvePluginManifestLinks } from "../plugin-manifest-utils";
 
 const logger = LoggerCache.getLogger("Plugins");
@@ -259,6 +261,27 @@ export class PluginExecutor extends IPluginExecutor {
                 }
             }
         }
+
+        if (r.httpRoutes != null) {
+            const def = await resolve(r.httpRoutes);
+            if (def != null) {
+                if (HttpServerManager.registerPlugin({
+                    name: script.manifest.name,
+                    definition: def
+                })) {
+                    registrations.httpRoutePrefix = def.prefix;
+                }
+            }
+        }
+
+        if (r.websocketListener != null) {
+            const def = await resolve(r.websocketListener);
+            if (def != null) {
+                if (WebSocketServerManager.registerCustomWebSocketListener(def.pluginName, def.callback)) {
+                    registrations.websocketListenerName = def.pluginName;
+                }
+            }
+        }
     }
 
     private runUnregistrations(registrations: PluginRegistrations) {
@@ -326,6 +349,22 @@ export class PluginExecutor extends IPluginExecutor {
                 OverlayWidgetManager.unregisterOverlayWidgetType(id);
             } catch (e) {
                 logger.warn(`Failed to unregister overlay widget ${id}`, e);
+            }
+        }
+
+        if (!!registrations.httpRoutePrefix?.length) {
+            try {
+                HttpServerManager.unregisterPlugin(registrations.httpRoutePrefix);
+            } catch (e) {
+                logger.warn(`Failed to unregister HTTP server plugin ${registrations.httpRoutePrefix}`, e);
+            }
+        }
+
+        if (!!registrations.websocketListenerName?.length) {
+            try {
+                WebSocketServerManager.unregisterCustomWebSocketListener(registrations.websocketListenerName);
+            } catch (e) {
+                logger.warn(`Failed to unregister WebSocket plugin listener ${registrations.websocketListenerName}`, e);
             }
         }
     }

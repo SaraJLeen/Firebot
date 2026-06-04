@@ -1,11 +1,9 @@
 import fsp from "fs/promises";
 import path from "path";
 
-import { FirebotSettingsDefaults } from "../types/settings";
-
+import { HttpServerManager } from "../server/http-server-manager";
 import { ProfileManager } from "./common/profile-manager";
 import { SettingsManager } from "./common/settings-manager";
-import webServer from "../server/http-server-manager";
 import frontendCommunicator from "./common/frontend-communicator";
 import { LoggerCache } from "./logger-cache";
 
@@ -139,7 +137,7 @@ class FontManager {
 
         if (font != null) {
             if (SettingsManager.getSetting("ChatCustomFontFamily") === name) {
-                SettingsManager.saveSetting("ChatCustomFontFamily", FirebotSettingsDefaults.ChatCustomFontFamily);
+                SettingsManager.deleteSetting("ChatCustomFontFamily");
                 SettingsManager.saveSetting("ChatCustomFontFamilyEnabled", false);
             }
 
@@ -173,7 +171,7 @@ class FontManager {
             await fsp.writeFile(this.fontCssPath, cssFileRaw, { encoding: "utf8" });
 
             frontendCommunicator.send("fonts:reload-font-css");
-            webServer.sendToOverlay("OVERLAY:RELOAD_FONTS");
+            HttpServerManager.sendToOverlay("OVERLAY:RELOAD_FONTS");
 
             this.logger.info("Font CSS file generated");
         } catch (error) {

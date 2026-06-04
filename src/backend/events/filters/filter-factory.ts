@@ -1,6 +1,11 @@
 /* eslint-disable @typescript-eslint/no-base-to-string */
-import { EventFilter, FilterSettings, PresetValue } from "../../../types/events";
-import { Awaitable } from "../../../types/util-types";
+import {
+    Awaitable,
+    EventFilter,
+    FilterSettings,
+    PresetValue
+} from "../../../types";
+
 import { ComparisonType } from "../../../shared/filter-constants";
 import { extractPropertyWithPath } from "../../utils";
 

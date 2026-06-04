@@ -4,7 +4,7 @@ import fs from "fs";
 import path from "path";
 import sanitizeFileName from "sanitize-filename";
 
-import type { FirebotAccount } from "../../types/accounts";
+import type { FirebotAccount } from "../../types";
 
 import { SettingsManager } from "./settings-manager";
 import * as dataAccess from "./data-access";

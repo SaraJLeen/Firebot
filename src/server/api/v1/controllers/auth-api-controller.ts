@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { Options, Token } from 'client-oauth2';
 
-import { AuthDetails } from '../../../../types/auth';
+import type { AuthDetails } from "../../../../types";
 
 import authManager from '../../../../backend/auth/auth-manager';
 import { LoggerCache } from '../../../../backend/logger-cache';
