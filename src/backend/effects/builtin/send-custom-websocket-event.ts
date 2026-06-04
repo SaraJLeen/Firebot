@@ -1,5 +1,5 @@
 import { EffectType } from "../../../types/effects";
-import HttpServerManager from "../../../server/http-server-manager";
+import { HttpServerManager } from "../../../server/http-server-manager";
 import { LoggerCache } from "../../logger-cache";
 
 const logger = LoggerCache.getLogger("Effects");

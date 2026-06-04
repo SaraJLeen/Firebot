@@ -5,11 +5,11 @@ import type {
     OverlayInstance,
     OverlayPosition,
     OverlayRotation
-} from '../../../types/effects';
+} from '../../../types';
+import { HttpServerManager } from "../../../server/http-server-manager";
 import { SettingsManager } from "../../common/settings-manager";
 import { TwitchApi } from "../../streaming-platforms/twitch/api";
 import mediaProcessor from "../../common/handlers/mediaProcessor";
-import webServer from "../../../server/http-server-manager";
 import frontendCommunicator from "../../common/frontend-communicator";
 import { LoggerCache } from "../../logger-cache";
 import { getRandomImage } from "../../common/handlers/reddit-processor";
@@ -165,7 +165,7 @@ const model: EffectType<{
                 }
 
                 // Send to overlay.
-                webServer.sendToOverlay("image", data);
+                HttpServerManager.sendToOverlay("image", data);
             }
         } catch {
             frontendCommunicator.send(

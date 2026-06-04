@@ -78,6 +78,15 @@ class HttpServerManager extends EventEmitter {
 
         // eslint-disable-next-line new-cap
         this.customRouteRouter = express.Router();
+
+        setInterval(() => websocketServerManager.reportClientsToFrontend(this.isDefaultServerStarted), 3000);
+
+        frontendCommunicator.on("http-server:get-overlay-status", () => {
+            return {
+                clientsConnected: websocketServerManager.overlayHasClients,
+                serverStarted: this.isDefaultServerStarted
+            };
+        });
     }
 
     start(): void {
@@ -734,13 +743,4 @@ class HttpServerManager extends EventEmitter {
 
 const manager = new HttpServerManager();
 
-setInterval(() => websocketServerManager.reportClientsToFrontend(manager.isDefaultServerStarted), 3000);
-
-frontendCommunicator.on("getOverlayStatus", () => {
-    return {
-        clientsConnected: websocketServerManager.overlayHasClients,
-        serverStarted: manager.isDefaultServerStarted
-    };
-});
-
-export = manager;
+export { manager as HttpServerManager };

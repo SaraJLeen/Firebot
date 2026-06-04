@@ -22,7 +22,7 @@ import { LoggerCache } from "../../logger-cache";
 import IntegrationManager from "../../integrations/integration-manager";
 import UIExtensionManager from "../../ui-extensions/ui-extension-manager";
 import OverlayWidgetManager from "../../overlay-widgets/overlay-widgets-manager";
-import httpServer from "../../../server/http-server-manager";
+import { HttpServerManager } from "../../../server/http-server-manager";
 import { resolvePluginManifestLinks } from "../plugin-manifest-utils";
 
 const logger = LoggerCache.getLogger("Plugins");
@@ -264,7 +264,7 @@ export class PluginExecutor extends IPluginExecutor {
         if (r.customHttpRoutes != null) {
             const def = await resolve(r.customHttpRoutes);
             if (def != null) {
-                if (httpServer.registerPlugin({
+                if (HttpServerManager.registerPlugin({
                     name: script.manifest.name,
                     definition: def
                 })) {
@@ -344,7 +344,7 @@ export class PluginExecutor extends IPluginExecutor {
 
         if (!!registrations.customHttpRoutePrefix?.length) {
             try {
-                httpServer.unregisterPlugin(registrations.customHttpRoutePrefix);
+                HttpServerManager.unregisterPlugin(registrations.customHttpRoutePrefix);
             } catch (e) {
                 logger.warn(`Failed to unregister HTTP server plugin ${registrations.customHttpRoutePrefix}`, e);
             }

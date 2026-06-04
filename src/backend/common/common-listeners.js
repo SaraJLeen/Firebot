@@ -23,10 +23,10 @@ function getLocalIpAddress() {
 }
 
 exports.setupCommonListeners = () => {
-    const frontendCommunicator = require("./frontend-communicator");
-    const { SettingsManager } = require("./settings-manager");
     const { BackupManager } = require("../backup-manager");
-    const webServer = require("../../server/http-server-manager");
+    const { HttpServerManager } = require("../../server/http-server-manager");
+    const { SettingsManager } = require("./settings-manager");
+    const frontendCommunicator = require("./frontend-communicator");
 
     frontendCommunicator.onAsync("get-ip-address", async () => {
         return getLocalIpAddress();
@@ -106,7 +106,7 @@ exports.setupCommonListeners = () => {
         if (data == null) {
             return;
         }
-        webServer.sendToOverlay(data.event, data.meta);
+        HttpServerManager.sendToOverlay(data.event, data.meta);
     });
 
     const updateFeedUrl = `https://update.electronjs.org/crowbartools/Firebot/win32/${app.getVersion()}`;

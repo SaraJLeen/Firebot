@@ -3,14 +3,14 @@ import fs from "fs/promises";
 import path from "path";
 import moment from "moment";
 
-import type { CustomEmbed, EmbedType } from "../../types/discord";
+import type { CustomEmbed, EmbedType } from "../../types";
 
+import { HttpServerManager } from "../../server/http-server-manager";
 import { SettingsManager } from "../common/settings-manager";
 import { TwitchApi } from "../streaming-platforms/twitch/api";
 import discord from "../integrations/builtin/discord/discord-message-sender";
 import discordEmbedBuilder from "../integrations/builtin/discord/discord-embed-builder";
 import mediaProcessor from "../common/handlers/mediaProcessor";
-import webServer from "../../server/http-server-manager";
 import { LoggerCache } from "../logger-cache";
 
 const logger = LoggerCache.getLogger("Core");
@@ -98,7 +98,7 @@ export function sendScreenshotToOverlay(screenshotDataUrl: string, effect: Scree
         }
     }
 
-    webServer.sendToOverlay("showScreenshot", {
+    HttpServerManager.sendToOverlay("showScreenshot", {
         screenshotDataUrl: screenshotDataUrl,
         width: effect.width,
         height: effect.height,
