@@ -6,7 +6,7 @@ import frontendCommunicator from "./frontend-communicator";
 import ConnectionManager from "./connection-manager";
 import { AccountAccess } from "./account-access";
 import { HttpServerManager } from "../../server/http-server-manager";
-import WebsocketServerManager from "../../server/websocket-server-manager";
+import { WebSocketServerManager } from "../../server/websocket-server-manager";
 import scriptManager from "../scripts/script-manager";
 import { isConnected } from "../integrations/builtin/obs/obs-remote";
 
@@ -43,7 +43,7 @@ async function getDebugInfoString(): Promise<string> {
     const connectedToOBS = isConnected() ? "Connected" : "Disconnected";
 
     const httpServerStatus = HttpServerManager.isDefaultServerStarted ? "Running" : "Stopped";
-    const websocketClients = WebsocketServerManager.getNumberOfOverlayClients();
+    const websocketClients = WebSocketServerManager.getNumberOfOverlayClients();
 
     const startupScripts = await scriptManager.getInstalledPlugins();
 

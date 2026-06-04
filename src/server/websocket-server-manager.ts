@@ -274,4 +274,4 @@ class WebSocketServerManager extends EventEmitter {
 
 const manager = new WebSocketServerManager();
 
-export = manager;
+export { manager as WebSocketServerManager };

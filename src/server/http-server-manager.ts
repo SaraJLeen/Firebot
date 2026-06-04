@@ -16,7 +16,7 @@ import type {
 import { SettingsManager } from "../backend/common/settings-manager";
 import { EffectManager } from "../backend/effects/effect-manager";
 import { ResourceTokenManager } from "../backend/resource-token-manager";
-import websocketServerManager from "./websocket-server-manager";
+import { WebSocketServerManager } from "./websocket-server-manager";
 import overlayWidgetManager from "../backend/overlay-widgets/overlay-widgets-manager";
 import { LoggerCache } from "../backend/logger-cache";
 
@@ -79,11 +79,11 @@ class HttpServerManager extends EventEmitter {
         // eslint-disable-next-line new-cap
         this.customRouteRouter = express.Router();
 
-        setInterval(() => websocketServerManager.reportClientsToFrontend(this.isDefaultServerStarted), 3000);
+        setInterval(() => WebSocketServerManager.reportClientsToFrontend(this.isDefaultServerStarted), 3000);
 
         frontendCommunicator.on("http-server:get-overlay-status", () => {
             return {
-                clientsConnected: websocketServerManager.overlayHasClients,
+                clientsConnected: WebSocketServerManager.overlayHasClients,
                 serverStarted: this.isDefaultServerStarted
             };
         });
@@ -261,15 +261,15 @@ class HttpServerManager extends EventEmitter {
     startDefaultHttpServer(): void {
         const port: number = SettingsManager.getSetting("WebServerPort");
 
-        websocketServerManager.createServer(this.defaultHttpServer);
+        WebSocketServerManager.createServer(this.defaultHttpServer);
 
         // Shim for any consumers of the EventEmitter
 
-        websocketServerManager.on("overlay-connected", (instanceName: string) => {
+        WebSocketServerManager.on("overlay-connected", (instanceName: string) => {
             this.emit("overlay-connected", instanceName);
         });
 
-        websocketServerManager.on("overlay-event", (event: unknown) => {
+        WebSocketServerManager.on("overlay-event", (event: unknown) => {
             this.emit("overlay-event", event);
         });
 
@@ -294,11 +294,11 @@ class HttpServerManager extends EventEmitter {
     }
 
     sendToOverlay(eventName: string, meta: Record<string, unknown> = {}, overlayInstance: string = null) {
-        websocketServerManager.sendToOverlay(eventName, meta, overlayInstance);
+        WebSocketServerManager.sendToOverlay(eventName, meta, overlayInstance);
     }
 
     refreshAllOverlays() {
-        websocketServerManager.refreshAllOverlays();
+        WebSocketServerManager.refreshAllOverlays();
     }
 
     /**
@@ -306,11 +306,11 @@ class HttpServerManager extends EventEmitter {
      * @param overlayInstance the instance to refresh, leave undefined to refresh default
      */
     refreshOverlayInstance(overlayInstance?: string) {
-        websocketServerManager.sendToOverlay("OVERLAY:REFRESH", undefined, overlayInstance);
+        WebSocketServerManager.sendToOverlay("OVERLAY:REFRESH", undefined, overlayInstance);
     }
 
     triggerCustomWebSocketEvent(eventType: string, payload: object) {
-        websocketServerManager.triggerEvent(`custom-event:${eventType}`, payload);
+        WebSocketServerManager.triggerEvent(`custom-event:${eventType}`, payload);
     }
 
     createServerInstance(): Express {
@@ -719,7 +719,7 @@ class HttpServerManager extends EventEmitter {
     private removeCustomRoute(path: string, method: string): void {
         const stacksToRemove = [];
         this.customRouteRouter.stack.forEach((s) => {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
             if (s.route?.path === path && (s.route as any).methods[method] === true
             ) {
                 stacksToRemove.push(s);
@@ -727,17 +727,18 @@ class HttpServerManager extends EventEmitter {
         });
 
         for (const stack of stacksToRemove) {
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
             const i = this.customRouteRouter.stack.indexOf(stack);
             this.customRouteRouter.stack.splice(i, 1);
         }
     }
 
     registerCustomWebSocketListener(pluginName: string, callback: CustomWebSocketHandler["callback"]): boolean {
-        return websocketServerManager.registerCustomWebSocketListener(pluginName, callback);
+        return WebSocketServerManager.registerCustomWebSocketListener(pluginName, callback);
     }
 
     unregisterCustomWebSocketListener(pluginName: string): boolean {
-        return websocketServerManager.unregisterCustomWebSocketListener(pluginName);
+        return WebSocketServerManager.unregisterCustomWebSocketListener(pluginName);
     }
 }
 
