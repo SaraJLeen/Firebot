@@ -1,17 +1,18 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { EffectInstance, EffectList, EffectType } from "./effects";
-import { Trigger } from "./triggers";
-import { Awaitable } from "./util-types";
-import { ReplaceVariable } from "./variables";
-import { EventFilter, EventSource } from "./events";
-import { SystemCommand } from "./commands";
-import { RestrictionType } from "./restrictions";
-import { FirebotParams, FirebotParameterArray } from "./parameters";
-import { FirebotGame } from "./games";
-import { Integration } from "./integrations";
-import { UIExtension } from "./ui-extensions";
-import { OverlayWidgetType } from "./overlay-widgets";
-import { PluginHttpRouteDefinition } from "./http-server";
+import type { EffectInstance, EffectList, EffectType } from "./effects";
+import type { Trigger } from "./triggers";
+import type { Awaitable } from "./util-types";
+import type { ReplaceVariable } from "./variables";
+import type { EventFilter, EventSource } from "./events";
+import type { SystemCommand } from "./commands";
+import type { RestrictionType } from "./restrictions";
+import type { FirebotParams, FirebotParameterArray } from "./parameters";
+import type { FirebotGame } from "./games";
+import type { Integration } from "./integrations";
+import type { UIExtension } from "./ui-extensions";
+import type { OverlayWidgetType } from "./overlay-widgets";
+import type { PluginHttpRouteDefinition } from "./http-server";
+import type { CustomWebSocketHandler } from "./websocket";
 
 type NoResult = Awaitable<void>;
 
@@ -128,7 +129,8 @@ export interface Plugin<Params extends FirebotParams = FirebotParams> extends Sc
         games?: DynamicArray<FirebotGame>;
         uiExtensions?: DynamicArray<UIExtension>;
         overlayWidgets?: DynamicArray<OverlayWidgetType<any, any>>;
-        customHttpRoutes?: DynamicObject<PluginHttpRouteDefinition>;
+        httpRoutes?: DynamicObject<PluginHttpRouteDefinition>;
+        websocketListener?: DynamicObject<CustomWebSocketHandler>;
     };
 
     /** Called when the plugin is loaded */
