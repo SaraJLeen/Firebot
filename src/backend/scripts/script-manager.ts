@@ -252,6 +252,8 @@ class ScriptManager {
         }
 
         await this.startPlugin(config, false);
+
+        frontendCommunicator.send("plugin-manager:refresh-plugins");
     }
 
     async stopAllPlugins(): Promise<void> {
@@ -293,6 +295,8 @@ class ScriptManager {
         } catch (error) {
             logger.error(`Error during updateParameters for ${active.fileName}`, error);
         }
+
+        frontendCommunicator.send("plugin-manager:refresh-plugins");
     }
 
     async setPluginEnabled(pluginId: string, enabled: boolean): Promise<void> {

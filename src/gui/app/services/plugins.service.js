@@ -20,6 +20,10 @@
 
             service.reloadPlugins = service.loadPlugins;
 
+            backendCommunicator.on("plugin-manager:refresh-plugins", () => {
+                service.reloadPlugins();
+            });
+
             service.getInstalledPlugins = function() {
                 return installedPlugins;
             };
