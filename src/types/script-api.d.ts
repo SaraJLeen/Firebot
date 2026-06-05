@@ -203,6 +203,15 @@ export interface Accounts {
     bot: FirebotAccount;
 }
 
+export interface ScriptWebServerApi {
+    /**
+     * Sends a custom event over the internal Firebot WebSocket server
+     * @param name Name of the event to send. Full event name will be `custom-event:{name}`
+     * @param data Any optional data you would like to send with the event
+     */
+    sendWebSocketEvent(name: string, data?: unknown);
+}
+
 export interface FirebotScriptApi {
     /** Running Firebot version, e.g. `"5.67.0"`. */
     version: string;
@@ -230,4 +239,6 @@ export interface FirebotScriptApi {
     notifications: ScriptNotificationsApi;
     /** Access to installed plugins. */
     plugins: ScriptPluginsApi;
+    /** Firebot internal web server functions. */
+    webServer: ScriptWebServerApi;
 }
