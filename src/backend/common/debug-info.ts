@@ -68,7 +68,7 @@ async function getDebugInfoString(): Promise<string> {
         'Plugins:',
         startupScripts.length === 0
             ? "  - None"
-            : startupScripts.map(p => `  - ${p.details.manifest.name}`).join("\n")
+            : startupScripts.map(p => `  - ${p.details.manifest.name} ${p.details.manifest.version}`).join("\n")
     ].join("\n");
 }
 
