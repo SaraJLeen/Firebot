@@ -36,20 +36,12 @@ export interface ScriptWebhookEvent {
 export type ScriptWebhookEventHandler = (event: ScriptWebhookEvent) => void;
 
 export interface ScriptWebhooksApi {
-    /** Create a new webhook (or return the existing one with the same name). */
-    save(name: string): ScriptWebhook | null;
     /** Look up a webhook by name. */
     get(name: string): ScriptWebhook | null;
-    /** Delete a webhook by name. Returns true if one was removed. */
-    delete(name: string): boolean;
     /** All webhooks owned by this script. */
     list(): ScriptWebhook[];
     /** Public URL for a webhook by name, or null if not found. */
     getUrl(name: string): string | null;
-    /**
-     * Subscribe to webhook events for this script. Returns an `unsubscribe` func
-     */
-    onReceived(handler: ScriptWebhookEventHandler): () => void;
 }
 
 /**

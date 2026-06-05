@@ -6,6 +6,7 @@ import {
     Awaitable,
     ScriptDetails
 } from "../../../types";
+import type { ScriptApiContext } from "../script-api";
 
 abstract class IBaseScriptExecutor {
     abstract canHandle(script: ScriptBase | LegacyCustomScript): Awaitable<boolean>;
@@ -44,7 +45,8 @@ export abstract class IPluginExecutor extends IBaseScriptExecutor {
     abstract executePlugin(
         script: ScriptBase | LegacyCustomScript,
         config: InstalledPluginConfig,
-        isInstalling?: boolean
+        isInstalling?: boolean,
+        ctx?: ScriptApiContext
     ): Awaitable<PluginExecutionResult>;
 
     abstract unloadPlugin(

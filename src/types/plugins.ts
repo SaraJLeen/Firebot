@@ -13,6 +13,7 @@ import type { UIExtension } from "./ui-extensions";
 import type { OverlayWidgetType } from "./overlay-widgets";
 import type { PluginHttpRouteDefinition } from "./http-server";
 import type { CustomWebSocketHandler } from "./websocket";
+import type { PluginWebhooks } from "./webhooks";
 
 type NoResult = Awaitable<void>;
 
@@ -131,6 +132,7 @@ export interface Plugin<Params extends FirebotParams = FirebotParams> extends Sc
         overlayWidgets?: DynamicArray<OverlayWidgetType<any, any>>;
         httpRoutes?: DynamicObject<PluginHttpRouteDefinition>;
         websocketListener?: DynamicObject<CustomWebSocketHandler>;
+        webhooks?: DynamicObject<PluginWebhooks>;
     };
 
     /** Called when the plugin is loaded */
