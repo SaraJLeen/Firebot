@@ -15,7 +15,7 @@ export type HttpMethod =
 export interface CustomHttpRoute {
     path: string;
     method: HttpMethod;
-    callback: (req: Request, res: Response) => Awaitable<void>;
+    handler: (req: Request, res: Response) => Awaitable<void>;
 }
 
 /**

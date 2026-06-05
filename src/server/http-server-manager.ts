@@ -416,7 +416,7 @@ class HttpServerManager extends EventEmitter {
             for (const route of plugin.definition.routes ?? []) {
                 if (!route.path?.length
                     || !route.method?.length
-                    || route.callback == null
+                    || route.handler == null
                 ) {
                     this.logger.warn(`Incomplete plugin route specified for ${prefix}; skipping route.`);
                     continue;
@@ -431,39 +431,39 @@ class HttpServerManager extends EventEmitter {
 
                 switch (route.method) {
                     case "GET":
-                        pluginRouter.get(fullRoute, route.callback);
+                        pluginRouter.get(fullRoute, route.handler);
                         break;
 
                     case "POST":
-                        pluginRouter.post(fullRoute, route.callback);
+                        pluginRouter.post(fullRoute, route.handler);
                         break;
 
                     case "PUT":
-                        pluginRouter.put(fullRoute, route.callback);
+                        pluginRouter.put(fullRoute, route.handler);
                         break;
 
                     case "PATCH":
-                        pluginRouter.patch(fullRoute, route.callback);
+                        pluginRouter.patch(fullRoute, route.handler);
                         break;
 
                     case "DELETE":
-                        pluginRouter.delete(fullRoute, route.callback);
+                        pluginRouter.delete(fullRoute, route.handler);
                         break;
 
                     case "HEAD":
-                        pluginRouter.head(fullRoute, route.callback);
+                        pluginRouter.head(fullRoute, route.handler);
                         break;
 
                     case "CONNECT":
-                        pluginRouter.connect(fullRoute, route.callback);
+                        pluginRouter.connect(fullRoute, route.handler);
                         break;
 
                     case "OPTIONS":
-                        pluginRouter.options(fullRoute, route.callback);
+                        pluginRouter.options(fullRoute, route.handler);
                         break;
 
                     case "TRACE":
-                        pluginRouter.trace(fullRoute, route.callback);
+                        pluginRouter.trace(fullRoute, route.handler);
                         break;
 
                     default:
@@ -733,8 +733,8 @@ class HttpServerManager extends EventEmitter {
         }
     }
 
-    registerCustomWebSocketListener(pluginName: string, callback: CustomWebSocketHandler["callback"]): boolean {
-        return WebSocketServerManager.registerCustomWebSocketListener(pluginName, callback);
+    registerCustomWebSocketListener(pluginName: string, handler: CustomWebSocketHandler["handler"]): boolean {
+        return WebSocketServerManager.registerCustomWebSocketListener(pluginName, handler);
     }
 
     unregisterCustomWebSocketListener(pluginName: string): boolean {

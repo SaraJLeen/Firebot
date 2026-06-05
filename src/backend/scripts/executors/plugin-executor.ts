@@ -277,7 +277,7 @@ export class PluginExecutor extends IPluginExecutor {
         if (r.websocketListener != null) {
             const def = await resolve(r.websocketListener);
             if (def != null) {
-                if (WebSocketServerManager.registerCustomWebSocketListener(def.pluginName, def.callback)) {
+                if (WebSocketServerManager.registerCustomWebSocketListener(def.pluginName, def.handler)) {
                     registrations.websocketListenerName = def.pluginName;
                 }
             }

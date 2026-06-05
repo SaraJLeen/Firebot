@@ -116,7 +116,7 @@ class WebSocketServerManager extends EventEmitter {
                                     const plugin = this.customHandlers.find(p => p.pluginName.toLowerCase() === pluginName.toLowerCase());
 
                                     if (plugin != null) {
-                                        plugin.callback(message.data);
+                                        plugin.handler(message.data);
                                     } else {
                                         sendError(ws, message.id, "Unknown plugin name specified");
                                     }
@@ -183,7 +183,7 @@ class WebSocketServerManager extends EventEmitter {
 
         const dataRaw = JSON.stringify(message);
 
-        this.server.clients.forEach(function each(client) {
+        this.server.clients.forEach((client) => {
             if (client.readyState !== 1 || client.type !== "overlay") {
                 return;
             }
@@ -217,7 +217,7 @@ class WebSocketServerManager extends EventEmitter {
 
         const dataRaw = JSON.stringify(message);
 
-        this.server.clients.forEach(function each(client) {
+        this.server.clients.forEach((client) => {
             if (client.readyState !== 1 || client.type !== "events") {
                 return;
             }
@@ -252,11 +252,11 @@ class WebSocketServerManager extends EventEmitter {
         return [...this.server.clients].filter(client => client.type === "overlay").length;
     }
 
-    registerCustomWebSocketListener(pluginName: string, callback: CustomWebSocketHandler["callback"]): boolean {
+    registerCustomWebSocketListener(pluginName: string, handler: CustomWebSocketHandler["handler"]): boolean {
         if (this.customHandlers.findIndex(p => p.pluginName.toLowerCase() === pluginName.toLowerCase()) === -1) {
             this.customHandlers.push({
                 pluginName,
-                callback
+                handler
             });
             this.logger.info(`Registered custom WebSocket listener for plugin "${pluginName}"`);
             return true;
