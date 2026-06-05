@@ -54,7 +54,10 @@ export interface Manifest {
     author: string;
     description: string | ManifestDescription;
 
-    // keywords?: string[];
+    /**
+     * An array of strings that describe or categorize your plugin
+     */
+    tags?: string[];
 
     /**
      * A link to the plugin's source code repository
