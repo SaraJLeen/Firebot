@@ -2,16 +2,24 @@
     "compilerOptions": {
         "declaration": true,
         "emitDeclarationOnly": true,
+        "noCheck": true,
         "esModuleInterop": true,
+        "allowSyntheticDefaultImports": true,
         "skipLibCheck": true,
         "moduleResolution": "node",
         "module": "CommonJS",
-        "target": "es2020",
+        "target": "es2023",
         "strict": false,
         "noImplicitAny": false,
-        "outDir": "dist/types/types",
-        "rootDir": "src/types"
+        "experimentalDecorators": true,
+        "downlevelIteration": true,
+        "baseUrl": ".",
+        "paths": {
+            "*": ["node_modules/*"]
+        },
+        "outDir": "dist/types",
+        "rootDir": "./src"
     },
-    "include": ["src/types/**/*.ts"],
-    "exclude": ["src/types/**/*.d.ts"]
+    "include": ["src/types/**/*.ts", "src/backend/**/*.ts"],
+    "exclude": ["src/**/*.d.ts", "src/main.ts"]
 }
