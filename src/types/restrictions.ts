@@ -1,3 +1,4 @@
+import type ng from "angular";
 import type { Trigger, TriggerType, TriggersObject } from "./triggers";
 import type { Awaitable } from "./util-types";
 

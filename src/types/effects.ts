@@ -4,7 +4,7 @@ import type { Awaitable } from "./util-types";
 
 type Func<T> = (...args: unknown[]) => T;
 
-interface EffectScope<EffectModel> extends ng.IScope {
+export interface EffectScope<EffectModel> extends ng.IScope {
     effect: EffectModel;
     [x: string]: any;
 }
@@ -207,7 +207,7 @@ export type RunEffectsContext = {
     [key: string]: unknown;
 };
 
-type QueueItem = {
+export type QueueItem = {
     runEffectsContext: RunEffectsContext;
     duration?: number;
     priority?: "none" | "high";

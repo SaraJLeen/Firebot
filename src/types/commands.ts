@@ -6,7 +6,7 @@ import type { Awaitable } from "./util-types";
 
 export type CommandType = "system" | "custom";
 
-type Cooldown = {
+export type Cooldown = {
     /**
      * Global cooldown to use a command in seconds.
      */
@@ -97,7 +97,7 @@ export type CommandDefinition<OptionsModel = any> = {
     allowTriggerBySharedChat?: boolean | "inherit" | undefined;
 };
 
-type UserCommand = {
+export type UserCommand = {
     trigger: string;
     args: string[];
     triggeredSubcmd?: SubCommand;

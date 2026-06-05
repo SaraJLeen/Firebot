@@ -375,7 +375,7 @@ export type ParametersWithNameConfig<P> = {
                                                 ? AnimationSelectParameter : FirebotParameter) & { name: K, showIf?: { [K2 in keyof P]?: P[K2] | Array<P[K2]> } };
 };
 
-type FirebotParamCategory<ParamConfig extends Record<string, unknown>> = {
+export type FirebotParamCategory<ParamConfig extends Record<string, unknown>> = {
     title: string;
     /**
      * Used to order categories in the UI.
@@ -386,7 +386,7 @@ type FirebotParamCategory<ParamConfig extends Record<string, unknown>> = {
 
 export type FirebotParams = Record<string, unknown>;
 
-export type FirebotParameterCategories<Config extends FirebotParams> = {
+export type FirebotParameterCategories<Config extends Record<string, Record<string, unknown>>> = {
     [Category in keyof Config]: FirebotParamCategory<Config[Category]>;
 };
 
