@@ -17,6 +17,8 @@ import { createNotificationsApi } from "./namespaces/notifications";
 import { createSettingsApi } from "./namespaces/settings";
 import { createPluginsApi } from "./namespaces/plugins";
 import { createWebServerApi } from "./namespaces/http-server";
+import { createVariableFactoryApi } from "./namespaces/variable-factory";
+import { createEventFilterFactoryApi } from "./namespaces/event-filter-factory";
 
 /**
  * Composition root for the Firebot Script API
@@ -37,7 +39,9 @@ export function buildScriptApi(ctx: ScriptApiContext): FirebotScriptApi {
         frontendCommunicator: createFrontendCommunicatorApi(ctx),
         notifications: createNotificationsApi(ctx),
         plugins: createPluginsApi(ctx),
-        webServer: createWebServerApi(ctx)
+        webServer: createWebServerApi(ctx),
+        variableFactory: createVariableFactoryApi(ctx),
+        eventFilterFactory: createEventFilterFactoryApi(ctx)
     };
 }
 

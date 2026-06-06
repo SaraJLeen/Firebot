@@ -4,7 +4,7 @@
 // Everything a custom script can touch via `require("@crowbartools/firebot-types")`
 // should be defined here
 
-import type { TriggeredEvent } from "./events";
+import type { EventFilter, TriggeredEvent } from "./events";
 import type { RunEffectsContext } from "./effects";
 import type { TwitchApi } from "../backend/streaming-platforms/twitch/api";
 import type { Notification } from "./notifications";
@@ -12,6 +12,9 @@ import type { FirebotAccount } from "./accounts";
 import type { FirebotSettingsTypes } from "./settings";
 import type { InstalledPlugin } from "./plugins";
 import type { PluginWebhook } from "./webhooks";
+import { ReplaceVariable } from "./variables";
+import type { VariableConfig } from "../backend/variables/variable-factory";
+import type { FilterConfig, PresetFilterConfig, TextFilterConfig } from "../backend/events/filters/filter-factory";
 
 export type ScriptLogMethod = (message: string, ...meta: unknown[]) => void;
 
@@ -191,6 +194,17 @@ export interface ScriptWebServerApi {
     sendWebSocketEvent(name: string, data?: unknown);
 }
 
+export interface ScriptVariableFactoryApi {
+    createEventDataVariable(config: VariableConfig): ReplaceVariable;
+}
+
+export interface ScriptEventFilterFactoryApi {
+    createTextFilter(config: TextFilterConfig): EventFilter;
+    createNumberFilter(config: FilterConfig): EventFilter;
+    createTextOrNumberFilter(config: TextFilterConfig): EventFilter;
+    createPresetFilter(config: PresetFilterConfig): EventFilter;
+}
+
 export interface FirebotScriptApi {
     /** Running Firebot version, e.g. `"5.67.0"`. */
     version: string;
@@ -220,4 +234,8 @@ export interface FirebotScriptApi {
     plugins: ScriptPluginsApi;
     /** Firebot internal web server functions. */
     webServer: ScriptWebServerApi;
+    /** Factory for creating variables based on event data. */
+    variableFactory: ScriptVariableFactoryApi;
+    /** Factory for creating event filters. */
+    eventFilterFactory: ScriptEventFilterFactoryApi;
 }

@@ -1,6 +1,6 @@
 import type { ReplaceVariable } from "../../types/variables";
 
-type VariableConfig = {
+export type VariableConfig = {
     handle: string;
     description: string;
     events: string[];
