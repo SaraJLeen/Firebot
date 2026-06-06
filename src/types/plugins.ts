@@ -48,6 +48,29 @@ interface ManifestFirebotVersion {
     patch?: number;
 }
 
+type FontAwesomeIcon = {
+    type: "font-awesome";
+    /**
+     * A FontAwesome icon name shown in the UI (eg. "fa-cogs").
+     */
+    name: `fa-${string}`;
+    /**
+     * A css color value (eg. "#FF0000") used for the icon.
+     */
+    color?: string;
+};
+
+type CustomIcon = {
+    type: "custom";
+    url: string;
+    /**
+     * A css color value (eg. "#FF0000") used for the background of the icon.
+     */
+    backgroundColor?: string;
+};
+
+export type PluginIcon = FontAwesomeIcon | CustomIcon;
+
 export interface Manifest {
     name: string;
     version: string;
@@ -79,13 +102,9 @@ export interface Manifest {
     maximumFirebotVersion?: ManifestFirebotVersion;
 
     /**
-     * A FontAwesome icon name shown in the UI (eg. "fa-cogs").
+     * The icon to be displayed for the plugin.
      */
-    icon?: `fa-${string}`;
-    /**
-     * A hex color code (eg. "#FF0000") used for the icon.
-     */
-    color?: string;
+    icon?: PluginIcon;
 
     /**
      * If true, the plugin will be initialized before parameters are shown to the user,

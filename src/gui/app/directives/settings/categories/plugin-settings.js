@@ -88,12 +88,7 @@
                                 ng-repeat="plugin in getPlugins() | orderBy:getPluginName track by plugin.config.id"
                                 style="display: flex; align-items: flex-start; gap: 14px; padding: 14px 16px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 8px; min-width: 0;"
                             >
-                                <div
-                                    ng-style="getPluginIconContainerStyle(plugin)"
-                                    style="width: 42px; height: 42px; border-radius: 8px; display:flex; align-items:center; justify-content:center; flex-shrink: 0;"
-                                >
-                                    <i ng-class="getPluginIconClass(plugin)" style="font-size: 18px;"></i>
-                                </div>
+                                <plugin-icon plugin-icon="plugin.details.manifest.icon"></plugin-icon>
 
                                 <div style="flex-grow: 1; min-width: 0;">
                                     <div style="display:flex; align-items:baseline; gap: 8px; flex-wrap: wrap;">
@@ -209,53 +204,6 @@
                 $scope.hasPluginLinks = function(plugin) {
                     const manifest = (plugin && plugin.details && plugin.details.manifest) || {};
                     return !!(manifest.repo || manifest.website || manifest.support);
-                };
-
-                const DEFAULT_PLUGIN_ICON_COLOR = "#53afff";
-                const DEFAULT_PLUGIN_ICON_CLASS = "fas fa-puzzle-piece";
-
-                function hexToRgb(hex) {
-                    if (!hex || typeof hex !== "string") {
-                        return null;
-                    }
-                    let value = hex.trim().replace(/^#/, "");
-                    if (value.length === 3) {
-                        value = value.split("").map(c => c + c).join("");
-                    }
-                    if (value.length !== 6 || /[^0-9a-fA-F]/.test(value)) {
-                        return null;
-                    }
-                    const num = parseInt(value, 16);
-                    return {
-                        r: (num >> 16) & 255,
-                        g: (num >> 8) & 255,
-                        b: num & 255
-                    };
-                }
-
-                function colorToBackground(color, opacity) {
-                    const rgb = hexToRgb(color);
-                    if (rgb) {
-                        return `rgba(${rgb.r},${rgb.g},${rgb.b},${opacity})`;
-                    }
-                    return color;
-                }
-
-                $scope.getPluginIconClass = function(plugin) {
-                    const manifestIcon = plugin && plugin.details && plugin.details.manifest && plugin.details.manifest.icon;
-                    if (manifestIcon && typeof manifestIcon === "string" && manifestIcon.startsWith("fa-")) {
-                        return `fas ${manifestIcon}`;
-                    }
-                    return DEFAULT_PLUGIN_ICON_CLASS;
-                };
-
-                $scope.getPluginIconContainerStyle = function(plugin) {
-                    const manifestColor = plugin && plugin.details && plugin.details.manifest && plugin.details.manifest.color;
-                    const color = (manifestColor && typeof manifestColor === "string") ? manifestColor : DEFAULT_PLUGIN_ICON_COLOR;
-                    return {
-                        color: color,
-                        background: colorToBackground(color, 0.15)
-                    };
                 };
 
                 $scope.togglePluginEnabled = function(plugin) {
