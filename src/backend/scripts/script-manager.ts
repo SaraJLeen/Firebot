@@ -271,7 +271,7 @@ class ScriptManager {
      * Handle a config change. Starts/stops as needed, and on a still-enabled plugin
      * either re-loads (if file may have changed) or invokes onParameterUpdate.
      */
-    async reloadPluginConfig(pluginConfig: InstalledPluginConfig): Promise<void> {
+    async reloadPluginConfig(pluginConfig: InstalledPluginConfig, isNewInstall = false): Promise<void> {
         const active = this.activePlugins[pluginConfig.id];
 
         // Disabled now -> stop if running
@@ -284,7 +284,7 @@ class ScriptManager {
 
         // Enabled, not yet running -> start
         if (!active) {
-            await this.startPlugin(pluginConfig, false);
+            await this.startPlugin(pluginConfig, isNewInstall);
             return;
         }
 
@@ -929,6 +929,12 @@ frontendCommunicator.onAsync(
     }
 );
 
+frontendCommunicator.onAsync("plugin-manager:save-config", async ({ pluginConfig, isNewInstall = false }: { pluginConfig: InstalledPluginConfig, isNewInstall?: boolean }) => {
+    const newConfig = PluginConfigManager.saveItem(pluginConfig);
+    await scriptManager.reloadPluginConfig(newConfig, isNewInstall);
+    return newConfig;
+});
+
 frontendCommunicator.onAsync(
     "plugin-manager:install-from-file",
     async (data: { filePath: string, overwrite?: boolean }) => {
@@ -964,14 +970,6 @@ frontendCommunicator.onAsync(
 );
 
 frontendCommunicator.onAsync(
-    "plugin-manager:reload",
-    async (config: InstalledPluginConfig) => {
-        await scriptManager.reloadPluginConfig(config);
-        return true;
-    }
-);
-
-frontendCommunicator.onAsync(
     "plugin-manager:delete",
     async (data: string | { id: string, deleteScriptFile?: boolean }) => {
         const id = typeof data === "string" ? data : data?.id;
@@ -980,9 +978,9 @@ frontendCommunicator.onAsync(
     }
 );
 
-PluginConfigManager.on("updated-item", async (config) => {
-    await scriptManager.reloadPluginConfig(config);
-});
+// PluginConfigManager.on("updated-item", async (config) => {
+//     await scriptManager.reloadPluginConfig(config);
+// });
 
 PluginConfigManager.on("deleted-item", async (config) => {
     await scriptManager.onPluginConfigDeleted(config);
