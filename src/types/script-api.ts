@@ -11,6 +11,7 @@ import type { Notification } from "./notifications";
 import type { FirebotAccount } from "./accounts";
 import type { FirebotSettingsTypes } from "./settings";
 import type { InstalledPlugin } from "./plugins";
+import type { PluginWebhook } from "./webhooks";
 
 export type ScriptLogMethod = (message: string, ...meta: unknown[]) => void;
 
@@ -21,25 +22,11 @@ export interface ScriptLoggerApi {
     error: ScriptLogMethod;
 }
 
-export interface ScriptWebhook {
-    id: string;
-    name: string;
-}
-
-export interface ScriptWebhookEvent {
-    webhook: ScriptWebhook;
-    payload: unknown;
-    rawPayload?: string;
-    headers: Record<string, string>;
-}
-
-export type ScriptWebhookEventHandler = (event: ScriptWebhookEvent) => void;
-
 export interface ScriptWebhooksApi {
     /** Look up a webhook by name. */
-    get(name: string): ScriptWebhook | null;
+    get(name: string): PluginWebhook | null;
     /** All webhooks owned by this script. */
-    list(): ScriptWebhook[];
+    list(): PluginWebhook[];
     /** Public URL for a webhook by name, or null if not found. */
     getUrl(name: string): string | null;
 }

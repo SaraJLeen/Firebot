@@ -1,5 +1,4 @@
-import type { ScriptWebhook, WebhookConfig } from "../../types";
-import type { ScriptWebhookEventHandler } from "../../types/script-api";
+import type { PluginWebhook, PluginWebhookEventHandler, WebhookConfig } from "../../types";
 
 import JsonDbManager from "../database/json-db-manager";
 import { AccountAccess } from "../common/account-access";
@@ -19,7 +18,7 @@ type ExtraEvents = {
 };
 
 class WebhookConfigManager extends JsonDbManager<WebhookConfig, ExtraEvents> {
-    private _registeredPlugins: Record<string, ScriptWebhookEventHandler> = {};
+    private _registeredPlugins: Record<string, PluginWebhookEventHandler> = {};
 
     constructor() {
         super("Webhook", "/webhooks", "Webhooks");
@@ -105,7 +104,7 @@ class WebhookConfigManager extends JsonDbManager<WebhookConfig, ExtraEvents> {
         return `https://api.crowbar.tools/v1/webhook/${streamer.channelId}/${webhookId}`;
     }
 
-    private toPublic(config: WebhookConfig): ScriptWebhook {
+    private toPublic(config: WebhookConfig): PluginWebhook {
         return { id: config.id, name: config.name };
     }
 
@@ -114,7 +113,7 @@ class WebhookConfigManager extends JsonDbManager<WebhookConfig, ExtraEvents> {
             .find(w => w.name === webhookName && w.scriptId === pluginId);
     }
 
-    getPluginWebhook(pluginId: string, webhookName: string): ScriptWebhook {
+    getPluginWebhook(pluginId: string, webhookName: string): PluginWebhook {
         if (pluginId == null || pluginId.trim() === ""
             || webhookName == null || webhookName.trim() === "") {
             return null;
@@ -123,13 +122,13 @@ class WebhookConfigManager extends JsonDbManager<WebhookConfig, ExtraEvents> {
         return found ? this.toPublic(found) : null;
     }
 
-    getAllPluginWebhooks(pluginId: string): ScriptWebhook[] {
+    getAllPluginWebhooks(pluginId: string): PluginWebhook[] {
         return this.getAllItems()
             .filter(w => w.scriptId === pluginId)
             .map(this.toPublic);
     }
 
-    savePluginWebhook(pluginId: string, webhookName: string): ScriptWebhook {
+    savePluginWebhook(pluginId: string, webhookName: string): PluginWebhook {
         if (pluginId == null || pluginId.trim() === ""
             || webhookName == null || webhookName.trim() === "") {
             return null;
@@ -164,7 +163,7 @@ class WebhookConfigManager extends JsonDbManager<WebhookConfig, ExtraEvents> {
         return this.getWebhookUrlById(found.id);
     }
 
-    registerPluginHandler(pluginId: string, handler: ScriptWebhookEventHandler) {
+    registerPluginHandler(pluginId: string, handler: PluginWebhookEventHandler) {
         if (pluginId == null || pluginId.trim() === "" || handler == null) {
             return false;
         }

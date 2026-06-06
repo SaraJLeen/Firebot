@@ -245,4 +245,4 @@ export type LegacyCustomScript = {
 };
 
 export type FirebotScriptApi = import("./script-api").FirebotScriptApi;
-export type { ScriptLoggerApi, ScriptWebhooksApi, ScriptWebhook, ScriptWebhookEvent } from "./script-api";
+export type { ScriptLoggerApi, ScriptWebhooksApi } from "./script-api";
