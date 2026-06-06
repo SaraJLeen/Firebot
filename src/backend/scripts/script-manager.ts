@@ -550,11 +550,15 @@ class ScriptManager {
         const fileNameChanged = newFileName !== oldFileName;
         const destFolder = ProfileManager.getPathInProfile("/scripts");
 
+        if (oldFilePath === newFilePath) {
+            return { success: false, error: "Selected file is the same as the current plugin." };
+        }
+
         // If renaming and the target name already belongs to another plugin / collides, ask the user.
         if (fileNameChanged && existsSync(newFilePath) && !overwrite) {
             return {
                 success: false,
-                error: `A script named '${newFileName}' already exists in the scripts folder.`,
+                error: `A plugin file named '${newFileName}' already exists in the scripts folder.`,
                 conflict: true
             };
         }
@@ -589,7 +593,7 @@ class ScriptManager {
                 }
             }
             await this.startPlugin(config, false).catch(() => undefined);
-            return { success: false, error: `Failed to copy script: ${(error as Error).message}` };
+            return { success: false, error: `Failed to copy plugin: ${(error as Error).message}` };
         }
 
         // 4. Validate the new file is a recognizable plugin.
@@ -977,10 +981,6 @@ frontendCommunicator.onAsync(
         return scriptManager.deletePlugin(id, deleteScriptFile);
     }
 );
-
-// PluginConfigManager.on("updated-item", async (config) => {
-//     await scriptManager.reloadPluginConfig(config);
-// });
 
 PluginConfigManager.on("deleted-item", async (config) => {
     await scriptManager.onPluginConfigDeleted(config);
