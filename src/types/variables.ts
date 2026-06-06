@@ -1,3 +1,4 @@
+import type { EventSourceAndId } from "./events";
 import type { Trigger, TriggersObject, TriggerType, TriggerMeta } from "./triggers";
 import type { Awaitable } from "./util-types";
 
@@ -56,4 +57,15 @@ export type RegisteredVariable = {
     argsCheck: (...args: unknown[]) => void;
     evaluator(trigger: Trigger, ...args: unknown[]): Awaitable<unknown>;
     getSuggestions: (triggerType: TriggerType, triggerMeta?: TriggerMeta) => Awaitable<VariableUsage[]>;
+};
+
+export type AdditionalVariableEvent = {
+    handle: string;
+    eventSourceId: string;
+    eventId: string;
+};
+
+export type PluginAdditonalVariableEvents = {
+    handle: string;
+    events: Array<EventSourceAndId>;
 };

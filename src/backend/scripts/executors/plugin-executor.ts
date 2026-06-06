@@ -203,6 +203,23 @@ export class PluginExecutor extends IPluginExecutor {
             }
         }
 
+        if (Array.isArray(r.additionalVariableEvents)) {
+            registrations.additionalVariableEvents = [];
+            for (const entry of r.additionalVariableEvents) {
+                const def = await resolve(entry);
+                if (def?.handle && Array.isArray(def.events)) {
+                    for (const event of def.events) {
+                        ReplaceVariableManager.addEventToVariable(def.handle, event.eventSourceId, event.eventId);
+                        registrations.additionalVariableEvents.push({
+                            handle: def.handle,
+                            eventSourceId: event.eventSourceId,
+                            eventId: event.eventId
+                        });
+                    }
+                }
+            }
+        }
+
         if (Array.isArray(r.eventSources)) {
             registrations.eventSourceIds = [];
             for (const entry of r.eventSources) {
@@ -346,6 +363,13 @@ export class PluginExecutor extends IPluginExecutor {
                 ReplaceVariableManager.unregisterReplaceVariable(handle);
             } catch (e) {
                 logger.warn(`Failed to unregister variable ${handle}`, e);
+            }
+        }
+        for (const varEvent of registrations.additionalVariableEvents ?? []) {
+            try {
+                ReplaceVariableManager.removeEventFromVariable(varEvent.handle, varEvent.eventSourceId, varEvent.eventId);
+            } catch (e) {
+                logger.warn(`Failed to unregister event ${varEvent.eventSourceId}:${varEvent.eventId} for variable ${varEvent.handle}`, e);
             }
         }
         for (const id of registrations.eventSourceIds ?? []) {

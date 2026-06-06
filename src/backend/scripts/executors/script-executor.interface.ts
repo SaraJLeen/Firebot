@@ -4,7 +4,8 @@ import {
     ScriptBase,
     ScriptContext,
     Awaitable,
-    ScriptDetails
+    ScriptDetails,
+    AdditionalVariableEvent
 } from "../../../types";
 import type { ScriptApiContext } from "../script-api";
 
@@ -19,6 +20,7 @@ abstract class IBaseScriptExecutor {
 export interface PluginRegistrations {
     effectIds?: string[];
     variableHandles?: string[];
+    additionalVariableEvents?: AdditionalVariableEvent[];
     eventSourceIds?: string[];
     filterIds?: string[];
     systemCommandIds?: string[];
