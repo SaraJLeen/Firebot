@@ -68,7 +68,7 @@ type Controller = {
                 }
             }
 
-            $ctrl.$onInit = function () {
+            $ctrl.$onInit = $ctrl.$onChanges = function () {
                 if (!$ctrl.pluginIcon || typeof $ctrl.pluginIcon !== "object") {
                     $ctrl.pluginIcon = {
                         type: "font-awesome",
