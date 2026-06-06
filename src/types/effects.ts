@@ -1,6 +1,7 @@
 import ng from "angular";
 import type { TriggerType, TriggersObject, Trigger } from "./triggers";
 import type { Awaitable } from "./util-types";
+import { EventSourceAndId } from "./events";
 
 type Func<T> = (...args: unknown[]) => T;
 
@@ -220,4 +221,15 @@ export type QueueState = {
     interval: number;
     mode: QueueMode;
     runEffectsImmediatelyWhenPaused?: boolean;
+};
+
+export type AdditionalEffectEvent = {
+    effectId: string;
+    eventSourceId: string;
+    eventId: string;
+};
+
+export type PluginAdditionalEffectEvents = {
+    effectId: string;
+    events: EventSourceAndId[];
 };

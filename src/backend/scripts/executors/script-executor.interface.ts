@@ -5,7 +5,8 @@ import {
     ScriptContext,
     Awaitable,
     ScriptDetails,
-    AdditionalVariableEvent
+    AdditionalVariableEvent,
+    AdditionalEffectEvent
 } from "../../../types";
 import type { ScriptApiContext } from "../script-api";
 
@@ -20,7 +21,6 @@ abstract class IBaseScriptExecutor {
 export interface PluginRegistrations {
     effectIds?: string[];
     variableHandles?: string[];
-    additionalVariableEvents?: AdditionalVariableEvent[];
     eventSourceIds?: string[];
     filterIds?: string[];
     systemCommandIds?: string[];
@@ -31,6 +31,8 @@ export interface PluginRegistrations {
     overlayWidgetIds?: string[];
     httpRoutePrefix?: string;
     websocketListenerName?: string;
+    additionalVariableEvents?: AdditionalVariableEvent[];
+    additionalEffectEvents?: AdditionalEffectEvent[];
 }
 
 export type PluginExecutionResult =

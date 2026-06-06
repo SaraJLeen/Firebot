@@ -86,15 +86,6 @@ export interface ScriptEventsApi {
 
 export interface ScriptEffectsApi {
     /**
-     * Register an existing effect to be available for an event.
-     * Useful for surfacing built-in effects on script provided events.
-     */
-    addEventToEffect(effectId: string, eventSourceId: string, eventId: string): void;
-
-    /** Reverse of `addEventToEffect`. */
-    removeEventFromEffect(effectId: string, eventSourceId: string, eventId: string): void;
-
-    /**
      * Run an effect list. Respects the list's run mode and effect queue, if any.
      * Resolves once the effects have been run (queued lists resolve
      * immediately).

@@ -65,7 +65,7 @@ export type AdditionalVariableEvent = {
     eventId: string;
 };
 
-export type PluginAdditonalVariableEvents = {
+export type PluginAdditionalVariableEvents = {
     handle: string;
     events: Array<EventSourceAndId>;
 };

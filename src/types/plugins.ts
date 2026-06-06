@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import type { EffectInstance, EffectList, EffectType } from "./effects";
+import type { EffectInstance, EffectList, EffectType, PluginAdditionalEffectEvents } from "./effects";
 import type { Trigger } from "./triggers";
 import type { Awaitable } from "./util-types";
-import type { PluginAdditonalVariableEvents, ReplaceVariable } from "./variables";
+import type { PluginAdditionalVariableEvents, ReplaceVariable } from "./variables";
 import type { EventFilter, EventSource } from "./events";
 import type { SystemCommand } from "./commands";
 import type { RestrictionType } from "./restrictions";
@@ -145,7 +145,6 @@ export interface Plugin<Params extends FirebotParams = FirebotParams> extends Sc
         effects?: DynamicArray<EffectType<any, any>>;
         eventSources?: DynamicArray<EventSource>;
         variables?: DynamicArray<ReplaceVariable>;
-        additionalVariableEvents?: DynamicArray<PluginAdditonalVariableEvents>;
         integrations?: DynamicArray<Integration<any>>;
         filters?: DynamicArray<EventFilter>;
         restrictions?: DynamicArray<RestrictionType<any>>;
@@ -156,6 +155,8 @@ export interface Plugin<Params extends FirebotParams = FirebotParams> extends Sc
         httpRoutes?: DynamicObject<PluginHttpRouteDefinition>;
         websocketListener?: DynamicObject<CustomWebSocketHandler>;
         webhooks?: DynamicObject<PluginWebhooks>;
+        additionalEffectEvents?: DynamicArray<PluginAdditionalEffectEvents>;
+        additionalVariableEvents?: DynamicArray<PluginAdditionalVariableEvents>;
     };
 
     /** Called when the plugin is loaded */
