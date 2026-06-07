@@ -17,7 +17,7 @@ export type NoFunctionArray = Array<NoFunctionValue>;
 
 export type Awaitable<T> = T | PromiseLike<T>;
 
-type ObjectOfUnknowns = {
+export type ObjectOfUnknowns = {
     [key: string]: unknown;
 };
 

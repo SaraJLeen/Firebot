@@ -154,8 +154,7 @@
                     // install & load the plugin, then show its params to the user
                     if ($ctrl.initFirst) {
                         $ctrl.isInitializing = true;
-                        pluginsService.savePluginConfig($ctrl.plugin.config)
-                            .then(() => pluginsService.reloadPlugin($ctrl.plugin.config))
+                        pluginsService.savePluginConfig($ctrl.plugin.config, true)
                             .then(() => {
                                 const updated = pluginsService.getPluginById($ctrl.plugin.config.id);
                                 if (updated && updated.details) {
@@ -172,7 +171,7 @@
                         return;
                     }
 
-                    pluginsService.savePluginConfig($ctrl.plugin.config).then(() => {
+                    pluginsService.savePluginConfig($ctrl.plugin.config, $ctrl.isNewInstall).then(() => {
                         $ctrl.close({ $value: { saved: true } });
                     });
                 };

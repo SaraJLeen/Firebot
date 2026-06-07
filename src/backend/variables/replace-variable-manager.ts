@@ -369,7 +369,7 @@ class ReplaceVariableManager extends EventEmitter {
             return;
         }
 
-        additionalEvents = additionalEvents.filter(e => e.eventSourceId !== eventSourceId && e.eventId !== eventId);
+        additionalEvents = additionalEvents.filter(e => !(e.eventSourceId === eventSourceId && e.eventId === eventId));
         this.additionalVariableEvents[variableHandle] = additionalEvents;
 
         this.logger.debug(`Removed event ${eventSourceId}:${eventId} from variable ${variableHandle}`);

@@ -11,6 +11,8 @@ import {
     PluginRegistrations,
     PluginExecutionResult
 } from "./script-executor.interface";
+import { ScriptApiContext } from "../script-api";
+
 import { EffectManager } from "../../effects/effect-manager";
 import { ReplaceVariableManager } from "../../variables/replace-variable-manager";
 import { EventManager } from "../../events/event-manager";
@@ -24,6 +26,7 @@ import UIExtensionManager from "../../ui-extensions/ui-extension-manager";
 import OverlayWidgetManager from "../../overlay-widgets/overlay-widgets-manager";
 import { HttpServerManager } from "../../../server/http-server-manager";
 import { WebSocketServerManager } from "../../../server/websocket-server-manager";
+import webhookManager from "../../webhooks/webhook-config-manager";
 import { resolvePluginManifestLinks } from "../plugin-manifest-utils";
 
 const logger = LoggerCache.getLogger("Plugins");
@@ -54,7 +57,8 @@ export class PluginExecutor extends IPluginExecutor {
     async executePlugin(
         script: ScriptBase | LegacyCustomScript,
         config: InstalledPluginConfig,
-        isInstalling?: boolean
+        isInstalling?: boolean,
+        ctx?: ScriptApiContext
     ): Promise<PluginExecutionResult> {
         if (!this.isPlugin(script)) {
             return {
@@ -71,7 +75,7 @@ export class PluginExecutor extends IPluginExecutor {
 
         try {
             if (script.registers) {
-                await this.registerAll(script, context, registrations);
+                await this.registerAll(script, config, context, registrations, ctx);
             }
 
             await script.onLoad?.(context, isInstalling);
@@ -113,6 +117,30 @@ export class PluginExecutor extends IPluginExecutor {
         } catch (error) {
             logger.error("Error during plugin onUnload", error);
         }
+
+        if (isUninstalling === true) {
+            const r = script.registers;
+            if (r == null) {
+                return;
+            }
+
+            const resolve = async <T>(item: T | ((c: ScriptContext) => T | PromiseLike<T>)): Promise<T> => {
+                return typeof item === "function"
+                    ? await (item as (c: ScriptContext) => T | PromiseLike<T>)(context)
+                    : item;
+            };
+
+            if (r.webhooks != null) {
+                const webhooks = await resolve(r.webhooks);
+                if (webhooks != null) {
+                    if (Array.isArray(webhooks.webhookNames)) {
+                        for (const name of webhooks.webhookNames) {
+                            webhookManager.deletePluginWebhook(config.id, name);
+                        }
+                    }
+                }
+            }
+        }
     }
 
     async updateParameters(
@@ -137,8 +165,10 @@ export class PluginExecutor extends IPluginExecutor {
 
     private async registerAll(
         script: Plugin,
+        config: InstalledPluginConfig,
         context: ScriptContext,
-        registrations: PluginRegistrations
+        registrations: PluginRegistrations,
+        apiContext: ScriptApiContext
     ) {
         const r = script.registers;
         if (r == null) {
@@ -277,8 +307,61 @@ export class PluginExecutor extends IPluginExecutor {
         if (r.websocketListener != null) {
             const def = await resolve(r.websocketListener);
             if (def != null) {
-                if (WebSocketServerManager.registerCustomWebSocketListener(def.pluginName, def.callback)) {
+                if (WebSocketServerManager.registerCustomWebSocketListener(def.pluginName, def.handler)) {
                     registrations.websocketListenerName = def.pluginName;
+                }
+            }
+        }
+
+        if (r.webhooks != null) {
+            const webhooks = await resolve(r.webhooks);
+            if (webhooks != null) {
+                if (webhooks.handler != null) {
+                    webhookManager.registerPluginHandler(config.id, webhooks.handler);
+                    const unsubscribe = () => {
+                        webhookManager.unregisterPluginHandler(config.id);
+                    };
+                    apiContext.onDispose(unsubscribe);
+                }
+
+                if (Array.isArray(webhooks.webhookNames)) {
+                    for (const name of webhooks.webhookNames) {
+                        webhookManager.savePluginWebhook(config.id, name);
+                    }
+                }
+            }
+        }
+
+        if (Array.isArray(r.additionalVariableEvents)) {
+            registrations.additionalVariableEvents = [];
+            for (const entry of r.additionalVariableEvents) {
+                const def = await resolve(entry);
+                if (def?.handle && Array.isArray(def.events)) {
+                    for (const event of def.events) {
+                        ReplaceVariableManager.addEventToVariable(def.handle, event.eventSourceId, event.eventId);
+                        registrations.additionalVariableEvents.push({
+                            handle: def.handle,
+                            eventSourceId: event.eventSourceId,
+                            eventId: event.eventId
+                        });
+                    }
+                }
+            }
+        }
+
+        if (Array.isArray(r.additionalEffectEvents)) {
+            registrations.additionalEffectEvents = [];
+            for (const entry of r.additionalEffectEvents) {
+                const def = await resolve(entry);
+                if (def?.effectId && Array.isArray(def.events)) {
+                    for (const event of def.events) {
+                        EffectManager.addEventToEffect(def.effectId, event.eventSourceId, event.eventId);
+                        registrations.additionalEffectEvents.push({
+                            effectId: def.effectId,
+                            eventSourceId: event.eventSourceId,
+                            eventId: event.eventId
+                        });
+                    }
                 }
             }
         }
@@ -365,6 +448,22 @@ export class PluginExecutor extends IPluginExecutor {
                 WebSocketServerManager.unregisterCustomWebSocketListener(registrations.websocketListenerName);
             } catch (e) {
                 logger.warn(`Failed to unregister WebSocket plugin listener ${registrations.websocketListenerName}`, e);
+            }
+        }
+
+        for (const varEvent of registrations.additionalVariableEvents ?? []) {
+            try {
+                ReplaceVariableManager.removeEventFromVariable(varEvent.handle, varEvent.eventSourceId, varEvent.eventId);
+            } catch (e) {
+                logger.warn(`Failed to unregister event ${varEvent.eventSourceId}:${varEvent.eventId} for variable ${varEvent.handle}`, e);
+            }
+        }
+
+        for (const varEvent of registrations.additionalEffectEvents ?? []) {
+            try {
+                EffectManager.removeEventFromEffect(varEvent.effectId, varEvent.eventSourceId, varEvent.eventId);
+            } catch (e) {
+                logger.warn(`Failed to unregister event ${varEvent.eventSourceId}:${varEvent.eventId} for effect ${varEvent.effectId}`, e);
             }
         }
     }

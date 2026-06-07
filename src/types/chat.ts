@@ -12,17 +12,17 @@ type FirebotChatMessagePartBase = {
     text: string;
 };
 
-type FirebotChatMessageTextPart = FirebotChatMessagePartBase & {
+export type FirebotChatMessageTextPart = FirebotChatMessagePartBase & {
     type: "text";
     flagged?: boolean;
 };
 
-type FirebotChatMessageLinkPart = FirebotChatMessagePartBase & {
+export type FirebotChatMessageLinkPart = FirebotChatMessagePartBase & {
     type: "link";
     url: string;
 };
 
-type FirebotChatMessageEmotePart = FirebotChatMessagePartBase & {
+export type FirebotChatMessageEmotePart = FirebotChatMessagePartBase & {
     type: "emote" | "third-party-emote";
     name: string;
     origin: string;
@@ -30,7 +30,7 @@ type FirebotChatMessageEmotePart = FirebotChatMessagePartBase & {
     animatedUrl?: string;
 };
 
-type FirebotChatMessageCheermotePart = FirebotChatMessagePartBase & {
+export type FirebotChatMessageCheermotePart = FirebotChatMessagePartBase & {
     type: "cheermote";
     name: string;
     url: string;
@@ -39,7 +39,7 @@ type FirebotChatMessageCheermotePart = FirebotChatMessagePartBase & {
     color: string;
 };
 
-type FirebotChatMessageMentionPart = FirebotChatMessagePartBase & {
+export type FirebotChatMessageMentionPart = FirebotChatMessagePartBase & {
     type: "mention";
     username: string;
     userId: string;

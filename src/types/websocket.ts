@@ -35,34 +35,34 @@ export type WebSocketEventType =
 "timer:updated" |
 "timer:deleted";
 
-interface Message {
+export interface Message {
     type: string;
     id?: number | string;
     name: string;
     data?: unknown;
 }
-interface InvokeMessage extends Message {
+export interface InvokeMessage extends Message {
     type: "invoke";
     id: string | number;
     data: unknown;
 }
-interface ResponseMessage extends Message {
+export interface ResponseMessage extends Message {
     type: "response";
     id: number | string;
     name: "error" | "success";
 }
-interface EventMessage extends Message {
+export interface EventMessage extends Message {
     type: "event";
 }
 
-interface InvokePluginMessage extends InvokeMessage {
+export interface InvokePluginMessage extends InvokeMessage {
     name: "plugin";
     pluginName: string;
 }
 
-interface CustomWebSocketHandler {
+export interface CustomWebSocketHandler {
     pluginName: string;
-    callback: (data: unknown) => Awaitable<void>;
+    handler: (data: unknown) => Awaitable<void>;
 }
 
 export type OverlayConnectedData = {

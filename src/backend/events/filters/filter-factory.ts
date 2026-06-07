@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-base-to-string */
 import {
     Awaitable,
+    EventData,
     EventFilter,
     FilterSettings,
     PresetValue
@@ -9,24 +10,15 @@ import {
 import { ComparisonType } from "../../../shared/filter-constants";
 import { extractPropertyWithPath } from "../../utils";
 
-type EventData = {
-    eventSourceId: string;
-    eventId: string;
-    eventMeta: Record<string, unknown>;
+export type FilterConfig = Pick<EventFilter, "id" | "name" | "description" | "events"> & {
+    eventMetaKey: string | ((eventData: EventData, filterSettings: FilterSettings) => string);
 };
 
-type FilterEvent = Omit<EventData, "eventMeta">;
-
-type FilterConfig = {
-    id: string;
-    name: string;
-    description: string;
-    events: Array<FilterEvent>;
-    eventMetaKey: string | ((eventData: EventData, filterSettings: FilterSettings) => string);
+export type TextFilterConfig = FilterConfig & {
     caseInsensitive?: boolean;
 };
 
-type PresetFilterConfig = FilterConfig & {
+export type PresetFilterConfig = FilterConfig & {
     presetValues: (...args: unknown[]) => Awaitable<PresetValue[]>;
     valueIsStillValid?(filterSettings: FilterSettings, ...args: unknown[]): Awaitable<boolean>;
     getSelectedValueDisplay?(filterSettings: FilterSettings, ...args: unknown[]): Awaitable<string>;
@@ -129,7 +121,7 @@ export function createTextFilter({
     eventMetaKey,
     caseInsensitive,
     ...config
-}: Omit<FilterConfig, "presetValues" | "allowIsNot">): Omit<EventFilter, "presetValues"> {
+}: TextFilterConfig): EventFilter {
     return {
         ...config,
         comparisonTypes: TEXT_COMPARISON_TYPES,
@@ -143,7 +135,7 @@ export function createTextFilter({
                 eventValue = eventValue.toString().toLowerCase();
             }
             const filterValue =
-                (caseInsensitive ? value?.toLowerCase() : value) ?? "";
+                (caseInsensitive ? (value as string)?.toLowerCase() : value) ?? "";
 
             return compareValue(comparisonType, filterValue, eventValue);
         }
@@ -153,9 +145,7 @@ export function createTextFilter({
 export function createNumberFilter({
     eventMetaKey,
     ...config
-}: Omit<FilterConfig, "caseInsensitive" | "presetValues" | "allowIsNot">): Omit<EventFilter, "presetValues" | "valueType"> & {
-    valueType: "number";
-} {
+}: FilterConfig): EventFilter {
     return {
         ...config,
         comparisonTypes: NUMBER_COMPARISON_TYPES,
@@ -175,7 +165,7 @@ export function createTextOrNumberFilter({
     eventMetaKey,
     caseInsensitive,
     ...config
-}: Omit<FilterConfig, "presetValues" | "allowIsNot">): Omit<EventFilter, "presetValues"> {
+}: TextFilterConfig): EventFilter {
     return {
         ...config,
         comparisonTypes: NUMBER_TEXT_COMPARISON_TYPES,
@@ -202,7 +192,7 @@ export function createPresetFilter({
     valueIsStillValid,
     allowIsNot = false,
     ...config
-}: Omit<PresetFilterConfig, "caseInsensitive">): EventFilter {
+}: PresetFilterConfig): EventFilter {
     const comparisonTypes: ComparisonType[] = [ComparisonType.IS];
     if (allowIsNot) {
         comparisonTypes.push(ComparisonType.IS_NOT);

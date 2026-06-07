@@ -1,10 +1,8 @@
-import type { EventFilter } from "../../../types";
-
 import { FilterManager } from "./filter-manager";
 import filters from "./builtin";
 
 export function loadFilters() {
     for (const definition of filters) {
-        FilterManager.registerFilter(definition as EventFilter);
+        FilterManager.registerFilter(definition);
     }
 }

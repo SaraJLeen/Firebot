@@ -4,8 +4,11 @@ import {
     ScriptBase,
     ScriptContext,
     Awaitable,
-    ScriptDetails
+    ScriptDetails,
+    AdditionalVariableEvent,
+    AdditionalEffectEvent
 } from "../../../types";
+import type { ScriptApiContext } from "../script-api";
 
 abstract class IBaseScriptExecutor {
     abstract canHandle(script: ScriptBase | LegacyCustomScript): Awaitable<boolean>;
@@ -28,6 +31,8 @@ export interface PluginRegistrations {
     overlayWidgetIds?: string[];
     httpRoutePrefix?: string;
     websocketListenerName?: string;
+    additionalVariableEvents?: AdditionalVariableEvent[];
+    additionalEffectEvents?: AdditionalEffectEvent[];
 }
 
 export type PluginExecutionResult =
@@ -44,7 +49,8 @@ export abstract class IPluginExecutor extends IBaseScriptExecutor {
     abstract executePlugin(
         script: ScriptBase | LegacyCustomScript,
         config: InstalledPluginConfig,
-        isInstalling?: boolean
+        isInstalling?: boolean,
+        ctx?: ScriptApiContext
     ): Awaitable<PluginExecutionResult>;
 
     abstract unloadPlugin(

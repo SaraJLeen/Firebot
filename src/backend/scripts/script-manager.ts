@@ -167,7 +167,7 @@ class ScriptManager {
 
         let result: PluginExecutionResult;
         try {
-            result = await executor.executePlugin(script, pluginConfig, installing);
+            result = await executor.executePlugin(script, pluginConfig, installing, apiInstance.context);
         } catch (error) {
             result = { success: false as const, error: (error as Error)?.message ?? "Unknown error" };
         }
@@ -252,6 +252,8 @@ class ScriptManager {
         }
 
         await this.startPlugin(config, false);
+
+        frontendCommunicator.send("plugin-manager:refresh-plugins");
     }
 
     async stopAllPlugins(): Promise<void> {
@@ -269,7 +271,7 @@ class ScriptManager {
      * Handle a config change. Starts/stops as needed, and on a still-enabled plugin
      * either re-loads (if file may have changed) or invokes onParameterUpdate.
      */
-    async reloadPluginConfig(pluginConfig: InstalledPluginConfig): Promise<void> {
+    async reloadPluginConfig(pluginConfig: InstalledPluginConfig, isNewInstall = false): Promise<void> {
         const active = this.activePlugins[pluginConfig.id];
 
         // Disabled now -> stop if running
@@ -282,7 +284,7 @@ class ScriptManager {
 
         // Enabled, not yet running -> start
         if (!active) {
-            await this.startPlugin(pluginConfig, false);
+            await this.startPlugin(pluginConfig, isNewInstall);
             return;
         }
 
@@ -293,6 +295,8 @@ class ScriptManager {
         } catch (error) {
             logger.error(`Error during updateParameters for ${active.fileName}`, error);
         }
+
+        frontendCommunicator.send("plugin-manager:refresh-plugins");
     }
 
     async setPluginEnabled(pluginId: string, enabled: boolean): Promise<void> {
@@ -546,11 +550,15 @@ class ScriptManager {
         const fileNameChanged = newFileName !== oldFileName;
         const destFolder = ProfileManager.getPathInProfile("/scripts");
 
+        if (oldFilePath === newFilePath) {
+            return { success: false, error: "Selected file is the same as the current plugin." };
+        }
+
         // If renaming and the target name already belongs to another plugin / collides, ask the user.
         if (fileNameChanged && existsSync(newFilePath) && !overwrite) {
             return {
                 success: false,
-                error: `A script named '${newFileName}' already exists in the scripts folder.`,
+                error: `A plugin file named '${newFileName}' already exists in the scripts folder.`,
                 conflict: true
             };
         }
@@ -585,7 +593,7 @@ class ScriptManager {
                 }
             }
             await this.startPlugin(config, false).catch(() => undefined);
-            return { success: false, error: `Failed to copy script: ${(error as Error).message}` };
+            return { success: false, error: `Failed to copy plugin: ${(error as Error).message}` };
         }
 
         // 4. Validate the new file is a recognizable plugin.
@@ -925,6 +933,12 @@ frontendCommunicator.onAsync(
     }
 );
 
+frontendCommunicator.onAsync("plugin-manager:save-config", async ({ pluginConfig, isNewInstall = false }: { pluginConfig: InstalledPluginConfig, isNewInstall?: boolean }) => {
+    const newConfig = PluginConfigManager.saveItem(pluginConfig);
+    await scriptManager.reloadPluginConfig(newConfig, isNewInstall);
+    return newConfig;
+});
+
 frontendCommunicator.onAsync(
     "plugin-manager:install-from-file",
     async (data: { filePath: string, overwrite?: boolean }) => {
@@ -960,14 +974,6 @@ frontendCommunicator.onAsync(
 );
 
 frontendCommunicator.onAsync(
-    "plugin-manager:reload",
-    async (config: InstalledPluginConfig) => {
-        await scriptManager.reloadPluginConfig(config);
-        return true;
-    }
-);
-
-frontendCommunicator.onAsync(
     "plugin-manager:delete",
     async (data: string | { id: string, deleteScriptFile?: boolean }) => {
         const id = typeof data === "string" ? data : data?.id;
@@ -975,10 +981,6 @@ frontendCommunicator.onAsync(
         return scriptManager.deletePlugin(id, deleteScriptFile);
     }
 );
-
-PluginConfigManager.on("updated-item", async (config) => {
-    await scriptManager.reloadPluginConfig(config);
-});
 
 PluginConfigManager.on("deleted-item", async (config) => {
     await scriptManager.onPluginConfigDeleted(config);

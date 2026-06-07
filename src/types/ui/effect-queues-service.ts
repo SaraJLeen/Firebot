@@ -1,4 +1,4 @@
-import type { EffectQueueConfig } from "../../types";
+import type { EffectQueueConfig } from "..";
 
 export type EffectQueuesService = {
     effectQueues: EffectQueueConfig[];

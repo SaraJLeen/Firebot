@@ -44,14 +44,14 @@ export type EventSource = {
 };
 
 export type PresetValue = {
-    value: any;
+    value: unknown;
     display: string;
 };
 
 export type FilterSettings = {
     type: string;
     comparisonType: ComparisonType;
-    value: any;
+    value: unknown;
 };
 
 export type EventSourceAndId = {
@@ -60,7 +60,7 @@ export type EventSourceAndId = {
 };
 
 export type EventData = EventSourceAndId & {
-    eventMeta: Record<string, any>;
+    eventMeta: Record<string, unknown>;
 };
 
 export type EventFilter = {
@@ -69,7 +69,7 @@ export type EventFilter = {
     description: string;
     events: EventSourceAndId[];
     comparisonTypes: string[];
-    valueType: "text" | "preset";
+    valueType: "text" | "number" | "preset";
     presetValues?(...args: unknown[]): Awaitable<PresetValue[]>;
     valueIsStillValid?(filterSettings: FilterSettings, ...args: unknown[]): Awaitable<boolean>;
     getSelectedValueDisplay?(filterSettings: FilterSettings, ...args: unknown[]): Awaitable<string>;

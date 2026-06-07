@@ -4,13 +4,17 @@
 // Everything a custom script can touch via `require("@crowbartools/firebot-types")`
 // should be defined here
 
-import type { TriggeredEvent } from "./events";
+import type { EventFilter, TriggeredEvent } from "./events";
 import type { RunEffectsContext } from "./effects";
 import type { TwitchApi } from "../backend/streaming-platforms/twitch/api";
 import type { Notification } from "./notifications";
 import type { FirebotAccount } from "./accounts";
 import type { FirebotSettingsTypes } from "./settings";
 import type { InstalledPlugin } from "./plugins";
+import type { PluginWebhook } from "./webhooks";
+import { ReplaceVariable } from "./variables";
+import type { VariableConfig } from "../backend/variables/variable-factory";
+import type { FilterConfig, PresetFilterConfig, TextFilterConfig } from "../backend/events/filters/filter-factory";
 
 export type ScriptLogMethod = (message: string, ...meta: unknown[]) => void;
 
@@ -21,35 +25,13 @@ export interface ScriptLoggerApi {
     error: ScriptLogMethod;
 }
 
-export interface ScriptWebhook {
-    id: string;
-    name: string;
-}
-
-export interface ScriptWebhookEvent {
-    webhook: ScriptWebhook;
-    payload: unknown;
-    rawPayload?: string;
-    headers: Record<string, string>;
-}
-
-export type ScriptWebhookEventHandler = (event: ScriptWebhookEvent) => void;
-
 export interface ScriptWebhooksApi {
-    /** Create a new webhook (or return the existing one with the same name). */
-    save(name: string): ScriptWebhook | null;
     /** Look up a webhook by name. */
-    get(name: string): ScriptWebhook | null;
-    /** Delete a webhook by name. Returns true if one was removed. */
-    delete(name: string): boolean;
+    get(name: string): PluginWebhook | null;
     /** All webhooks owned by this script. */
-    list(): ScriptWebhook[];
+    list(): PluginWebhook[];
     /** Public URL for a webhook by name, or null if not found. */
     getUrl(name: string): string | null;
-    /**
-     * Subscribe to webhook events for this script. Returns an `unsubscribe` func
-     */
-    onReceived(handler: ScriptWebhookEventHandler): () => void;
 }
 
 /**
@@ -103,15 +85,6 @@ export interface ScriptEventsApi {
 }
 
 export interface ScriptEffectsApi {
-    /**
-     * Register an existing effect to be available for an event.
-     * Useful for surfacing built-in effects on script provided events.
-     */
-    addEventToEffect(effectId: string, eventSourceId: string, eventId: string): void;
-
-    /** Reverse of `addEventToEffect`. */
-    removeEventFromEffect(effectId: string, eventSourceId: string, eventId: string): void;
-
     /**
      * Run an effect list. Respects the list's run mode and effect queue, if any.
      * Resolves once the effects have been run (queued lists resolve
@@ -203,6 +176,26 @@ export interface Accounts {
     bot: FirebotAccount;
 }
 
+export interface ScriptWebServerApi {
+    /**
+     * Sends a custom event over the internal Firebot WebSocket server
+     * @param name Name of the event to send. Full event name will be `custom-event:{name}`
+     * @param data Any optional data you would like to send with the event
+     */
+    sendWebSocketEvent(name: string, data?: unknown);
+}
+
+export interface ScriptVariableFactoryApi {
+    createEventDataVariable(config: VariableConfig): ReplaceVariable;
+}
+
+export interface ScriptEventFilterFactoryApi {
+    createTextFilter(config: TextFilterConfig): EventFilter;
+    createNumberFilter(config: FilterConfig): EventFilter;
+    createTextOrNumberFilter(config: TextFilterConfig): EventFilter;
+    createPresetFilter(config: PresetFilterConfig): EventFilter;
+}
+
 export interface FirebotScriptApi {
     /** Running Firebot version, e.g. `"5.67.0"`. */
     version: string;
@@ -230,4 +223,10 @@ export interface FirebotScriptApi {
     notifications: ScriptNotificationsApi;
     /** Access to installed plugins. */
     plugins: ScriptPluginsApi;
+    /** Firebot internal web server functions. */
+    webServer: ScriptWebServerApi;
+    /** Factory for creating variables based on event data. */
+    variableFactory: ScriptVariableFactoryApi;
+    /** Factory for creating event filters. */
+    eventFilterFactory: ScriptEventFilterFactoryApi;
 }

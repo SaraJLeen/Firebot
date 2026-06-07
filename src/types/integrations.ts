@@ -4,13 +4,15 @@ import type {
 } from "./parameters";
 import type { Awaitable, ObjectOfUnknowns } from "./util-types";
 
-export type Integration<Params extends FirebotParams = FirebotParams> = {
+export type IntegrationParams = Record<string, Record<string, unknown>>;
+
+export type Integration<Params extends IntegrationParams = IntegrationParams> = {
     definition: IntegrationDefinition<Params>;
     integration: IntegrationController<Params>;
 };
 
 export type IntegrationDefinition<
-    Params extends FirebotParams = FirebotParams
+    Params extends IntegrationParams = IntegrationParams
 > = {
     id: string;
     name: string;
@@ -62,7 +64,7 @@ type LinkData =
     }
     | null;
 
-export type IntegrationData<Params extends FirebotParams = FirebotParams> = {
+export type IntegrationData<Params extends IntegrationParams = IntegrationParams> = {
     settings: any;
     userSettings?: Params;
     oauth?: any;
@@ -70,7 +72,7 @@ export type IntegrationData<Params extends FirebotParams = FirebotParams> = {
 };
 
 export interface IntegrationController<
-    Params extends FirebotParams = FirebotParams
+    Params extends IntegrationParams = IntegrationParams
 > {
     connected: boolean;
     init(
@@ -87,7 +89,7 @@ export interface IntegrationController<
     ): Awaitable<void>;
 }
 
-type IntegrationWithUnknowns = {
+export type IntegrationWithUnknowns = {
     definition: IntegrationDefinition & ObjectOfUnknowns;
     integration: IntegrationController & ObjectOfUnknowns;
 };

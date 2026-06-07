@@ -20,6 +20,10 @@
 
             service.reloadPlugins = service.loadPlugins;
 
+            backendCommunicator.on("plugin-manager:refresh-plugins", () => {
+                service.reloadPlugins();
+            });
+
             service.getInstalledPlugins = function() {
                 return installedPlugins;
             };
@@ -28,24 +32,12 @@
                 return installedPlugins.find(p => p.config && p.config.id === id);
             };
 
-            service.savePluginConfig = function(pluginConfig) {
+            service.savePluginConfig = function(pluginConfig, isNewInstall = false) {
                 if (!pluginConfig || !pluginConfig.id) {
                     return $q.resolve(false);
                 }
                 return $q.when(
-                    backendCommunicator.fireEventAsync("plugin-manager:save-config", pluginConfig)
-                ).then(() => service.loadPlugins());
-            };
-
-            /**
-             * Saves the config and waits for the plugin to (re)load on the backend before resolving
-             */
-            service.reloadPlugin = function(pluginConfig) {
-                if (!pluginConfig || !pluginConfig.id) {
-                    return $q.resolve(false);
-                }
-                return $q.when(
-                    backendCommunicator.fireEventAsync("plugin-manager:reload", pluginConfig)
+                    backendCommunicator.fireEventAsync("plugin-manager:save-config", { pluginConfig, isNewInstall })
                 ).then(() => service.loadPlugins());
             };
 

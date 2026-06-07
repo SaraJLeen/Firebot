@@ -166,7 +166,7 @@ export type OverlayWidgetType<
     };
 };
 
-type OverlayWidgetConfig<Settings = Record<string, unknown>, State = Record<string, unknown>> = {
+export type OverlayWidgetConfig<Settings = Record<string, unknown>, State = Record<string, unknown>> = {
     id: string;
     name: string;
     type: string;

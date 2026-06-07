@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import type { EffectInstance, EffectList, EffectType } from "./effects";
+import type { EffectInstance, EffectList, EffectType, PluginAdditionalEffectEvents } from "./effects";
 import type { Trigger } from "./triggers";
 import type { Awaitable } from "./util-types";
-import type { ReplaceVariable } from "./variables";
+import type { PluginAdditionalVariableEvents, ReplaceVariable } from "./variables";
 import type { EventFilter, EventSource } from "./events";
 import type { SystemCommand } from "./commands";
 import type { RestrictionType } from "./restrictions";
@@ -13,6 +13,7 @@ import type { UIExtension } from "./ui-extensions";
 import type { OverlayWidgetType } from "./overlay-widgets";
 import type { PluginHttpRouteDefinition } from "./http-server";
 import type { CustomWebSocketHandler } from "./websocket";
+import type { PluginWebhooks } from "./webhooks";
 
 type NoResult = Awaitable<void>;
 
@@ -47,13 +48,39 @@ interface ManifestFirebotVersion {
     patch?: number;
 }
 
+type FontAwesomeIcon = {
+    type: "font-awesome";
+    /**
+     * A FontAwesome icon name shown in the UI (eg. "fa-cogs").
+     */
+    name: `fa-${string}`;
+    /**
+     * A css color value (eg. "#FF0000") used for the icon.
+     */
+    color?: string;
+};
+
+type CustomIcon = {
+    type: "custom";
+    url: string;
+    /**
+     * A css color value (eg. "#FF0000") used for the background of the icon.
+     */
+    backgroundColor?: string;
+};
+
+export type PluginIcon = FontAwesomeIcon | CustomIcon;
+
 export interface Manifest {
     name: string;
     version: string;
     author: string;
     description: string | ManifestDescription;
 
-    // keywords?: string[];
+    /**
+     * An array of strings that describe or categorize your plugin
+     */
+    tags?: string[];
 
     /**
      * A link to the plugin's source code repository
@@ -75,13 +102,9 @@ export interface Manifest {
     maximumFirebotVersion?: ManifestFirebotVersion;
 
     /**
-     * A FontAwesome icon name shown in the UI (eg. "fa-cogs").
+     * The icon to be displayed for the plugin.
      */
-    icon?: `fa-${string}`;
-    /**
-     * A hex color code (eg. "#FF0000") used for the icon.
-     */
-    color?: string;
+    icon?: PluginIcon;
 
     /**
      * If true, the plugin will be initialized before parameters are shown to the user,
@@ -131,6 +154,9 @@ export interface Plugin<Params extends FirebotParams = FirebotParams> extends Sc
         overlayWidgets?: DynamicArray<OverlayWidgetType<any, any>>;
         httpRoutes?: DynamicObject<PluginHttpRouteDefinition>;
         websocketListener?: DynamicObject<CustomWebSocketHandler>;
+        webhooks?: DynamicObject<PluginWebhooks>;
+        additionalEffectEvents?: DynamicArray<PluginAdditionalEffectEvents>;
+        additionalVariableEvents?: DynamicArray<PluginAdditionalVariableEvents>;
     };
 
     /** Called when the plugin is loaded */
@@ -221,4 +247,4 @@ export type LegacyCustomScript = {
 };
 
 export type FirebotScriptApi = import("./script-api").FirebotScriptApi;
-export type { ScriptLoggerApi, ScriptWebhooksApi, ScriptWebhook, ScriptWebhookEvent } from "./script-api";
+export type { ScriptLoggerApi, ScriptWebhooksApi } from "./script-api";
