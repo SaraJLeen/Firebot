@@ -367,7 +367,7 @@ class ScriptManager {
             if (await executor.canHandle(script)) {
                 if (expectedScriptType && expectedScriptType !== "plugin") {
                     await this.disposeEffectScriptApi(fileName);
-                    return { success: false, error: `Only ${expectedScriptType}'s are allowed.` };
+                    return { success: false, error: `Only ${expectedScriptType}s are allowed.` };
                 }
                 const details = await executor.getScriptDetails(script);
                 if (details) {
@@ -381,7 +381,7 @@ class ScriptManager {
             if (await executor.canHandle(script)) {
                 if (expectedScriptType && expectedScriptType !== "script") {
                     await this.disposeEffectScriptApi(fileName);
-                    return { success: false, error: `Only ${expectedScriptType}'s are allowed.` };
+                    return { success: false, error: `Only ${expectedScriptType}s are allowed.` };
                 }
                 const details = await executor.getScriptDetails(script);
                 if (details) {
