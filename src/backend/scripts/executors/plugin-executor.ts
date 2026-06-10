@@ -482,7 +482,6 @@ export class PluginExecutor extends IPluginExecutor {
     }
 
     private isPlugin(script: ScriptBase | LegacyCustomScript): script is Plugin {
-        return (script as ScriptBase).manifest != null
-            && (script as ScriptBase).manifest.type === "plugin";
+        return (script as ScriptBase).manifest != null;
     }
 }

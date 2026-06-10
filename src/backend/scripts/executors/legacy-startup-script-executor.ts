@@ -142,8 +142,7 @@ export class LegacyStartUpScript extends IPluginExecutor {
                 name: manifest.name,
                 description: manifest.description,
                 website: manifest.website,
-                initBeforeShowingParams: manifest.initBeforeShowingParams,
-                type: "plugin"
+                initBeforeShowingParams: manifest.initBeforeShowingParams
             },
             parametersSchema: parametersArray
         };

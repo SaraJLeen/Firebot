@@ -59,8 +59,7 @@ export class LegacyEffectScriptExecutor {
                 author: manifest?.author ?? "Unknown",
                 name: manifest?.name ?? "Unknown",
                 description: manifest?.description ?? "No description",
-                website: manifest?.website ?? "No website",
-                type: "script"
+                website: manifest?.website ?? "No website"
             },
             parametersSchema: parametersArray
         };

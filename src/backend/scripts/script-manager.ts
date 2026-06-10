@@ -391,12 +391,12 @@ class ScriptManager {
         const contextSource: ScriptApiContextSource = scriptType === "plugin" ? {
             kind: "plugin",
             config: { fileName, id: randomUUID(), parameters: {} },
-            manifest: { author: "Unknown", name: fileName, version: "0.0.0", description: "", type: "plugin" },
+            manifest: { author: "Unknown", name: fileName, version: "0.0.0", description: "" },
             isInspecting: true
         } : {
             kind: "effect-script",
             fileName,
-            manifest: { author: "Unknown", name: fileName, version: "0.0.0", description: "", type: "script" },
+            manifest: { author: "Unknown", name: fileName, version: "0.0.0", description: "" },
             isInspecting: true
         };
 

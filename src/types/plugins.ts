@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import type { EffectInstance, EffectList, EffectType, PluginAdditionalEffectEvents } from "./effects";
+import type { EffectType, PluginAdditionalEffectEvents } from "./effects";
 import type { Trigger } from "./triggers";
 import type { Awaitable } from "./util-types";
 import type { PluginAdditionalVariableEvents, ReplaceVariable } from "./variables";
@@ -111,26 +111,13 @@ export interface Manifest {
      * allowing the plugin to provide custom parameter types that can be used in its own parametersSchema.
      */
     initBeforeShowingParams?: boolean;
-
-    type: ScriptType;
 }
-
-type EffectScriptResult = {
-    success: boolean;
-    errorMessage?: string;
-    effects?: EffectList | Array<EffectInstance>;
-    onEffectsDone?: () => Awaitable<void>;
-};
 
 
 export interface ScriptBase<Params extends FirebotParams = FirebotParams> {
     manifest: Manifest;
 
     parametersSchema?: FirebotParameterArray<Params>;
-}
-
-export interface EffectScript<Params extends FirebotParams = FirebotParams> extends ScriptBase<Params> {
-    run: (context: ScriptContext<Params>) => Awaitable<void | EffectScriptResult>;
 }
 
 export interface Plugin<Params extends FirebotParams = FirebotParams> extends ScriptBase<Params> {
