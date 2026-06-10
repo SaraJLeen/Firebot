@@ -27,15 +27,15 @@ export type InstalledPluginConfig<Params extends GenericParameters = GenericPara
     parameters: Params;
 };
 
-export type ScriptContext<Params extends FirebotParams = FirebotParams> = {
+export type PluginContext<Params extends FirebotParams = FirebotParams> = {
     trigger?: Trigger;
     parameters: Params;
 };
 
-type DynamicObject<T> = T | ((context: ScriptContext) => Awaitable<T>);
-type DynamicArray<T> = Array<T | ((context: ScriptContext) => Awaitable<T>)>;
+type DynamicObject<T> = T | ((context: PluginContext) => Awaitable<T>);
+type DynamicArray<T> = Array<T | ((context: PluginContext) => Awaitable<T>)>;
 
-export type ScriptType = "script" | "plugin";
+export type PluginType = "script" | "plugin";
 
 interface ManifestDescription {
     short: string;
@@ -114,16 +114,16 @@ export interface Manifest {
 }
 
 
-export interface ScriptBase<Params extends FirebotParams = FirebotParams> {
+export interface PluginBase<Params extends FirebotParams = FirebotParams> {
     manifest: Manifest;
 
     parametersSchema?: FirebotParameterArray<Params>;
 }
 
-export interface Plugin<Params extends FirebotParams = FirebotParams> extends ScriptBase<Params> {
+export interface Plugin<Params extends FirebotParams = FirebotParams> extends PluginBase<Params> {
     /**
      * Automatically handles registration with appropriate managers for definitions
-     * when the script is unloaded, definitions will automagically be unregistered.
+     * when the plugin is unloaded, definitions will automagically be unregistered.
      *
      * Array entries can be direct definitions or functions that return definitions
      * (or promises of definitions) for dynamic registration based on context (e.g. parameter values).
@@ -147,20 +147,20 @@ export interface Plugin<Params extends FirebotParams = FirebotParams> extends Sc
     };
 
     /** Called when the plugin is loaded */
-    onLoad?: (context: ScriptContext<Params>, isInstalling?: boolean) => NoResult;
+    onLoad?: (context: PluginContext<Params>, isInstalling?: boolean) => NoResult;
 
     /** Called when Firebot is closing or plugin is disabled / removed  */
-    onUnload?: (context: ScriptContext<Params>, isUninstalling?: boolean) => NoResult;
+    onUnload?: (context: PluginContext<Params>, isUninstalling?: boolean) => NoResult;
 
     /** Called when the user updates plugin-specific parameters */
-    onParameterUpdate?: (context: ScriptContext<Params>) => NoResult;
+    onParameterUpdate?: (context: PluginContext<Params>) => NoResult;
 }
 
-export type ScriptDetails = Pick<ScriptBase, "manifest" | "parametersSchema">;
+export type PluginDetails = Pick<PluginBase, "manifest" | "parametersSchema">;
 
 export type InstalledPlugin = {
     config: InstalledPluginConfig;
-    details: ScriptDetails;
+    details: PluginDetails;
 };
 
 /* Legacy types */
@@ -233,5 +233,5 @@ export type LegacyCustomScript = {
     stop?: () => Awaitable<void>;
 };
 
-export type FirebotScriptApi = import("./script-api").FirebotScriptApi;
-export type { ScriptLoggerApi, ScriptWebhooksApi } from "./script-api";
+export type FirebotPluginApi = import("./plugin-api").FirebotPluginApi;
+export type { PluginLoggerApi as PluginLoggerApi, PluginWebhooksApi as PluginWebhooksApi } from "./plugin-api";

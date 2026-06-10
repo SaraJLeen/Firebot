@@ -1,4 +1,4 @@
-export type NotificationSource = "external" | "internal" | "script";
+export type NotificationSource = "external" | "internal" | "plugin";
 
 export type NotificationType = "info" | "tip" | "update" | "alert";
 
@@ -14,7 +14,7 @@ export type NotificationBase = {
     message: string;
     type: NotificationType;
     source?: NotificationSource;
-    scriptName?: string;
+    pluginName?: string;
     externalId?: string;
     metadata?: Record<string, unknown>;
 };

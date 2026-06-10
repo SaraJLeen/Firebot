@@ -24,14 +24,14 @@ export async function willQuit(event: Event) {
     const { HotkeyManager } = await import("../../../hotkeys/hotkey-manager");
     const { ScheduledTaskManager } = await import("../../../timers/scheduled-task-manager");
     const { SettingsManager } = await import("../../../common/settings-manager");
-    const scriptManager = (await import("../../../scripts/script-manager")).default;
+    const { PluginManager } = await import("../../../plugins/plugin-manager");
     const viewerOnlineStatusManager = (await import("../../../viewers/viewer-online-status-manager")).default;
 
     // Stop all scheduled tasks
     ScheduledTaskManager.stop();
 
     // Stop all plugins so they can clean up
-    await scriptManager.stopAllPlugins();
+    await PluginManager.stopAllPlugins();
 
     // Unregister all shortcuts.
     HotkeyManager.unregisterAllHotkeys();

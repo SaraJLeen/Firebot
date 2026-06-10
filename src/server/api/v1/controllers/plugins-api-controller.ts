@@ -1,5 +1,5 @@
 import { Request, Response } from "express";
-import scriptManager from "../../../../backend/scripts/script-manager";
+import { PluginManager } from "../../../../backend/plugins/plugin-manager";
 
 /**
  * Convenience endpoint used for plugin hot-reloading. A plugin's dev tooling can
@@ -13,7 +13,7 @@ export async function restartPlugin(
     const fileName = req.body?.fileName ?? (req.query?.fileName as string | undefined);
 
     try {
-        await scriptManager.restartPluginByFileName(fileName);
+        await PluginManager.restartPluginByFileName(fileName);
     } catch {
         // best-effort, ignore errors
     }

@@ -626,8 +626,8 @@ async function createMainWindow() {
             splashscreenWindow.destroy();
         }
 
-        const scriptRunner = require("../../scripts/script-manager").default;
-        await scriptRunner.startPlugins();
+        const { PluginManager } = require("../../plugins/plugin-manager");
+        await PluginManager.startPlugins();
 
         const { EventManager } = require("../../events/event-manager");
         EventManager.triggerEvent("firebot", "firebot-started", {

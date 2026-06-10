@@ -183,7 +183,7 @@ export async function whenReady() {
     overlayWidgetConfigManager.loadItems();
 
     windowManagement.updateSplashScreenStatus("Loading plugins...");
-    const { PluginConfigManager } = await import("../../../scripts/plugin-config-manager");
+    const { PluginConfigManager } = await import("../../../plugins/plugin-config-manager");
     PluginConfigManager.loadItems();
 
     windowManagement.updateSplashScreenStatus("Starting chat moderation manager...");
@@ -247,7 +247,7 @@ export async function whenReady() {
     const { QuoteManager } = await import("../../../quotes/quote-manager");
     await QuoteManager.loadQuoteDatabase();
 
-    // These are defined globally for Custom Scripts.
+    // These are defined globally for legacy Custom Scripts.
     // We will probably want to handle these differently but we shouldn't
     // change anything until we are ready as changing this will break most scripts
     const Effect = await import("../../../common/EffectType");

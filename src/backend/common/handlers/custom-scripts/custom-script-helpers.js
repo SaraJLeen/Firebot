@@ -94,7 +94,7 @@ class ScriptWebhookManager extends EventEmitter {
 
 const { AccountAccess } = require("../../account-access");
 
-function buildModules(scriptManifest) {
+function buildModules(scriptId, scriptManifest) {
     const notificationManager = require("../../../notifications/notification-manager").NotificationManager;
 
     const scriptNameNormalized = scriptManifest.name.replace(/[#%&{}\\<>*?/$!'":@`|=\s-]+/g, "-").toLowerCase();
@@ -105,7 +105,7 @@ function buildModules(scriptManifest) {
         path: require("path"),
         JsonDb: require("node-json-db").JsonDB,
         moment: require("moment"),
-        logger: logger.child({ module: "Plugin", script: scriptManifest.name }),
+        logger: logger.child({ module: "Plugin", plugin: scriptId ?? scriptManifest.name }),
         // thin chat shim for basic backwards compatibility
         chat: {
             /**
@@ -220,12 +220,12 @@ function buildModules(scriptManifest) {
     };
 }
 
-function buildRunRequest(scriptManifest, params, trigger) {
+function buildRunRequest(scriptId, scriptManifest, params, trigger) {
     const scriptNameNormalized = scriptManifest.name.replace(/[#%&{}\\<>*?/$!'":@`|=\s-]+/g, "-").toLowerCase();
     const scriptDataDir = path.resolve(ProfileManager.getPathInProfile("/script-data/"), `./${scriptNameNormalized}/`);
 
     return {
-        modules: buildModules(scriptManifest),
+        modules: buildModules(scriptId, scriptManifest),
         command: trigger?.metadata?.userCommand,
         user: {
             name: trigger?.metadata?.username

@@ -13,8 +13,8 @@
             <div class="modal-body">
                 <p>Are you sure you want to remove "<b>{{$ctrl.pluginName}}</b>"?</p>
                 <firebot-checkbox
-                    label="Also delete the script file from the scripts folder"
-                    model="$ctrl.deleteScriptFile"
+                    label="Also delete the plugin file from the scripts folder"
+                    model="$ctrl.deletePluginFile"
                 ></firebot-checkbox>
             </div>
             <div class="modal-footer">
@@ -31,7 +31,7 @@
                 const $ctrl = this;
 
                 $ctrl.pluginName = "";
-                $ctrl.deleteScriptFile = false;
+                $ctrl.deletePluginFile = false;
 
                 $ctrl.$onInit = function() {
                     $ctrl.pluginName = $ctrl.resolve.pluginName;
@@ -41,7 +41,7 @@
                     $ctrl.close({
                         $value: {
                             confirmed: true,
-                            deleteScriptFile: $ctrl.deleteScriptFile === true
+                            deletePluginFile: $ctrl.deletePluginFile === true
                         }
                     });
                 };
