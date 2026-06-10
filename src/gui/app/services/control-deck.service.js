@@ -59,6 +59,8 @@
             service.showQRCodeModal = () => {
                 modalService.showModal({
                     component: "controlDeckQrCodeModal",
+                    backdrop: true,
+                    keyboard: true,
                     size: "sm"
                 });
             };
