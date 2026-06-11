@@ -903,9 +903,7 @@ class PluginManager {
 
     private loadPlugin(pluginFilePath: string): LoadedPlugin | null {
         try {
-            if (SettingsManager.getSetting("ClearCustomScriptCache")) {
-                delete require.cache[require.resolve(pluginFilePath)];
-            }
+            delete require.cache[require.resolve(pluginFilePath)];
 
             const loadedPlugin = require(pluginFilePath) as { default: unknown };
 

@@ -55,7 +55,6 @@ export type FirebotSettingsTypes = {
     ChatTaggedNotificationVolume: number;
     ChatTimestamps: boolean;
     ClearChatFeedMode: "never" | "onlyStreamer" | "always";
-    ClearCustomScriptCache: boolean;
     ConnectOnLaunch: boolean;
     ControlDeckEnabled: boolean;
     ControlDeckPin?: string;

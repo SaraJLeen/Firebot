@@ -20,21 +20,6 @@
                     </firebot-setting>
 
                     <firebot-setting
-                        name="Clear Script Cache"
-                        description="Reload plugin/script files from disk before each run. Useful when actively developing a plugin. Most users should leave this disabled."
-                    >
-                        <setting-description-addon>
-                            <b>Requires Plugins &amp; Scripts to be enabled.</b>
-                        </setting-description-addon>
-                        <toggle-button
-                            toggle-model="settings.getSetting('ClearCustomScriptCache')"
-                            on-toggle="settings.saveSetting('ClearCustomScriptCache', !settings.getSetting('ClearCustomScriptCache'))"
-                            disabled="!settings.getSetting('RunCustomScripts')"
-                            font-size="40"
-                        />
-                    </firebot-setting>
-
-                    <firebot-setting
                         name="While Loops"
                         description="Enable or disable the conditional 'While Loop' option in the Loop Effects effect."
                     >

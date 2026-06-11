@@ -77,7 +77,6 @@ const FirebotSettingsDefaults: FirebotSettingsTypes = {
     ChatTaggedNotificationVolume: 5,
     ChatTimestamps: true,
     ClearChatFeedMode: "onlyStreamer",
-    ClearCustomScriptCache: false,
     ConnectOnLaunch: false,
     ControlDeckEnabled: false,
     ControlDeckPin: undefined,
@@ -486,12 +485,6 @@ class SettingsManager extends TypedEmitter<Events> {
 
     /** @deprecated Use `saveSetting("CopiedOverlayVersion", value)` instead */
     setOverlayVersion = (value: string) => this.saveSetting("CopiedOverlayVersion", value);
-
-    /** @deprecated Use `getSetting("ClearCustomScriptCache")` instead */
-    getClearCustomScriptCache = () => this.getSetting("ClearCustomScriptCache");
-
-    /** @deprecated Use `saveSetting("ClearCustomScriptCache", value)` instead */
-    setClearCustomScriptCache = (value: boolean) => this.saveSetting("ClearCustomScriptCache", value);
 
     /** @deprecated Use `getSetting("RunCustomScripts")` instead */
     isCustomScriptsEnabled = () => this.getSetting("RunCustomScripts");
