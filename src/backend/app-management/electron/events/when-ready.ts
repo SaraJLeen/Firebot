@@ -265,7 +265,7 @@ export async function whenReady() {
     const { HttpServerManager } = (await import("../../../../server/http-server-manager"));
     HttpServerManager.start();
 
-    const { BonjourManager } = (await import("../../../bonjour-manager"));
+    const { BonjourManager } = (await import("../../../../server/bonjour-manager"));
     BonjourManager.start();
 
     // register websocket event handlers
