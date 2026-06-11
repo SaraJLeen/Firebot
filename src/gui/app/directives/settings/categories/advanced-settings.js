@@ -21,7 +21,7 @@
 
                     <firebot-setting
                         name="Clear Script Cache"
-                        description="Reload script files from disk before each run. Useful when actively developing a plugin or effect script. Most users should leave this disabled."
+                        description="Reload plugin/script files from disk before each run. Useful when actively developing a plugin. Most users should leave this disabled."
                     >
                         <setting-description-addon>
                             <b>Requires Plugins &amp; Scripts to be enabled.</b>

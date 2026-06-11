@@ -35,9 +35,9 @@ const effect = {
 
             logger.debug("Processing script...");
 
-            const scriptManager = require("../../scripts/script-manager").default;
+            const { PluginManager } = require("../../plugins/plugin-manager");
 
-            scriptManager
+            PluginManager
                 .runEffectScript(event.effect, event.trigger)
                 .then((result) => {
                     if (result == null) {

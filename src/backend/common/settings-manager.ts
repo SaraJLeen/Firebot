@@ -1,4 +1,4 @@
-import { EventEmitter } from "events";
+import { TypedEmitter } from "tiny-typed-emitter";
 import { JsonDB } from "node-json-db";
 import fs from "fs";
 import path from "path";
@@ -79,6 +79,10 @@ const FirebotSettingsDefaults: FirebotSettingsTypes = {
     ClearChatFeedMode: "onlyStreamer",
     ClearCustomScriptCache: false,
     ConnectOnLaunch: false,
+    ControlDeckEnabled: false,
+    ControlDeckPin: undefined,
+    ControlDeckOrientationMode: "dynamic",
+    ControlDeckDefaultDeckId: null,
     CopiedOverlayVersion: "",
     DashboardLayout: {
         dashboardViewerList: "225px",
@@ -153,6 +157,10 @@ const FirebotSettingsPaths: Partial<Record<keyof FirebotSettingsTypes, string>> 
     ChatShowSevenTvEmotes: "/settings/chat/emotes/seventv",
     ChatTaggedNotificationSound: "/settings/chat/tagged/sound",
     ChatTaggedNotificationVolume: "/settings/chat/tagged/volume",
+    ControlDeckEnabled: "/settings/controlDeck/enabled",
+    ControlDeckPin: "/settings/controlDeck/pin",
+    ControlDeckOrientationMode: "/settings/controlDeck/orientationMode",
+    ControlDeckDefaultDeckId: "/settings/controlDeck/defaultDeckId",
     DashboardLayout: "/settings/dashboard/layout",
     DeleteProfile: "/profiles/deleteProfile",
     LoggedInProfile: "/profiles/loggedInProfile",
@@ -162,7 +170,13 @@ const FirebotSettingsPaths: Partial<Record<keyof FirebotSettingsTypes, string>> 
     ViewerListPageSize: "/settings/viewerListDatabase/pageSize"
 };
 
-class SettingsManager extends EventEmitter {
+type Events = {
+    [settingName in keyof FirebotSettingsTypes as `settings:setting-updated:${settingName}`]: (data: FirebotSettingsTypes[settingName]) => void;
+} & {
+    [settingName in keyof FirebotSettingsTypes as `settings:setting-deleted:${settingName}`]: () => void;
+};
+
+class SettingsManager extends TypedEmitter<Events> {
     private logger = LoggerCache.getLogger("Settings");
     settingsCache: Partial<Record<keyof FirebotSettingsTypes, unknown>> = {};
 
@@ -214,6 +228,33 @@ class SettingsManager extends EventEmitter {
                 firstTimeUse: false
             }
         }));
+    }
+
+    private handleCorruptGlobalSettingsFile() {
+        this.logger.warn("global-settings.json file appears to be corrupt. Resetting file...");
+
+        const globalSettingsPath = path.join(dataAccess.getUserDataPath(), "global-settings.json");
+        const profilesRoot = path.join(dataAccess.getUserDataPath(), "profiles");
+        const profileDirs = fs.readdirSync(profilesRoot)
+            .filter(f => fs.statSync(path.join(profilesRoot, f)).isDirectory());
+
+        let loggedInProfile = profileDirs[0] ?? "";
+        for (const dir of profileDirs) {
+            const normalizedDir = dir.toLowerCase();
+            if (normalizedDir === "main profile"
+                || normalizedDir.startsWith("main")
+            ) {
+                loggedInProfile = dir;
+                break;
+            }
+        }
+
+        fs.writeFileSync(globalSettingsPath, JSON.stringify({
+            profiles: {
+                activeProfiles: profileDirs,
+                loggedInProfile
+            }
+        }, null, 4));
     }
 
     private migrateUserSettingsToGlobal() {
@@ -289,6 +330,7 @@ class SettingsManager extends EventEmitter {
             }
             if ((err as Error).name === "DatabaseError") {
                 this.logger.error(`Failed to read "${settingPath}" in global settings file. File may be corrupt.`, err?.inner?.message ?? err.stack);
+                this.handleCorruptGlobalSettingsFile();
             } else if ((err as Error).name !== "DataError") {
                 this.logger.warn(err);
             }
@@ -381,7 +423,8 @@ class SettingsManager extends EventEmitter {
         }
 
         frontendCommunicator.send(`settings:setting-updated:${settingName}`, data);
-        this.emit(`settings:setting-updated:${settingName}`, data);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        this.emit(`settings:setting-updated:${settingName}` as any, data);
     }
 
     /**
@@ -397,7 +440,8 @@ class SettingsManager extends EventEmitter {
         }
 
         frontendCommunicator.send(`settings:setting-updated:${settingName}`, null);
-        this.emit(`settings:setting-deleted:${settingName}`);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        this.emit(`settings:setting-deleted:${settingName}` as any);
     }
 
     /**

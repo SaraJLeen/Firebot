@@ -11,7 +11,7 @@
 
             service.loadPlugins = function() {
                 return $q.when(
-                    backendCommunicator.fireEventAsync("script-manager:get-installed-plugins")
+                    backendCommunicator.fireEventAsync("plugin-manager:get-installed-plugins")
                 ).then((plugins) => {
                     installedPlugins = Array.isArray(plugins) ? plugins : [];
                     return installedPlugins;
@@ -41,14 +41,14 @@
                 ).then(() => service.loadPlugins());
             };
 
-            service.deletePlugin = function(pluginId, deleteScriptFile = false) {
+            service.deletePlugin = function(pluginId, deletePluginFile = false) {
                 if (!pluginId) {
                     return $q.resolve(false);
                 }
                 return $q.when(
                     backendCommunicator.fireEventAsync("plugin-manager:delete", {
                         id: pluginId,
-                        deleteScriptFile: deleteScriptFile === true
+                        deletePluginFile: deletePluginFile === true
                     })
                 ).then(() => service.loadPlugins());
             };
@@ -98,7 +98,7 @@
 
             service.getScriptDetails = function(fileName, expectedScriptType) {
                 return $q.when(
-                    backendCommunicator.fireEventAsync("script-manager:get-script-details", { fileName, expectedScriptType })
+                    backendCommunicator.fireEventAsync("plugin-manager:get-plugin-details", { fileName, expectedScriptType })
                 );
             };
 

@@ -42,6 +42,7 @@ export type PasswordParameter = BaseParameter & {
 
 export type BooleanParameter = BaseParameter & {
     type: "boolean";
+    useSwitch?: boolean;
     default: boolean;
 };
 
@@ -224,6 +225,8 @@ export type FontOptionsParameter = BaseParameter & {
     default: FontOptions;
     allowAlpha?: boolean;
     hideColor?: boolean;
+    /** When true, the font size input is hidden */
+    hideSize?: boolean;
 };
 
 export type RadioCardsParameter<V = string> = BaseParameter & {

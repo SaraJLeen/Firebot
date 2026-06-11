@@ -167,6 +167,12 @@ export async function whenReady() {
     const { QuickActionManager } = await import("../../../quick-actions/quick-action-manager");
     QuickActionManager.loadItems();
 
+    windowManagement.updateSplashScreenStatus("Loading control decks...");
+    const { ControlDeckControlTypeManager } = await import("../../../control-deck/control-type-manager");
+    ControlDeckControlTypeManager.registerBuiltInControlTypes();
+    const { ControlDeckManager } = await import("../../../control-deck/control-deck-manager");
+    ControlDeckManager.loadItems();
+
     windowManagement.updateSplashScreenStatus("Loading webhooks...");
     const webhookConfigManager = (await import("../../../webhooks/webhook-config-manager")).default;
     webhookConfigManager.loadItems();
@@ -179,7 +185,12 @@ export async function whenReady() {
     overlayWidgetConfigManager.loadItems();
 
     windowManagement.updateSplashScreenStatus("Loading plugins...");
-    const { PluginConfigManager } = await import("../../../scripts/plugin-config-manager");
+
+    // Migrate legacy startup scripts before we load plugin configs
+    const { PluginManager } = await import("../../../plugins/plugin-manager");
+    await PluginManager.migrateLegacyStartUpScriptsToPlugins();
+
+    const { PluginConfigManager } = await import("../../../plugins/plugin-config-manager");
     PluginConfigManager.loadItems();
 
     windowManagement.updateSplashScreenStatus("Starting chat moderation manager...");
@@ -243,7 +254,7 @@ export async function whenReady() {
     const { QuoteManager } = await import("../../../quotes/quote-manager");
     await QuoteManager.loadQuoteDatabase();
 
-    // These are defined globally for Custom Scripts.
+    // These are defined globally for legacy Custom Scripts.
     // We will probably want to handle these differently but we shouldn't
     // change anything until we are ready as changing this will break most scripts
     const Effect = await import("../../../common/EffectType");
@@ -259,6 +270,9 @@ export async function whenReady() {
     windowManagement.updateSplashScreenStatus("Starting internal web server...");
     const { HttpServerManager } = (await import("../../../../server/http-server-manager"));
     HttpServerManager.start();
+
+    const { BonjourManager } = (await import("../../../bonjour-manager"));
+    BonjourManager.start();
 
     // register websocket event handlers
     const websocketEventsHandler = await import("../../../../server/websocket-events-handler");
@@ -285,6 +299,7 @@ export async function whenReady() {
     windowManagement.updateSplashScreenStatus("Starting notification manager...");
     const { NotificationManager } = await import("../../../notifications/notification-manager");
     NotificationManager.loadNotificationCache();
+    NotificationManager.migrateLegacyScriptNotifications();
 
     // get ui extension manager in memory
     await import("../../../ui-extensions/ui-extension-manager");

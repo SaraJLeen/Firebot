@@ -56,7 +56,7 @@
                         </div>
                     </div>
                     <div class="muted" style="font-size: 12px; padding: 0 4px 20px;">
-                        Want to write your own scripts? Learn how <a
+                        Want to write your own plugins? Learn how <a
                             class="clickable"
                             ng-click="openLink('https://docs.firebot.app/v5/dev/scripts')"
                         >here</a>.
@@ -237,7 +237,7 @@
                         },
                         closeCallback: (response) => {
                             if (response && response.confirmed) {
-                                pluginsService.deletePlugin(plugin.config.id, response.deleteScriptFile);
+                                pluginsService.deletePlugin(plugin.config.id, response.deletePluginFile);
                             }
                         }
                     });
@@ -307,7 +307,7 @@
                             }
                             if (result.conflict) {
                                 utilityService.showConfirmationModal({
-                                    title: "Script File Already Exists",
+                                    title: "Plugin File Already Exists",
                                     question: `${result.error} Overwrite it?`,
                                     confirmLabel: "Overwrite",
                                     confirmBtnType: "btn-warning"
@@ -330,7 +330,7 @@
                     $q.when(backendCommunicator.fireEventAsync("open-file-browser", {
                         currentPath: profileManager.getPathInProfile("/scripts"),
                         options: {
-                            title: "Select Plugin Script",
+                            title: "Select Plugin",
                             buttonLabel: "Select",
                             filters: [{ name: "JavaScript", extensions: ["js"] }]
                         }
@@ -351,7 +351,7 @@
                             }
                             if (result.conflict) {
                                 utilityService.showConfirmationModal({
-                                    title: "Script File Already Exists",
+                                    title: "Plugin File Already Exists",
                                     question: `${result.error} Overwrite it?`,
                                     confirmLabel: "Overwrite",
                                     confirmBtnType: "btn-warning"
@@ -381,7 +381,7 @@
                     $q.when(backendCommunicator.fireEventAsync("open-file-browser", {
                         currentPath: profileManager.getPathInProfile("/scripts"),
                         options: {
-                            title: "Select New Plugin Script",
+                            title: "Select New Plugin",
                             buttonLabel: "Select",
                             filters: [{ name: "JavaScript", extensions: ["js"] }]
                         }

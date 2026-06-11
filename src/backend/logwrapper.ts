@@ -7,7 +7,7 @@ import os from "os";
 import fs from "fs";
 import { getPathInUserData, getJsonDbInUserData } from "./common/data-access";
 import frontendCommunicator from "./common/frontend-communicator";
-import { getScriptLogName } from "./script-log-names";
+import { getPluginLogName } from "./plugin-log-names";
 
 const DATE_FORMAT = "YYYY-MM-DD HH:mm:ss.SSS";
 const LOG_FOLDER = getPathInUserData("/logs");
@@ -70,9 +70,9 @@ function getLogFormat(addMetadataToMessage = true) {
                 switch (moduleName) {
                     case "Plugin":
                         {
-                            const scriptId = typeof info.script === "string" ? info.script : null;
-                            moduleTag = scriptId
-                                ? ` [Plugin: ${getScriptLogName(scriptId) ?? scriptId}]`
+                            const pluginId = typeof info.plugin === "string" ? info.plugin : null;
+                            moduleTag = pluginId
+                                ? ` [Plugin: ${getPluginLogName(pluginId) ?? pluginId}]`
                                 : ` [${moduleName}]`;
                         }
                         break;
