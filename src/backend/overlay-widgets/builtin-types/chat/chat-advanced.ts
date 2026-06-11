@@ -532,6 +532,25 @@ The same fields in the default message template are available here, plus these a
                   if(chatMessage.rawText.includes("ℹ️")) {
                     return;
                   }
+                  else if(chatMessage.rawText.includes("Saralene is now live!")) {
+                    return;
+                  }
+                  else if(chatMessage.rawText.includes("SaralenAlt is now live!")) {
+                    return;
+                  }
+                }
+                // Sara -- Ignore certain commands
+                else if(chatMessage.rawText.includes("!gamename") || chatMessage.rawText.includes("!gn ") || chatMessage.rawText.includes("!g ")) {
+                  return;
+                }
+                else if(chatMessage.rawText.includes("!tipbar")) {
+                  return;
+                }
+                else if(chatMessage.rawText.includes("!rollcredits")) {
+                  return;
+                }
+                else if(chatMessage.rawText.includes("!clearcredits")) {
+                  return;
                 }
 
                 // Check the ignore list
