@@ -56,9 +56,9 @@
                         </div>
                         <div ng-if="cell.control" class="cd-cell-content">
                             <i ng-if="cell.control._typeInfo.missing" class="fas fa-exclamation-triangle cd-cell-missing-glyph" uib-tooltip="This control's type ('{{cell.control.type}}') is not registered. It may belong to an uninstalled plugin." tooltip-append-to-body="true"></i>
-                            <img ng-if="cell.control._previewIcon.kind === 'image'" class="cd-cell-icon" ng-src="{{cell.control._previewIcon.url}}" />
-                            <lucide-icon ng-if="cell.control._previewIcon.kind === 'glyph'" class="cd-cell-glyph" name="{{cell.control._previewIcon.name}}" color="{{cell.control._previewIcon.color}}" size="28"></lucide-icon>
-                            <span ng-if="cell.control._previewIcon.kind === 'emoji'" class="cd-cell-emoji">{{cell.control._previewIcon.emoji}}</span>
+                            <img ng-if="cell.control._previewIcon.kind === 'image'" class="cd-cell-icon" ng-src="{{cell.control._previewIcon.url}}" ng-style="cell.control._previewIcon.style" />
+                            <lucide-icon ng-if="cell.control._previewIcon.kind === 'glyph'" class="cd-cell-glyph" name="{{cell.control._previewIcon.name}}" color="{{cell.control._previewIcon.color}}" size="{{cell.control._previewIcon.size}}"></lucide-icon>
+                            <span ng-if="cell.control._previewIcon.kind === 'emoji'" class="cd-cell-emoji" ng-style="cell.control._previewIcon.style">{{cell.control._previewIcon.emoji}}</span>
                             <div class="cd-cell-name" ng-style="cell.control._labelStyle">{{cell.control.label || cell.control.name}}</div>
                             <div class="cd-cell-actions">
                                 <span ng-if="!cell.pinned && cell.control._typeInfo.isFolder" class="cd-action" uib-tooltip="Open" tooltip-append-to-body="true" ng-click="$ctrl.openFolder($event, cell.control)"><i class="fas fa-folder-open"></i></span>
@@ -130,18 +130,35 @@
                 };
 
                 const resolvePreview = (control) => {
+                    const iconScale = Math.max(control.iconSize || 100, 1) / 100;
                     const icon = control.icon;
                     if (icon == null) {
                         control._previewIcon = { kind: "none" };
                     } else if (icon.type === "glyph") {
-                        control._previewIcon = { kind: "glyph", name: icon.name, color: icon.color };
+                        control._previewIcon = {
+                            kind: "glyph",
+                            name: icon.name,
+                            color: icon.color,
+                            size: Math.round(35 * iconScale)
+                        };
                     } else if (icon.type === "emoji") {
-                        control._previewIcon = { kind: "emoji", emoji: icon.emoji };
+                        control._previewIcon = {
+                            kind: "emoji",
+                            emoji: icon.emoji,
+                            style: { "font-size": `${Math.round(32 * iconScale)}px` }
+                        };
                     } else if (icon.type === "image" && icon.path) {
                         const url = icon.source === "url"
                             ? icon.path
                             : (icon.path.startsWith("file://") ? icon.path : `file://${icon.path}`);
-                        control._previewIcon = { kind: "image", url };
+                        control._previewIcon = {
+                            kind: "image",
+                            url,
+                            style: {
+                                "max-width": `${Math.round(50 * iconScale)}px`,
+                                "max-height": `${Math.round(50 * iconScale)}px`
+                            }
+                        };
                     } else {
                         control._previewIcon = { kind: "none" };
                     }
@@ -170,12 +187,14 @@
                     }
 
                     const labelFont = control.label ? control.labelFont : null;
-                    control._labelStyle = labelFont
+                    const labelScale = control.label ? Math.max(control.labelSize || 100, 1) / 100 : 1;
+                    control._labelStyle = (labelFont || labelScale !== 1)
                         ? {
-                            "font-family": labelFont.family || undefined,
-                            "font-weight": labelFont.weight || undefined,
-                            "font-style": labelFont.italic ? "italic" : undefined,
-                            "color": labelFont.color || undefined
+                            "font-family": labelFont?.family || undefined,
+                            "font-weight": labelFont?.weight || undefined,
+                            "font-style": labelFont?.italic ? "italic" : undefined,
+                            "color": labelFont?.color || undefined,
+                            "font-size": labelScale !== 1 ? `${Math.round(12 * labelScale)}px` : undefined
                         }
                         : null;
                 };

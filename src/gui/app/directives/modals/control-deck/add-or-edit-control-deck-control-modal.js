@@ -40,6 +40,12 @@
                     <div ng-if="$ctrl.control.label" style="margin-top:10px;">
                         <label class="control-label" style="font-size: 13px;">Label Font</label>
                         <font-options ng-model="$ctrl.control.labelFont" hide-size="true"></font-options>
+                        <div style="margin-top:10px;">
+                            <label class="control-label" style="font-size: 13px;">Label Size ({{$ctrl.control.labelSize || 100}}%)</label>
+                            <div class="volume-slider-wrapper">
+                                <rzslider rz-slider-model="$ctrl.control.labelSize" rz-slider-options="$ctrl.sizeSliderOptions"></rzslider>
+                            </div>
+                        </div>
                     </div>
                 </firebot-form-group>
 
@@ -83,6 +89,13 @@
 
                         <div ng-if="$ctrl.iconKind === 'emoji'" style="margin-top:10px;">
                             <emoji-picker model="$ctrl.control.icon.emoji"></emoji-picker>
+                        </div>
+
+                        <div ng-if="$ctrl.iconKind !== 'none'" style="margin-top:10px;">
+                            <label class="control-label" style="font-size: 13px;">Icon Size ({{$ctrl.control.iconSize || 100}}%)</label>
+                            <div class="volume-slider-wrapper">
+                                <rzslider rz-slider-model="$ctrl.control.iconSize" rz-slider-options="$ctrl.sizeSliderOptions"></rzslider>
+                            </div>
                         </div>
                    </div>
                 </firebot-form-group>
@@ -211,12 +224,21 @@
             modalInstance: "<",
             modalId: "@"
         },
-        controller: function($scope, controlDeckService, ngToast) {
+        controller: function($scope, $timeout, controlDeckService, ngToast) {
             const $ctrl = this;
 
             $ctrl.isNew = true;
 
             $ctrl.selectedType = null;
+
+            $ctrl.sizeSliderOptions = {
+                floor: 25,
+                ceil: 300,
+                step: 5,
+                hideLimitLabels: true,
+                hidePointerLabels: true,
+                showSelectionBar: true
+            };
 
             $ctrl.controlTypeOptions = controlDeckService.controlTypes.map(t => ({
                 value: t.id,
@@ -393,8 +415,19 @@
                 $ctrl.iconKind = $ctrl.control.icon?.type ?? "none";
                 $ctrl.backgroundKind = $ctrl.control.background?.type ?? "none";
 
+                if ($ctrl.control.iconSize == null) {
+                    $ctrl.control.iconSize = 100;
+                }
+                if ($ctrl.control.labelSize == null) {
+                    $ctrl.control.labelSize = 100;
+                }
+
                 applySettingsDefaults();
                 updateEffectsTriggerMeta();
+
+                $timeout(() => {
+                    $scope.$broadcast("rzSliderForceRender");
+                }, 100);
             };
 
             $ctrl.save = () => {
@@ -416,6 +449,13 @@
                     } else {
                         $ctrl.control.label = label;
                     }
+                }
+
+                if ($ctrl.control.icon == null || $ctrl.control.iconSize === 100) {
+                    delete $ctrl.control.iconSize;
+                }
+                if ($ctrl.control.label == null || $ctrl.control.labelSize === 100) {
+                    delete $ctrl.control.labelSize;
                 }
 
                 if ($ctrl.selectedType.enableInputs && $ctrl.control.inputs?.length) {

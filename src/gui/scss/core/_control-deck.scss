@@ -242,8 +242,8 @@
     }
 
     .cd-cell-icon {
-        max-width: 42px;
-        max-height: 42px;
+        max-width: 50px;
+        max-height: 50px;
         object-fit: contain;
         pointer-events: none;
     }
@@ -255,20 +255,18 @@
     }
 
     .cd-cell-emoji {
-        font-size: 26px;
+        font-size: 32px;
         line-height: 1;
         pointer-events: none;
     }
 
     .cd-cell-folder-glyph {
-        font-size: 22px;
+        font-size: 28px;
     }
 
     .cd-cell-name {
-        font-size: 12px;
+        font-size: 15px;
         font-weight: 600;
-        max-height: 2.4em;
-        overflow: hidden;
         word-break: break-word;
     }
 

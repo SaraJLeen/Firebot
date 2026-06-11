@@ -116,12 +116,14 @@ function mapControlDeckDeckView(deck: ControlDeck): ControlDeckView {
             type: control.type,
             label: control.label,
             labelFont: control.labelFont,
+            labelSize: control.labelSize,
             pageId: control.pageId,
             parentId: control.parentId ?? null,
             position: control.position,
             size: control.size,
             inputs: control.inputs,
             icon,
+            iconSize: control.iconSize,
             background,
             resolvedSettings: resolveSettingsForView(controlType, control.settings)
         };

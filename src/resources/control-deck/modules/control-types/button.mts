@@ -18,7 +18,7 @@ export default defineComponent({
     template: /* html */`
         <button class="deck-control-hit" @click="onPress">
             <div class="deck-control-inner">
-                <control-icon :icon="control.icon"></control-icon>
+                <control-icon :icon="control.icon" :scale="control.iconSize || 100"></control-icon>
                 <control-label :control="control"></control-label>
             </div>
         </button>

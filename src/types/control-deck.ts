@@ -94,14 +94,18 @@ export type ControlDeckControl<Params extends FirebotParams = FirebotParams> = {
     type: string;
     /** Optional label rendered on the control itself, if the control type allows labels */
     label?: string;
-    /** Font config for the label (size is fixed by the control) */
+    /** Font config for the label */
     labelFont?: Partial<FontOptions>;
+    /** Label size as a percentage of the default size (100 = default) */
+    labelSize?: number;
     /** The page this control belongs to */
     pageId: string;
     /** The parent folder control id, or null when placed at the page root */
     parentId: string | null;
     /** The icon shown on the control, if the control type allows icons */
     icon?: ControlDeckIcon;
+    /** Icon size as a percentage of the default size (100 = default) */
+    iconSize?: number;
     /** The background shown behind the control, if the control type allows backgrounds */
     background?: ControlDeckBackground;
     /** Placement within the deck's grid */
