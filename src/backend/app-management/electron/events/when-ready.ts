@@ -185,6 +185,11 @@ export async function whenReady() {
     overlayWidgetConfigManager.loadItems();
 
     windowManagement.updateSplashScreenStatus("Loading plugins...");
+
+    // Migrate legacy startup scripts before we load plugin configs
+    const { PluginManager } = await import("../../../plugins/plugin-manager");
+    await PluginManager.migrateLegacyStartUpScriptsToPlugins();
+
     const { PluginConfigManager } = await import("../../../plugins/plugin-config-manager");
     PluginConfigManager.loadItems();
 
@@ -294,6 +299,7 @@ export async function whenReady() {
     windowManagement.updateSplashScreenStatus("Starting notification manager...");
     const { NotificationManager } = await import("../../../notifications/notification-manager");
     NotificationManager.loadNotificationCache();
+    NotificationManager.migrateLegacyScriptNotifications();
 
     // get ui extension manager in memory
     await import("../../../ui-extensions/ui-extension-manager");

@@ -19,13 +19,13 @@ const utils = require("../../utils");
  * @extends EventEmitter
  */
 class ScriptWebhookManager extends EventEmitter {
-    constructor(scriptName) {
+    constructor(scriptId) {
         super();
-        this.scriptName = scriptName;
+        this.scriptId = scriptId;
         this.setMaxListeners(0);
 
         webhookManager.on("webhook-received", (data) => {
-            if (data.config.scriptId !== this.scriptName) {
+            if (data.config.scriptId !== this.scriptId) {
                 return;
             }
             this.emit("webhook-received", data);
@@ -39,12 +39,12 @@ class ScriptWebhookManager extends EventEmitter {
 
         const existing = webhookManager
             .getAllItems()
-            .find(w => w.name === name && w.scriptId === this.scriptName);
+            .find(w => w.name === name && w.scriptId === this.scriptId);
 
         return webhookManager.saveItem({
             name,
             id: existing?.id ?? undefined,
-            scriptId: this.scriptName
+            scriptId: this.scriptId
         });
     }
 
@@ -55,7 +55,7 @@ class ScriptWebhookManager extends EventEmitter {
 
         return webhookManager
             .getAllItems()
-            .find(w => w.name === name && w.scriptId === this.scriptName)
+            .find(w => w.name === name && w.scriptId === this.scriptId)
             ?? null;
     }
 
@@ -66,7 +66,7 @@ class ScriptWebhookManager extends EventEmitter {
 
         const existing = webhookManager
             .getAllItems()
-            .find(w => w.name === name && w.scriptId === this.scriptName);
+            .find(w => w.name === name && w.scriptId === this.scriptId);
 
         if (existing == null) {
             return false;
@@ -78,7 +78,7 @@ class ScriptWebhookManager extends EventEmitter {
     getWebhooks() {
         return webhookManager
             .getAllItems()
-            .filter(w => w.scriptId === this.scriptName);
+            .filter(w => w.scriptId === this.scriptId);
     }
 
     getWebhookUrl(name) {
@@ -171,14 +171,14 @@ function buildModules(scriptId, scriptManifest) {
                 utils.humanizeTime(secs, simpleOutput === true ? "simple" : "default")
         },
         resourceTokenManager: require("../../resource-token-manager").ResourceTokenManager,
-        webhookManager: new ScriptWebhookManager(scriptNameNormalized),
+        webhookManager: new ScriptWebhookManager(scriptId ?? scriptNameNormalized),
         notificationManager: {
             addNotification: (notificationBase, permanentlySave = true) => {
                 return notificationManager.addNotification(
                     {
                         ...notificationBase,
-                        source: "script",
-                        scriptName: scriptManifest.name ?? "unknown"
+                        source: "plugin",
+                        pluginName: scriptManifest.name ?? "unknown"
                     },
                     permanentlySave
                 );
@@ -187,8 +187,8 @@ function buildModules(scriptId, scriptManifest) {
                 const notification = notificationManager.getNotification(id);
                 if (
                     notification &&
-                    notification.source === "script" &&
-                    notification.scriptName === (scriptManifest.name ?? "unknown")
+                    notification.source === "plugin" &&
+                    notification.pluginName === (scriptManifest.name ?? "unknown")
                 ) {
                     return notification;
                 }
@@ -197,14 +197,14 @@ function buildModules(scriptId, scriptManifest) {
             getNotifications: () => {
                 return notificationManager
                     .getNotifications()
-                    .filter(n => n.source === "script" && n.scriptName === (scriptManifest.name ?? "unknown"));
+                    .filter(n => n.source === "plugin" && n.pluginName === (scriptManifest.name ?? "unknown"));
             },
             deleteNotification: (id) => {
                 const notification = notificationManager.getNotification(id);
                 if (
                     notification &&
-                    notification.source === "script" &&
-                    notification.scriptName === (scriptManifest.name ?? "unknown")
+                    notification.source === "plugin" &&
+                    notification.pluginName === (scriptManifest.name ?? "unknown")
                 ) {
                     notificationManager.deleteNotification(id);
                 }
@@ -212,7 +212,7 @@ function buildModules(scriptId, scriptManifest) {
             clearAllNotifications: () => {
                 notificationManager
                     .getNotifications()
-                    .filter(n => n.source === "script" && n.scriptName === (scriptManifest.name ?? "unknown"))
+                    .filter(n => n.source === "plugin" && n.pluginName === (scriptManifest.name ?? "unknown"))
                     .forEach(n => notificationManager.deleteNotification(n.id));
             }
         },

@@ -1,11 +1,17 @@
 import { JsonDB } from "node-json-db";
 import { randomUUID } from "crypto";
 
+import type {
+    Notification,
+    ExternalNotification,
+    NotificationBase,
+    NotificationCache
+} from "../../types";
+
 import { ProfileManager } from "../common/profile-manager";
 import frontendCommunicator from "../common/frontend-communicator";
 import { LoggerCache } from "../logger-cache";
 import { deepClone } from "../utils";
-import { Notification, ExternalNotification, NotificationBase, NotificationCache } from "../../types";
 
 const EXTERNAL_NOTIFICATION_SOURCE_URL = "https://api.crowbar.tools/v1/notifications/v5";
 
@@ -167,6 +173,29 @@ class NotificationManager {
         if (this._externalCheckInterval != null) {
             clearInterval(this._externalCheckInterval);
             this._externalCheckInterval = null;
+        }
+    }
+
+    migrateLegacyScriptNotifications(): void {
+        // @ts-ignore
+        if (this._notificationCache.notifications.some(n => n.source === "script")) {
+            const updatedNotifications = this._notificationCache.notifications
+                .map((n) => {
+                // @ts-ignore
+                    if (n.source === "script") {
+                        return {
+                            ...n,
+                            source: "plugin",
+                            // @ts-ignore
+                            pluginName: n.scriptName as string,
+                            scriptName: undefined
+                        } as Notification;
+                    }
+                    return n;
+                });
+
+            this._notificationCache.notifications = updatedNotifications;
+            this.saveNotifications();
         }
     }
 }

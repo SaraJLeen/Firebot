@@ -14,12 +14,14 @@ import type {
     PluginType,
     Trigger
 } from "../../types";
+import type { FirebotPluginApi } from "../../types/plugin-api";
 
 import { ProfileManager } from "../common/profile-manager";
 import { LoggerCache } from "../logger-cache";
 import frontendCommunicator from "../common/frontend-communicator";
 import { SettingsManager } from "../common/settings-manager";
 import { PluginConfigManager } from "./plugin-config-manager";
+import webhookConfigManager from "../webhooks/webhook-config-manager";
 
 import { PluginExecutor } from "./executors/plugin-executor";
 import { LegacyStartUpScript } from "./executors/legacy-startup-script-executor";
@@ -33,7 +35,6 @@ import {
 import { buildPluginApi, createPluginApiContext } from "./plugin-api";
 import type { PluginApiContext, PluginApiContextSource } from "./plugin-api";
 import type { DisposeBag } from "./plugin-api/internal/dispose-bag";
-import type { FirebotPluginApi } from "../../types/plugin-api";
 
 const logger = LoggerCache.getLogger("Plugins");
 
@@ -90,6 +91,81 @@ class PluginManager {
 
     constructor() {
         this.installRequireInterceptor();
+    }
+
+    async migrateLegacyStartUpScriptsToPlugins() {
+        const hasMigrated = SettingsManager.getSetting("MigratedLegacyStartUpScriptsToPlugins");
+        if (hasMigrated) {
+            return;
+        }
+
+        if (!ProfileManager.profileDataPathExistsSync("startup-scripts-config.json")) {
+            SettingsManager.saveSetting("MigratedLegacyStartUpScriptsToPlugins", true);
+            return;
+        }
+
+        const startUpScriptsDb = ProfileManager
+            .getJsonDbInProfile("startup-scripts-config");
+
+
+        type StartUpScriptData = Record<string, {
+            id: string;
+            name: string;
+            scriptName: string;
+            parameters?: Record<string, { value: string }>;
+        }>;
+
+        const startupScriptsData: StartUpScriptData | undefined = startUpScriptsDb.getData("/") as unknown as StartUpScriptData;
+
+        logger.info("Migrating start up scripts to plugins");
+
+        if (startupScriptsData) {
+            for (const script of Object.values(startupScriptsData)) {
+                try {
+                    // Create new entry
+                    PluginConfigManager.saveItem({
+                        id: script.id,
+                        fileName: script.scriptName,
+                        enabled: true,
+                        legacyImport: true,
+                        parameters: Object.entries(script.parameters ?? {}).reduce<Record<string, unknown>>((acc, [paramKey, param]) => {
+                            acc[paramKey] = param?.value;
+                            return acc;
+                        }, {})
+                    });
+
+                    // Load manifest
+                    const fullScriptPath = this.getPluginFilePath(script.scriptName);
+                    const loadedScript = this.loadPluginIsolated(fullScriptPath);
+                    const scriptManifest = await (loadedScript as LegacyCustomScript).getScriptManifest();
+                    const scriptNameNormalized = scriptManifest.name.replace(/[#%&{}\\<>*?/$!'":@`|=\s-]+/g, "-").toLowerCase();
+
+                    // Migrate webhooks
+                    const existingWebhooks = (webhookConfigManager.getAllItems() ?? [])
+                        .filter(h => h.scriptId === scriptNameNormalized);
+
+                    for (const webhook of existingWebhooks) {
+                        webhookConfigManager.saveItem({
+                            id: webhook.id,
+                            name: webhook.name,
+                            scriptId: script.id
+                        });
+                    }
+                } catch (error) {
+                    logger.error(`Failed to migrate start up script ${script.id}: ${error}`);
+                }
+            }
+        }
+
+        // eslint-disable-next-line no-warning-comments
+        // TODO: in a future version we can uncomment the following to clean up old start up script data after migration has been out for a while
+
+        // this.logger.info("Deleting start up scripts database");
+        // ProfileManager.deletePathInProfile("startup-scripts-config.json");
+
+        SettingsManager.saveSetting("MigratedLegacyStartUpScriptsToPlugins", true);
+
+        logger.info("Start up scripts migration complete");
     }
 
     // #region Plugin lifecycle
