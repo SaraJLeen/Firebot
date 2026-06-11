@@ -9,6 +9,9 @@
     <title>Control Deck</title>
     <link rel="apple-touch-icon" sizes="180x180" href="./images/apple-touch-icon.png">
     <link rel="icon" type="image/x-icon" href="./images/favicon.ico">
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://rsms.me/inter/inter.css" />
     <link rel="stylesheet" href="./styles/main.css" />
     <script src="./lib/lucide.min.js"></script>
     <script src="./lib/NoSleep.min.js"></script>
@@ -86,8 +89,9 @@
                             v-for="cell in placedControls"
                             :key="cell.control.id"
                             :control="cell.control"
+                            :type-component="controlTypeRegistry[cell.control.type] ? controlTypeRegistry[cell.control.type].component : null"
                             :style="{ gridColumn: cell.col + ' / span ' + cell.w, gridRow: cell.row + ' / span ' + cell.h }"
-                            @press="pressControl(cell.control)"
+                            @interact="handleControlInteract(cell.control, $event)"
                         ></deck-control>
                     </div>
                 </div>

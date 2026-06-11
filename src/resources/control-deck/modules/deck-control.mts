@@ -1,56 +1,61 @@
-import { defineComponent, computed, type PropType } from "vue";
+import { defineComponent, computed, type Component, type PropType } from "vue";
 
-import type { ControlDeckControlView } from "./types.mjs";
+import { FOLDER_CONTROL_TYPE_ID } from "./control-types/index.mjs";
+import type { ControlDeckControlView, ControlInteraction } from "./types.mjs";
 
+// Thin shell for a control on the deck grid: renders the control's background
+// and hosts the control type's component, which owns the content + gestures.
 export const deckControl = defineComponent({
     props: {
         control: { type: Object as PropType<ControlDeckControlView>, required: true },
+        typeComponent: { type: Object as PropType<Component | null>, default: null }
     },
-    emits: ["press"],
+    emits: ["interact"],
     setup(props, { emit }) {
-        const isFolder = computed(() => props.control.type === "folder");
-        const style = computed(() => ({
-            backgroundColor: props.control.backgroundColor || "#2c3035"
-        }));
-        const onPress = (): void => emit("press");
+        const isFolder = computed(() => props.control.type === FOLDER_CONTROL_TYPE_ID);
 
-        return { isFolder, style, onPress };
+        const style = computed(() => {
+            const background = props.control.background;
+            if (background?.type === "image") {
+                return {
+                    backgroundImage: `url("${background.url.replace(/"/g, '\\"')}")`,
+                    backgroundSize: "cover",
+                    backgroundPosition: "center"
+                };
+            }
+            return {
+                backgroundColor: background?.type === "color" && background.color
+                    ? background.color
+                    : "#2c3035"
+            };
+        });
+
+        const onInteract = (interaction: ControlInteraction): void => emit("interact", interaction);
+
+        return { isFolder, style, onInteract };
     },
     template: /* html */`
-        <button
+        <div
             class="deck-control"
-            :class="{ folder: isFolder }"
+            :class="{ folder: isFolder, unknown: !typeComponent }"
             :style="style"
-            @click="onPress"
         >
-            <div class="deck-control-inner">
-                <img
-                    v-if="control.icon && control.icon.type === 'image'"
-                    class="deck-control-icon"
-                    :src="control.icon.url"
-                    alt=""
-                    draggable="false"
-                />
+            <component
+                v-if="typeComponent"
+                :is="typeComponent"
+                class="deck-control-component"
+                :control="control"
+                @interact="onInteract"
+            ></component>
+            <div v-else class="deck-control-inner">
                 <lucide-icon
-                    v-else-if="control.icon && control.icon.type === 'glyph'"
                     class="deck-control-glyph"
-                    :name="control.icon.name"
-                    :color="control.icon.color"
-                    :size="44"
-                ></lucide-icon>
-                <span
-                    v-else-if="control.icon && control.icon.type === 'emoji'"
-                    class="deck-control-emoji"
-                >{{ control.icon.emoji }}</span>
-                <lucide-icon
-                    v-else-if="isFolder"
-                    class="deck-control-glyph"
-                    name="folder"
-                    color="white"
-                    :size="44"
+                    name="alert-triangle"
+                    color="#f0ad4e"
+                    :size="32"
                 ></lucide-icon>
                 <div class="deck-control-name">{{ control.name }}</div>
             </div>
-        </button>
+        </div>
     `
 });

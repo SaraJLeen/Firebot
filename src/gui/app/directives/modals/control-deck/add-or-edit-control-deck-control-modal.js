@@ -22,17 +22,36 @@
                         ng-model="$ctrl.control.type"
                         grid-columns="2"
                     />
+                    <div ng-if="!$ctrl.selectedType" class="alert alert-warning" style="margin-top:10px;margin-bottom:0;">
+                        <i class="fas fa-exclamation-triangle mr-2"></i>
+                        The control type "{{$ctrl.control.type}}" is not registered. It may belong to a plugin that is uninstalled or disabled.
+                    </div>
                 </firebot-form-group>
 
-                <firebot-form-group name="control-icon" label="Icon">
+                <hr />
+
+                <firebot-form-group ng-if="$ctrl.selectedType.enableLabel" name="control-label" label="Label">
+                    <p class="help-block">Optional text shown on the control itself.</p>
+                    <firebot-input
+                        model="$ctrl.control.label"
+                        placeholder-text="Enter text"
+                        disable-variables="true"
+                    />
+                    <div ng-if="$ctrl.control.label" style="margin-top:10px;">
+                        <label class="control-label" style="font-size: 13px;">Label Font</label>
+                        <font-options ng-model="$ctrl.control.labelFont" hide-size="true"></font-options>
+                    </div>
+                </firebot-form-group>
+
+                <firebot-form-group ng-if="$ctrl.selectedType.enableIcon" name="control-icon" label="Icon">
                    <div>
                         <firebot-radio-cards
                             options="$ctrl.iconOptions"
-                            ng-model="$ctrl.control.icon.type"
+                            ng-model="$ctrl.iconKind"
                             grid-columns="4"
                         />
 
-                        <div ng-if="$ctrl.control.icon.type === 'image'" style="margin-top:10px;">
+                        <div ng-if="$ctrl.iconKind === 'image'" style="margin-top:10px;">
                             <firebot-radios
                                 options="$ctrl.imageSourceOptions"
                                 model="$ctrl.control.icon.source"
@@ -40,14 +59,14 @@
                             />
                         </div>
 
-                        <div ng-if="$ctrl.control.icon.type === 'image' && $ctrl.control.icon.source === 'local'" style="margin-top:10px;">
+                        <div ng-if="$ctrl.iconKind === 'image' && $ctrl.control.icon.source === 'local'" style="margin-top:10px;">
                             <file-chooser
                                 model="$ctrl.control.icon.path"
                                 options="{ filters: [ {name: 'Images', extensions: ['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg']} ] }"
                             ></file-chooser>
                         </div>
 
-                        <div ng-if="$ctrl.control.icon.type === 'image' && $ctrl.control.icon.source === 'url'" style="margin-top:10px;">
+                        <div ng-if="$ctrl.iconKind === 'image' && $ctrl.control.icon.source === 'url'" style="margin-top:10px;">
                             <firebot-input
                                 model="$ctrl.control.icon.path"
                                 placeholder-text="https://..."
@@ -55,35 +74,56 @@
                             />
                         </div>
 
-                        <div ng-if="$ctrl.control.icon.type === 'glyph'" style="margin-top:10px;">
+                        <div ng-if="$ctrl.iconKind === 'glyph'" style="margin-top:10px;">
                             <lucide-icon-picker model="$ctrl.control.icon.name"></lucide-icon-picker>
                             <div style="margin-top:10px;">
                                 <color-picker-input label="Glyph Color" model="$ctrl.control.icon.color" show-clear="true"></color-picker-input>
                             </div>
                         </div>
 
-                        <div ng-if="$ctrl.control.icon.type === 'emoji'" style="margin-top:10px;">
+                        <div ng-if="$ctrl.iconKind === 'emoji'" style="margin-top:10px;">
                             <emoji-picker model="$ctrl.control.icon.emoji"></emoji-picker>
                         </div>
                    </div>
                 </firebot-form-group>
 
-                <firebot-form-group name="control-background" label="Background Color">
-                    <color-picker-input model="$ctrl.control.backgroundColor" show-clear="true"></color-picker-input>
+                <firebot-form-group ng-if="$ctrl.selectedType.enableBackground" name="control-background" label="Background">
+                    <div>
+                        <firebot-radio-cards
+                            options="$ctrl.backgroundOptions"
+                            ng-model="$ctrl.backgroundKind"
+                            grid-columns="3"
+                        />
+
+                        <div ng-if="$ctrl.backgroundKind === 'color'" style="margin-top:10px;">
+                            <color-picker-input model="$ctrl.control.background.color" show-clear="true"></color-picker-input>
+                        </div>
+
+                        <div ng-if="$ctrl.backgroundKind === 'image'" style="margin-top:10px;">
+                            <firebot-radios
+                                options="$ctrl.imageSourceOptions"
+                                model="$ctrl.control.background.source"
+                                inline="true"
+                            />
+                            <div ng-if="$ctrl.control.background.source === 'local'" style="margin-top:10px;">
+                                <file-chooser
+                                    model="$ctrl.control.background.path"
+                                    options="{ filters: [ {name: 'Images', extensions: ['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg']} ] }"
+                                ></file-chooser>
+                            </div>
+                            <div ng-if="$ctrl.control.background.source === 'url'" style="margin-top:10px;">
+                                <firebot-input
+                                    model="$ctrl.control.background.path"
+                                    placeholder-text="https://..."
+                                    disable-variables="true"
+                                />
+                            </div>
+                        </div>
+                    </div>
                 </firebot-form-group>
 
-                <div ng-if="$ctrl.control.type === 'folder'" class="form-group flex-row jspacebetween">
-                    <div>
-                        <label class="control-label" style="margin:0;">Auto Return</label>
-                        <p class="help-block">If enabled, the folder will automatically return to the parent after a button within it is pressed.</p>
-                    </div>
-                    <div>
-                        <toggle-button toggle-model="$ctrl.control.autoReturn" auto-update-value="true" font-size="32"></toggle-button>
-                    </div>
-                </div>
-
-                <firebot-form-group ng-if="$ctrl.control.type === 'button'" name="control-inputs" label="Inputs">
-                    <p class="help-block">Inputs are shown when this button is pressed on a device. Effects can access the values via $controlDeckInput[name].</p>
+                <firebot-form-group ng-if="$ctrl.selectedType.enableInputs" name="control-inputs" label="Inputs">
+                    <p class="help-block">Inputs are shown when this control is pressed on a device. Effects can access the values via $controlDeckInput[name].</p>
                     <div ng-repeat="input in $ctrl.control.inputs track by $index" style="margin-bottom:3px;">
                         <div class="expandable-item"
                             style="justify-content: space-between;"
@@ -148,15 +188,15 @@
                     </button>
                 </firebot-form-group>
 
-                <div ng-if="$ctrl.control.type === 'button'" style="margin-top:20px;">
-                    <effect-list
-                        header="What should this control do?"
-                        effects="$ctrl.control.effectList"
+                <div ng-if="$ctrl.selectedType.settingsSchema.length > 0" style="margin-top:20px;">
+                    <hr />
+                    <dynamic-parameters
+                        settings-schema="$ctrl.selectedType.settingsSchema"
+                        settings="$ctrl.control.settings"
                         trigger="control_deck"
-                        trigger-meta="{ rootEffects: $ctrl.control.effectList, controlInputs: $ctrl.control.inputs }"
-                        update="$ctrl.effectListUpdated(effects)"
-                        modalId="{{$ctrl.modalId}}"
-                    ></effect-list>
+                        trigger-meta="$ctrl.effectsTriggerMeta"
+                        modal-id="{{$ctrl.modalId}}"
+                    ></dynamic-parameters>
                 </div>
             </div>
             <div class="modal-footer">
@@ -171,20 +211,30 @@
             modalInstance: "<",
             modalId: "@"
         },
-        controller: function($scope, ngToast) {
+        controller: function($scope, controlDeckService, ngToast) {
             const $ctrl = this;
 
             $ctrl.isNew = true;
 
-            $ctrl.controlTypeOptions = [
-                { value: "button", label: "Button", iconClass: "fa-square", description: "A button that runs effects when pressed" },
-                { value: "folder", label: "Folder", iconClass: "fa-folder", description: "A folder that can contain other controls" }
-            ];
+            $ctrl.selectedType = null;
+
+            $ctrl.controlTypeOptions = controlDeckService.controlTypes.map(t => ({
+                value: t.id,
+                label: t.name,
+                iconClass: t.icon,
+                description: t.description
+            }));
 
             $ctrl.iconOptions = [
                 { value: "none", label: "None", iconClass: "fa-ban" },
                 { value: "glyph", label: "Glyph", iconClass: "fa-icons" },
                 { value: "emoji", label: "Emoji", iconClass: "fa-smile" },
+                { value: "image", label: "Image", iconClass: "fa-image" }
+            ];
+
+            $ctrl.backgroundOptions = [
+                { value: "none", label: "None", iconClass: "fa-ban" },
+                { value: "color", label: "Color", iconClass: "fa-palette" },
                 { value: "image", label: "Image", iconClass: "fa-image" }
             ];
 
@@ -226,27 +276,106 @@
                 }
             };
 
-            $scope.$watch("$ctrl.control.icon.type", (newType, oldType) => {
-                if (newType === oldType) {
+            $ctrl.iconKind = "none";
+            $ctrl.backgroundKind = "none";
+
+            $ctrl.effectsTriggerMeta = {};
+
+            const updateEffectsTriggerMeta = () => {
+                $ctrl.effectsTriggerMeta = {
+                    rootEffects: $ctrl.control.settings?.effects,
+                    controlInputs: $ctrl.control.inputs
+                };
+            };
+
+            const applySettingsDefaults = () => {
+                if ($ctrl.control.settings == null) {
+                    $ctrl.control.settings = {};
+                }
+                for (const param of ($ctrl.selectedType?.settingsSchema || [])) {
+                    if ($ctrl.control.settings[param.name] === undefined && param.default !== undefined) {
+                        $ctrl.control.settings[param.name] = JSON.parse(angular.toJson(param.default));
+                    }
+                }
+            };
+
+            const applyDefaultIcon = () => {
+                if ($ctrl.selectedType?.enableIcon
+                    && $ctrl.control.icon == null
+                    && $ctrl.selectedType.defaultIcon != null) {
+                    $ctrl.control.icon = JSON.parse(angular.toJson($ctrl.selectedType.defaultIcon));
+                    $ctrl.iconKind = $ctrl.control.icon.type;
+                }
+            };
+
+            $scope.$watch("$ctrl.control.type", (newTypeId, oldTypeId) => {
+                $ctrl.selectedType = controlDeckService.getControlType(newTypeId);
+
+                if (newTypeId === oldTypeId) {
                     return;
                 }
-                if (newType === "none") {
-                    $ctrl.control.icon = { type: "none" };
-                } else if (newType === "glyph") {
+
+                // Reset type-specific settings when switching types
+                $ctrl.control.settings = {};
+                applySettingsDefaults();
+
+                if (!$ctrl.selectedType?.enableIcon) {
+                    $ctrl.iconKind = "none";
+                    delete $ctrl.control.icon;
+                } else {
+                    applyDefaultIcon();
+                }
+                if (!$ctrl.selectedType?.enableBackground) {
+                    $ctrl.backgroundKind = "none";
+                    delete $ctrl.control.background;
+                }
+                if (!$ctrl.selectedType?.enableInputs) {
+                    delete $ctrl.control.inputs;
+                }
+                if (!$ctrl.selectedType?.enableLabel) {
+                    delete $ctrl.control.label;
+                    delete $ctrl.control.labelFont;
+                }
+
+                updateEffectsTriggerMeta();
+            });
+
+            $scope.$watch("$ctrl.iconKind", (newKind, oldKind) => {
+                if (newKind === oldKind) {
+                    return;
+                }
+                // Already in sync (e.g. a default icon was just applied)
+                if ($ctrl.control.icon?.type === newKind) {
+                    return;
+                }
+                if (newKind === "none") {
+                    delete $ctrl.control.icon;
+                } else if (newKind === "glyph") {
                     $ctrl.control.icon = { type: "glyph", name: undefined, color: undefined };
-                } else if (newType === "emoji") {
+                } else if (newKind === "emoji") {
                     $ctrl.control.icon = { type: "emoji", emoji: undefined };
-                } else if (newType === "image") {
+                } else if (newKind === "image") {
                     $ctrl.control.icon = { type: "image", source: "url", path: "" };
+                }
+            });
+
+            $scope.$watch("$ctrl.backgroundKind", (newKind, oldKind) => {
+                if (newKind === oldKind) {
+                    return;
+                }
+                if (newKind === "none") {
+                    delete $ctrl.control.background;
+                } else if (newKind === "color") {
+                    $ctrl.control.background = { type: "color", color: "" };
+                } else if (newKind === "image") {
+                    $ctrl.control.background = { type: "image", source: "url", path: "" };
                 }
             });
 
             $ctrl.control = {
                 name: "",
-                type: "button",
-                icon: { type: "none" },
-                backgroundColor: "",
-                effectList: { id: undefined, list: [] }
+                type: "firebot:button",
+                settings: {}
             };
 
             $ctrl.$onInit = () => {
@@ -254,13 +383,18 @@
                     $ctrl.control = JSON.parse(angular.toJson($ctrl.resolve.control));
                     $ctrl.isNew = false;
                 }
-                if ($ctrl.control.effectList == null) {
-                    $ctrl.control.effectList = { id: undefined, list: [] };
-                }
-            };
 
-            $ctrl.effectListUpdated = (effects) => {
-                $ctrl.control.effectList = effects;
+                $ctrl.selectedType = controlDeckService.getControlType($ctrl.control.type);
+
+                if ($ctrl.isNew) {
+                    applyDefaultIcon();
+                }
+
+                $ctrl.iconKind = $ctrl.control.icon?.type ?? "none";
+                $ctrl.backgroundKind = $ctrl.control.background?.type ?? "none";
+
+                applySettingsDefaults();
+                updateEffectsTriggerMeta();
             };
 
             $ctrl.save = () => {
@@ -269,7 +403,22 @@
                     return;
                 }
 
-                if ($ctrl.control.type === "button" && $ctrl.control.inputs?.length) {
+                if ($ctrl.selectedType == null) {
+                    ngToast.create("This control's type is not registered, so it can't be saved.");
+                    return;
+                }
+
+                if ($ctrl.selectedType.enableLabel) {
+                    const label = ($ctrl.control.label || "").trim();
+                    if (label === "") {
+                        delete $ctrl.control.label;
+                        delete $ctrl.control.labelFont;
+                    } else {
+                        $ctrl.control.label = label;
+                    }
+                }
+
+                if ($ctrl.selectedType.enableInputs && $ctrl.control.inputs?.length) {
                     const seenNames = {};
                     for (const input of $ctrl.control.inputs) {
                         const name = (input.name || "").trim();

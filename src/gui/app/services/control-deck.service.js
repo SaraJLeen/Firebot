@@ -8,8 +8,18 @@
 
             service.decks = [];
 
+            service.controlTypes = [];
+
             service.loadDecks = () => {
                 service.decks = backendCommunicator.fireEventSync("control-deck:get-decks") || [];
+            };
+
+            service.loadControlTypes = () => {
+                service.controlTypes = backendCommunicator.fireEventSync("control-deck:get-control-types") || [];
+            };
+
+            service.getControlType = (typeId) => {
+                return service.controlTypes.find(t => t.id === typeId) || null;
             };
 
             service.getDeck = (deckId) => {

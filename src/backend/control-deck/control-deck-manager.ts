@@ -1,6 +1,7 @@
 import {
     ControlDeck,
     ControlDeckControl,
+    EffectList,
     Trigger
 } from "../../types";
 
@@ -81,31 +82,75 @@ class ControlDeckManager extends JsonDbManager<ControlDeck> {
         return deck.controls?.find(c => c.id === controlId) ?? null;
     }
 
-    triggerControl(deckId: string, controlId: string, inputValues?: Record<string, string | number | boolean>): boolean {
+    /**
+     * Routes a hosted-page interaction to the control's type handler. Returns
+     * false when the control or its type can't be resolved.
+     */
+    async handleInteraction(
+        deckId: string,
+        controlId: string,
+        action: string,
+        data: unknown,
+        inputValues?: Record<string, string | number | boolean>
+    ): Promise<boolean> {
         const control = this.getControl(deckId, controlId);
+        if (control == null) {
+            return false;
+        }
 
-        if (control == null || control.type !== "button" || control.effectList == null) {
+        // Lazy require to avoid a circular dep at module load
+        const { ControlDeckControlTypeManager } =
+            require("./control-type-manager") as typeof import("./control-type-manager");
+
+        const controlType = ControlDeckControlTypeManager.getControlType(control.type);
+        if (controlType == null) {
+            this.logger.warn(`Control "${control.name}" has unknown control type "${control.type}"`);
             return false;
         }
 
         const deck = this.getItem(deckId);
+        const resolvedInputValues = inputValues ?? {};
 
-        const request = {
-            trigger: {
-                type: "control_deck",
-                metadata: {
-                    username: AccountAccess.getAccounts().streamer.username,
-                    deckId: deckId,
-                    deckName: deck?.name,
-                    controlId: control.id,
-                    controlName: control.name,
-                    inputValues: inputValues ?? {}
-                }
-            } as Trigger,
-            effects: control.effectList
+        const triggerEffectList = async (
+            effectList: EffectList,
+            extraMetadata?: Record<string, unknown>
+        ): Promise<void> => {
+            if (effectList == null) {
+                return;
+            }
+            const request = {
+                trigger: {
+                    type: "control_deck",
+                    metadata: {
+                        username: AccountAccess.getAccounts().streamer.username,
+                        deckId: deckId,
+                        deckName: deck?.name,
+                        controlId: control.id,
+                        controlName: control.name,
+                        inputValues: resolvedInputValues,
+                        ...(extraMetadata ?? {})
+                    }
+                } as Trigger,
+                effects: effectList
+            };
+            await effectRunner.processEffects(request);
         };
 
-        void effectRunner.processEffects(request);
+        try {
+            await controlType.onInteraction(
+                {
+                    control,
+                    deckId,
+                    action,
+                    data,
+                    inputValues: resolvedInputValues
+                },
+                { triggerEffectList }
+            );
+        } catch (error) {
+            this.logger.error(`Error handling "${action}" interaction for control "${control.name}" (type ${control.type})`, error);
+        }
+
         return true;
     }
 

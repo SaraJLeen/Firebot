@@ -1,7 +1,14 @@
 import type { Request, Response } from "express";
-import type { ControlDeck, ControlDeckControl, ControlDeckControlView, ControlDeckView } from "../../../../types";
+import type {
+    ControlDeck,
+    ControlDeckControl,
+    ControlDeckControlType,
+    ControlDeckControlView,
+    ControlDeckView
+} from "../../../../types";
 import crypto from "crypto";
 import { ControlDeckManager } from "../../../../backend/control-deck/control-deck-manager";
+import { ControlDeckControlTypeManager } from "../../../../backend/control-deck/control-type-manager";
 import { ResourceTokenManager } from "../../../../backend/resource-token-manager";
 import { SettingsManager } from "../../../../backend/common/settings-manager";
 
@@ -27,6 +34,45 @@ function controlDeckPinMatches(providedPin: unknown): boolean {
     return crypto.timingSafeEqual(expected, actual);
 }
 
+function resolveSettingsForView(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    controlType: ControlDeckControlType<any> | null,
+    settings: Record<string, unknown> | undefined
+): Record<string, unknown> {
+    const resolved: Record<string, unknown> = {};
+
+
+    if (controlType == null || settings == null) {
+        return settings ?? {};
+    }
+
+    for (const param of controlType.settingsSchema ?? []) {
+        const name = param.name;
+        const value = settings[name];
+
+        if (value === undefined) {
+            continue;
+        }
+
+        if (param.type === "effectlist"
+            || param.type === "password") {
+            continue;
+        }
+
+        if (param.type === "filepath") {
+            if (typeof value === "string" && value !== "") {
+                const token = ResourceTokenManager.storeResourcePath(value, null);
+                resolved[name] = `/resource/${token}`;
+            }
+            continue;
+        }
+
+        resolved[name] = value;
+    }
+
+    return resolved;
+}
+
 function mapControlDeckDeckView(deck: ControlDeck): ControlDeckView {
     const controls: ControlDeckControlView[] = (deck.controls ?? []).map((control: ControlDeckControl) => {
         let icon: ControlDeckControlView["icon"];
@@ -47,18 +93,37 @@ function mapControlDeckDeckView(deck: ControlDeck): ControlDeckView {
             }
         }
 
+        let background: ControlDeckControlView["background"];
+        const srcBackground = control.background;
+        if (srcBackground != null) {
+            if (srcBackground.type === "color" && srcBackground.color) {
+                background = { type: "color", color: srcBackground.color };
+            } else if (srcBackground.type === "image" && srcBackground.path) {
+                if (srcBackground.source === "url") {
+                    background = { type: "image", url: srcBackground.path };
+                } else {
+                    const token = ResourceTokenManager.storeResourcePath(srcBackground.path, null);
+                    background = { type: "image", url: `/resource/${token}` };
+                }
+            }
+        }
+
+        const controlType = ControlDeckControlTypeManager.getControlType(control.type);
+
         return {
             id: control.id,
             name: control.name,
             type: control.type,
+            label: control.label,
+            labelFont: control.labelFont,
             pageId: control.pageId,
             parentId: control.parentId ?? null,
-            backgroundColor: control.backgroundColor,
             position: control.position,
             size: control.size,
-            autoReturn: control.autoReturn,
             inputs: control.inputs,
-            icon
+            icon,
+            background,
+            resolvedSettings: resolveSettingsForView(controlType, control.settings)
         };
     });
 
@@ -131,20 +196,8 @@ export function getDeck(
     res.json(mapControlDeckDeckView(deck));
 };
 
-export function pressControl(
-    req: Request,
-    res: Response
-) {
-    const enabled = SettingsManager.getSetting("ControlDeckEnabled");
-
-    if (enabled !== true) {
-        res.status(403).json({ status: "error", message: "Control Deck is disabled" });
-        return;
-    }
-
-    // Only accept a flat object of primitive input values
+function parseInputValues(rawInputValues: unknown): Record<string, string | number | boolean> {
     const inputValues: Record<string, string | number | boolean> = {};
-    const rawInputValues = (req.body as { inputValues?: unknown })?.inputValues;
     if (rawInputValues != null && typeof rawInputValues === "object" && !Array.isArray(rawInputValues)) {
         for (const [key, value] of Object.entries(rawInputValues as Record<string, unknown>)) {
             if (typeof value === "string" || typeof value === "number" || typeof value === "boolean") {
@@ -152,13 +205,45 @@ export function pressControl(
             }
         }
     }
+    return inputValues;
+}
 
-    const success = ControlDeckManager.triggerControl(req.params.deckId, req.params.controlId, inputValues);
+async function handleInteraction(
+    req: Request,
+    res: Response,
+    action: string,
+    data: unknown
+): Promise<void> {
+    const enabled = SettingsManager.getSetting("ControlDeckEnabled");
+
+    if (enabled !== true) {
+        res.status(403).json({ status: "error", message: "Control Deck is disabled" });
+        return;
+    }
+
+    const inputValues = parseInputValues((req.body as { inputValues?: unknown })?.inputValues);
+
+    const success = await ControlDeckManager.handleInteraction(
+        req.params.deckId,
+        req.params.controlId,
+        action,
+        data,
+        inputValues
+    );
     if (!success) {
-        res.status(404).json({ status: "error", message: "Control not found or has no effects" });
+        res.status(404).json({ status: "error", message: "Control not found or has an unknown type" });
         return;
     }
 
     res.json({ status: "success" });
+}
+
+export async function interactWithControl(
+    req: Request,
+    res: Response
+) {
+    const body = req.body as { action?: unknown, data?: unknown };
+    const action = typeof body?.action === "string" && body.action.length > 0 ? body.action : "press";
+    await handleInteraction(req, res, action, body?.data ?? null);
 };
 

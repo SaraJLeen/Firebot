@@ -168,6 +168,8 @@ export async function whenReady() {
     QuickActionManager.loadItems();
 
     windowManagement.updateSplashScreenStatus("Loading control decks...");
+    const { ControlDeckControlTypeManager } = await import("../../../control-deck/control-type-manager");
+    ControlDeckControlTypeManager.registerBuiltInControlTypes();
     const { ControlDeckManager } = await import("../../../control-deck/control-deck-manager");
     ControlDeckManager.loadItems();
 

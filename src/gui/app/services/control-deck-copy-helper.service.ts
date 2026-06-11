@@ -1,6 +1,6 @@
 "use strict";
 
-import type { ControlDeckControl, ControlDeckPage, ObjectCopyHelper } from "../../../types";
+import type { ControlDeckControl, ControlDeckPage, ControlDeckService, EffectList, ObjectCopyHelper } from "../../../types";
 
 (function() {
 
@@ -10,7 +10,7 @@ import type { ControlDeckControl, ControlDeckPage, ObjectCopyHelper } from "../.
     // @ts-ignore
     angular
         .module("firebotApp")
-        .factory("controlDeckCopyHelper", function(objectCopyHelper: ObjectCopyHelper) {
+        .factory("controlDeckCopyHelper", function(objectCopyHelper: ObjectCopyHelper, controlDeckService: ControlDeckService) {
 
             let COPIED_PAGE: {
                 page: ControlDeckPage;
@@ -29,6 +29,23 @@ import type { ControlDeckControl, ControlDeckPage, ObjectCopyHelper } from "../.
                 return JSON.parse(angular.toJson(object));
             }
 
+            function isFolderControl(control: ControlDeckControl): boolean {
+                return control.type === "firebot:folder";
+            }
+
+            // Regenerate effect ids within any effectlist settings params
+            function regenerateEffectListIds(control: ControlDeckControl): ControlDeckControl {
+                const typeDef = controlDeckService.getControlType(control.type);
+                for (const param of typeDef?.settingsSchema ?? []) {
+                    if (param.type === "effectlist" && control.settings?.[param.name] != null) {
+                        control.settings[param.name] = objectCopyHelper.copyAndReplaceIds(
+                            control.settings[param.name] as EffectList
+                        );
+                    }
+                }
+                return control;
+            }
+
             function getCopiedNestedControls(originalId: string, newId: string, allControls: ControlDeckControl[]): ControlDeckControl[] {
                 const directChildren = allControls.filter(c => c.parentId === originalId && c.id !== originalId);
                 const copiedControls: ControlDeckControl[] = [];
@@ -37,7 +54,7 @@ import type { ControlDeckControl, ControlDeckPage, ObjectCopyHelper } from "../.
                     copiedChild.id = randomUUID();
                     copiedChild.parentId = newId;
                     copiedControls.push(copiedChild);
-                    if (child.type === "folder") {
+                    if (isFolderControl(child)) {
                         const copiedNested = getCopiedNestedControls(child.id, copiedChild.id, allControls);
                         copiedControls.push(...copiedNested);
                     }
@@ -51,21 +68,14 @@ import type { ControlDeckControl, ControlDeckPage, ObjectCopyHelper } from "../.
                 const copiedControl = copyObject(control);
                 copiedControl.id = newControlId;
 
-                if (control.type !== "folder") {
-                    if (copiedControl.effectList) {
-                        copiedControl.effectList = objectCopyHelper.copyAndReplaceIds(copiedControl.effectList);
-                    }
+                if (!isFolderControl(control)) {
                     return {
-                        control: copiedControl
+                        control: regenerateEffectListIds(copiedControl)
                     };
                 }
 
-                const copiedNestedControls = getCopiedNestedControls(control.id, copiedControl.id, allControls).map((c) => {
-                    if (c.effectList) {
-                        c.effectList = objectCopyHelper.copyAndReplaceIds(c.effectList);
-                    }
-                    return c;
-                });
+                const copiedNestedControls = getCopiedNestedControls(control.id, copiedControl.id, allControls)
+                    .map(c => regenerateEffectListIds(c));
 
                 return {
                     control: copiedControl,
@@ -82,7 +92,7 @@ import type { ControlDeckControl, ControlDeckPage, ObjectCopyHelper } from "../.
                 copiedPage.id = newPageId;
 
                 const folderIdMap = {};
-                const copiedFolders = allControls.filter(c => c.pageId === originalPageId && c.type === "folder").map((c) => {
+                const copiedFolders = allControls.filter(c => c.pageId === originalPageId && isFolderControl(c)).map((c) => {
                     const originalId = c.id;
                     const cloned = copyObject(c);
                     cloned.id = randomUUID();
@@ -98,7 +108,7 @@ import type { ControlDeckControl, ControlDeckPage, ObjectCopyHelper } from "../.
                     }
                 }
 
-                const copiedNonFolders = allControls.filter(c => c.pageId === originalPageId && c.type !== "folder").map((c) => {
+                const copiedNonFolders = allControls.filter(c => c.pageId === originalPageId && !isFolderControl(c)).map((c) => {
                     const cloned = copyObject(c);
                     cloned.id = randomUUID();
                     cloned.pageId = newPageId;
@@ -108,12 +118,7 @@ import type { ControlDeckControl, ControlDeckPage, ObjectCopyHelper } from "../.
                     return cloned;
                 });
 
-                const copiedControls = [...copiedFolders, ...copiedNonFolders].map((c) => {
-                    if (c.effectList) {
-                        c.effectList = objectCopyHelper.copyAndReplaceIds(c.effectList);
-                    }
-                    return c;
-                });
+                const copiedControls = [...copiedFolders, ...copiedNonFolders].map(c => regenerateEffectListIds(c));
 
                 return {
                     page: copiedPage,

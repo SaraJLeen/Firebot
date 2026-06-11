@@ -1,12 +1,11 @@
+import type { FirebotParameterArray, FirebotParams, FontOptions } from "./parameters";
 import type { EffectList } from "./effects";
+import type { Awaitable } from "./util-types";
 
-/**
- * Reserved page id for the "Pinned" shadow page. Buttons with this pageId are
- * replicated onto every real page (unless a page button overrides the slot)
- */
 export const CONTROL_DECK_PINNED_PAGE_ID = "pinned";
 
-export type ControlDeckControlType = "button" | "folder";
+export const CONTROL_DECK_BUTTON_TYPE_ID = "firebot:button";
+export const CONTROL_DECK_FOLDER_TYPE_ID = "firebot:folder";
 
 /** An image icon — either a local file path or a URL. */
 export type ControlDeckImageIcon = {
@@ -26,10 +25,6 @@ export type ControlDeckGlyphIcon = {
     color?: string;
 };
 
-export type ControlDeckNoneIcon = {
-    type: "none";
-};
-
 /** An emoji icon referenced by its unicode character. */
 export type ControlDeckEmojiIcon = {
     type: "emoji";
@@ -37,8 +32,11 @@ export type ControlDeckEmojiIcon = {
     emoji: string;
 };
 
+export type ControlDeckIcon = ControlDeckImageIcon | ControlDeckGlyphIcon | ControlDeckEmojiIcon;
 
-export type ControlDeckIcon = ControlDeckImageIcon | ControlDeckGlyphIcon | ControlDeckEmojiIcon | ControlDeckNoneIcon;
+export type ControlDeckBackground =
+    | { type: "color", color: string }
+    | { type: "image", source: "local" | "url", path: string };
 
 export type ControlDeckInputType = "text" | "number" | "toggle" | "preset";
 
@@ -88,33 +86,36 @@ export type ControlDeckControlSize = {
     height: number;
 };
 
-export type ControlDeckControl = {
+export type ControlDeckControl<Params extends FirebotParams = FirebotParams> = {
     id: string;
+    /** Reference name (shown in the editor, folder breadcrumbs, etc — not on the control itself) */
     name: string;
-    type: ControlDeckControlType;
+    /** The control type id, e.g. "firebot:button" */
+    type: string;
+    /** Optional label rendered on the control itself, if the control type allows labels */
+    label?: string;
+    /** Font config for the label (size is fixed by the control) */
+    labelFont?: Partial<FontOptions>;
     /** The page this control belongs to */
     pageId: string;
     /** The parent folder control id, or null when placed at the page root */
     parentId: string | null;
-    /** The icon shown on the control */
-    icon: ControlDeckIcon;
-    backgroundColor?: string;
+    /** The icon shown on the control, if the control type allows icons */
+    icon?: ControlDeckIcon;
+    /** The background shown behind the control, if the control type allows backgrounds */
+    background?: ControlDeckBackground;
     /** Placement within the deck's grid */
     position?: ControlDeckControlPosition;
     /** How many grid cells the control spans (default 1x1) */
     size?: ControlDeckControlSize;
-    /** Effects to run when the control is pressed. Only used when type is "button" */
-    effectList?: EffectList;
     /**
-     * Inputs the user is prompted for when the control is pressed on the hosted
-     * page. The provided values are sent with the press and are available to
-     * effects via $controlDeckInput
+     * Inputs the user is prompted for when the control is interacted with on the
+     * hosted page. The provided values are sent with the interaction and are
+     * available to effects via $controlDeckInput
      */
     inputs?: ControlDeckControlInput[];
-    /**
-     * Whether a folder control should automatically return to the parent page after a button within it is pressed. Only used when type is "folder".
-     */
-    autoReturn?: boolean;
+    /** Type-specific settings, defined by the control type's settingsSchema */
+    settings: Params;
 };
 
 export type ControlDeckGrid = {
@@ -145,7 +146,7 @@ export type ControlDeckSettings = {
     /**
      * How the hosted grid responds to device rotation.
      * - "fixed": grid keeps its designed dimensions regardless of orientation
-     * - "dynamic": grid rotates to best fill the screen for the current orientation
+     * - "dynamic": grid rotates to best fill the screen
      */
     orientationMode?: ControlDeckOrientationMode;
 };
@@ -155,14 +156,22 @@ export type ControlDeckResolvedIcon =
     | { type: "glyph", name: string, color?: string }
     | { type: "emoji", emoji: string };
 
+/** A control background as projected to the hosted page (local images resolved to urls) */
+export type ControlDeckResolvedBackground =
+    | { type: "color", color: string }
+    | { type: "image", url: string };
+
 /**
  * A control as projected to the hosted Control Deck page. Server-only fields
- * (the raw effect list and local icon path) are removed, and the resolved
- * `icon` the page should render is added.
+ * are removed: the icon/background are resolved to renderable values, and the
+ * type-specific settings are filtered per the type's settingsSchema (effect
+ * lists, passwords, and hosted-hidden params stripped; file paths tokenized).
  */
 export type ControlDeckControlView =
-    Omit<ControlDeckControl, "icon" | "effectList"> & {
+    Omit<ControlDeckControl, "icon" | "background" | "settings"> & {
         icon?: ControlDeckResolvedIcon;
+        background?: ControlDeckResolvedBackground;
+        resolvedSettings: Record<string, unknown>;
     };
 
 /** A deck as projected to the hosted Control Deck page. */
@@ -170,3 +179,58 @@ export type ControlDeckView =
     Omit<ControlDeck, "controls"> & {
         controls: ControlDeckControlView[];
     };
+
+/** The event passed to a control type's onInteraction handler */
+export type ControlDeckInteractionEvent<Params extends FirebotParams = FirebotParams> = {
+    control: ControlDeckControl<Params>;
+    deckId: string;
+    action: string;
+    data: unknown;
+    /** Values the user provided for the control's configured inputs */
+    inputValues: Record<string, string | number | boolean>;
+};
+
+export type ControlDeckInteractionContext = {
+    /**
+     * Runs an effect list with the standard control_deck trigger metadata
+     * (username, deck/control ids + names, inputValues) pre-filled. Extra
+     * metadata is merged into the trigger metadata.
+     */
+    triggerEffectList: (effectList: EffectList, extraMetadata?: Record<string, unknown>) => Promise<void>;
+};
+
+export type ControlDeckControlType<Params extends FirebotParams = FirebotParams> = {
+    id: string;
+    /** Display name shown in the Add Control picker, e.g. "Slider" */
+    name: string;
+    description: string;
+    /** Font Awesome icon class for the Add Control picker, e.g. "fa-square" */
+    icon: string;
+
+    /** Default grid cell span when the control is added */
+    defaultSize?: ControlDeckControlSize;
+    minSize?: ControlDeckControlSize;
+    maxSize?: ControlDeckControlSize;
+
+    /** When true, the standard icon config is shown for controls of this type */
+    enableIcon?: boolean;
+    /**
+     * Default icon for new controls of this type.
+     */
+    defaultIcon?: ControlDeckIcon;
+    /** When true, the standard background config (color or image) is shown for controls of this type */
+    enableBackground?: boolean;
+    /** When true, the inputs config is shown for controls of this type */
+    enableInputs?: boolean;
+    /** When true, the optional label (+ label font) config is shown for controls of this type */
+    enableLabel?: boolean;
+
+    /** Schema for the type-specific settings shown in the control edit modal */
+    settingsSchema: FirebotParameterArray<Params>;
+
+    /** Called when a device interacts with a control of this type */
+    onInteraction: (
+        event: ControlDeckInteractionEvent<Params>,
+        context: ControlDeckInteractionContext
+    ) => Awaitable<void>;
+};

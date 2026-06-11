@@ -1,6 +1,8 @@
 "use strict";
 
 (function() {
+    const FOLDER_TYPE_ID = "firebot:folder";
+
     angular
         .module("firebotApp")
         .component("controlDeckGrid", {
@@ -22,8 +24,8 @@
                     <div
                         ng-repeat="cell in $ctrl.cells track by (cell.control ? cell.control.id : ('empty-' + cell.col + '-' + cell.row))"
                         class="cd-cell"
-                        ng-class="{ 'cd-cell-empty': !cell.control, 'cd-cell-folder': cell.control.type === 'folder', 'cd-cell-pinned': cell.pinned, 'cd-cell-resizing': cell.control && cell.control.id === $ctrl.resizingId }"
-                        ng-style="{ 'grid-column': cell.col + ' / span ' + cell.w, 'grid-row': cell.row + ' / span ' + cell.h, 'background-color': cell.control.backgroundColor || (cell.control ? '#2c3035' : 'transparent') }"
+                        ng-class="{ 'cd-cell-empty': !cell.control, 'cd-cell-folder': cell.control._typeInfo.isFolder, 'cd-cell-missing': cell.control._typeInfo.missing, 'cd-cell-pinned': cell.pinned, 'cd-cell-resizing': cell.control && cell.control.id === $ctrl.resizingId }"
+                        ng-style="$ctrl.cellStyle(cell)"
                         data-col="{{cell.col}}"
                         data-row="{{cell.row}}"
                         data-control-id="{{!cell.pinned ? cell.control.id : ''}}"
@@ -53,13 +55,13 @@
                             </div>
                         </div>
                         <div ng-if="cell.control" class="cd-cell-content">
+                            <i ng-if="cell.control._typeInfo.missing" class="fas fa-exclamation-triangle cd-cell-missing-glyph" uib-tooltip="This control's type ('{{cell.control.type}}') is not registered. It may belong to an uninstalled plugin." tooltip-append-to-body="true"></i>
                             <img ng-if="cell.control._previewIcon.kind === 'image'" class="cd-cell-icon" ng-src="{{cell.control._previewIcon.url}}" />
                             <lucide-icon ng-if="cell.control._previewIcon.kind === 'glyph'" class="cd-cell-glyph" name="{{cell.control._previewIcon.name}}" color="{{cell.control._previewIcon.color}}" size="28"></lucide-icon>
                             <span ng-if="cell.control._previewIcon.kind === 'emoji'" class="cd-cell-emoji">{{cell.control._previewIcon.emoji}}</span>
-                            <i ng-if="cell.control._previewIcon.kind === 'none' && cell.control.type === 'folder'" class="fas fa-folder cd-cell-folder-glyph"></i>
-                            <div class="cd-cell-name">{{cell.control.name}}</div>
+                            <div class="cd-cell-name" ng-style="cell.control._labelStyle">{{cell.control.label || cell.control.name}}</div>
                             <div class="cd-cell-actions">
-                                <span ng-if="!cell.pinned && cell.control.type === 'folder'" class="cd-action" uib-tooltip="Open" tooltip-append-to-body="true" ng-click="$ctrl.openFolder($event, cell.control)"><i class="fas fa-folder-open"></i></span>
+                                <span ng-if="!cell.pinned && cell.control._typeInfo.isFolder" class="cd-action" uib-tooltip="Open" tooltip-append-to-body="true" ng-click="$ctrl.openFolder($event, cell.control)"><i class="fas fa-folder-open"></i></span>
                                 <span ng-if="!cell.pinned" class="cd-action" uib-tooltip="Edit" tooltip-append-to-body="true" ng-click="$ctrl.edit($event, cell.control)"><i class="fas fa-pen"></i></span>
                                 <span
                                     ng-if="!cell.pinned"
@@ -106,7 +108,7 @@
                     </div>
                 </div>
             `,
-            controller: function($element, $scope, controlDeckCopyHelper, ngToast) {
+            controller: function($element, $scope, controlDeckService, controlDeckCopyHelper, ngToast) {
                 const $ctrl = this;
 
                 $ctrl.cells = [];
@@ -143,6 +145,51 @@
                     } else {
                         control._previewIcon = { kind: "none" };
                     }
+
+                    const typeDef = controlDeckService.getControlType(control.type);
+                    control._typeInfo = {
+                        def: typeDef,
+                        missing: typeDef == null,
+                        isFolder: control.type === FOLDER_TYPE_ID
+                    };
+
+                    const bg = control.background;
+                    if (bg?.type === "color" && bg.color) {
+                        control._previewBg = { "background-color": bg.color };
+                    } else if (bg?.type === "image" && bg.path) {
+                        const url = bg.source === "url"
+                            ? bg.path
+                            : (bg.path.startsWith("file://") ? bg.path : `file://${bg.path}`);
+                        control._previewBg = {
+                            "background-image": `url("${url.replace(/"/g, '\\"')}")`,
+                            "background-size": "cover",
+                            "background-position": "center"
+                        };
+                    } else {
+                        control._previewBg = null;
+                    }
+
+                    const labelFont = control.label ? control.labelFont : null;
+                    control._labelStyle = labelFont
+                        ? {
+                            "font-family": labelFont.family || undefined,
+                            "font-weight": labelFont.weight || undefined,
+                            "font-style": labelFont.italic ? "italic" : undefined,
+                            "color": labelFont.color || undefined
+                        }
+                        : null;
+                };
+
+                $ctrl.cellStyle = (cell) => {
+                    const style = {
+                        "grid-column": `${cell.col} / span ${cell.w}`,
+                        "grid-row": `${cell.row} / span ${cell.h}`,
+                        "background-color": cell.control ? "#2c3035" : "transparent"
+                    };
+                    if (cell.control?._previewBg) {
+                        Object.assign(style, cell.control._previewBg);
+                    }
+                    return style;
                 };
 
                 const effectiveSize = (control) => {

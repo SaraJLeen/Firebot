@@ -20,6 +20,15 @@
     width: 22px;
 }
 
+.cd-cell-missing {
+    outline: 1px dashed rgba(255, 180, 0, 0.6);
+}
+
+.cd-cell-missing-glyph {
+    color: #f0ad4e;
+    font-size: 22px;
+}
+
 .cd-page-bar {
     display: flex;
     align-items: center;

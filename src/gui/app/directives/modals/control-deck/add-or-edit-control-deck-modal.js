@@ -413,6 +413,9 @@
                                 updated.parentId = control.parentId ?? null;
                                 updated.position = control.position;
                                 delete updated._previewIcon;
+                                delete updated._previewBg;
+                                delete updated._typeInfo;
+                                delete updated._labelStyle;
                                 $ctrl.deck.controls[index] = updated;
                                 $ctrl.refreshGrid();
                             }
@@ -431,7 +434,7 @@
             };
 
             $ctrl.deleteControl = (control) => {
-                const isFolder = control.type === "folder";
+                const isFolder = control.type === "firebot:folder";
                 utilityService
                     .showConfirmationModal({
                         title: "Delete Control",
@@ -506,6 +509,9 @@
                     const clone = angular.extend({}, c);
                     delete clone._previewIcon;
                     delete clone._previewSize;
+                    delete clone._previewBg;
+                    delete clone._typeInfo;
+                    delete clone._labelStyle;
                     return clone;
                 });
             };

@@ -176,6 +176,7 @@
         hotkeyService.loadHotkeys();
 
         controlDeckService.loadDecks();
+        controlDeckService.loadControlTypes();
 
         gamesService.loadGames();
 

@@ -233,7 +233,7 @@ router.route("/control-deck/decks")
 router.route("/control-deck/decks/:deckId")
     .get(controlDeck.pinMiddleware, controlDeck.getDeck);
 
-router.route("/control-deck/decks/:deckId/controls/:controlId/press")
-    .post(controlDeck.pinMiddleware, controlDeck.pressControl);
+router.route("/control-deck/decks/:deckId/controls/:controlId/interact")
+    .post(controlDeck.pinMiddleware, controlDeck.interactWithControl);
 
 export = router;

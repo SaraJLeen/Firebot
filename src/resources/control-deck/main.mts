@@ -5,12 +5,15 @@ import { deckPicker } from "./modules/deck-picker.mjs";
 import { pinPrompt } from "./modules/pin-prompt.mjs";
 import { inputPrompt } from "./modules/input-prompt.mjs";
 import { lucideIcon } from "./modules/lucide-icon.mjs";
+import { controlIcon } from "./modules/control-icon.mjs";
+import { controlLabel } from "./modules/control-label.mjs";
+import { controlTypeRegistry, FOLDER_CONTROL_TYPE_ID } from "./modules/control-types/index.mjs";
 import {
     ApiError,
     fetchControlDeckSettings,
     fetchDecks,
     fetchDeck,
-    pressControl as apiPressControl,
+    interactWithControl,
     connectWebSocket,
     getStoredPin,
     setStoredPin
@@ -21,6 +24,7 @@ import type {
     ControlDeckView,
     ControlDeckPage,
     ControlInputValues,
+    ControlInteraction,
     DeckSummary,
     GridDims,
     PlacedControl
@@ -323,26 +327,45 @@ const rootComponent = defineComponent({
             }
         }
 
-        async function pressControl(control: ControlDeckControlView): Promise<void> {
-            if (control.type === "folder") {
+        async function handleControlInteract(
+            control: ControlDeckControlView,
+            interaction: ControlInteraction
+        ): Promise<void> {
+            const typeEntry = controlTypeRegistry[control.type];
+
+            if (control.type === FOLDER_CONTROL_TYPE_ID && interaction.action === "open") {
                 folderStack.value.push({
                     id: control.id,
-                    autoReturn: control.autoReturn
+                    autoReturn: control.resolvedSettings?.autoReturn === true
                 });
                 return;
             }
-            // Prompt for inputs before sending the press
-            if (control.inputs?.length) {
+
+            // Prompt for inputs before sending the interaction
+            const shouldPromptInputs = (control.inputs?.length ?? 0) > 0;
+            if (shouldPromptInputs) {
+                pendingInteraction = interaction;
                 inputPromptControl.value = control;
                 return;
             }
-            await sendPress(control);
+
+            await sendInteraction(control, interaction);
         }
 
-        async function sendPress(control: ControlDeckControlView, inputValues?: ControlInputValues): Promise<void> {
+        async function sendInteraction(
+            control: ControlDeckControlView,
+            interaction: ControlInteraction,
+            inputValues?: ControlInputValues
+        ): Promise<void> {
             try {
                 if (currentDeckId.value) {
-                    await apiPressControl(currentDeckId.value, control.id, inputValues);
+                    await interactWithControl(
+                        currentDeckId.value,
+                        control.id,
+                        interaction.action,
+                        interaction.data,
+                        inputValues
+                    );
                     const autoReturnFolder = folderStack.value[folderStack.value.length - 1]?.autoReturn;
                     if (autoReturnFolder) {
                         setTimeout(() => {
@@ -358,17 +381,21 @@ const rootComponent = defineComponent({
         }
 
         const inputPromptControl = ref<ControlDeckControlView | null>(null);
+        let pendingInteraction: ControlInteraction | null = null;
 
         async function submitControlInputs(inputValues: ControlInputValues): Promise<void> {
             const control = inputPromptControl.value;
+            const interaction = pendingInteraction ?? { action: "press", data: null };
             inputPromptControl.value = null;
+            pendingInteraction = null;
             if (control) {
-                await sendPress(control, inputValues);
+                await sendInteraction(control, interaction, inputValues);
             }
         }
 
         function cancelControlInputs(): void {
             inputPromptControl.value = null;
+            pendingInteraction = null;
         }
 
         function handleWsEvent(name: string, data: unknown): void {
@@ -466,11 +493,12 @@ const rootComponent = defineComponent({
             currentParentId,
             currentFolder,
             placedControls,
+            controlTypeRegistry,
             submitPin,
             selectDeck,
             selectPage,
             goBack,
-            pressControl,
+            handleControlInteract,
             inputPromptControl,
             submitControlInputs,
             cancelControlInputs,
@@ -486,6 +514,8 @@ app
     .component("DeckPicker", deckPicker)
     .component("PinPrompt", pinPrompt)
     .component("InputPrompt", inputPrompt)
+    .component("ControlIcon", controlIcon)
+    .component("ControlLabel", controlLabel)
     .component("LucideIcon", lucideIcon);
 
 app.mount("#app");

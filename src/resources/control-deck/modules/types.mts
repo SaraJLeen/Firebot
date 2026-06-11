@@ -15,7 +15,19 @@ export type ControlPosition = ControlDeckControlPosition;
 
 export type ControlSize = ControlDeckControlSize;
 
-export type { ControlDeckControlView, ControlDeckControlInput, ControlDeckResolvedIcon, ControlDeckView, ControlDeckPage };
+export type {
+    ControlDeckControlView,
+    ControlDeckControlInput,
+    ControlDeckResolvedIcon,
+    ControlDeckView,
+    ControlDeckPage
+};
+
+/** A component-defined interaction emitted by a control's hosted component. */
+export interface ControlInteraction {
+    action: string;
+    data?: unknown;
+}
 
 export interface DeckSummary {
     id: string;
