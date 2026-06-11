@@ -4,13 +4,13 @@ const { app } = require("electron");
 const EventEmitter = require("events");
 const path = require("path");
 
-const { TwitchApi } = require("../../../streaming-platforms/twitch/api");
-const { ProfileManager } = require("../../profile-manager");
-const { SettingsManager } = require("../../settings-manager");
-const webhookManager = require("../../../webhooks/webhook-config-manager");
-const twitchChat = require("../../../chat/twitch-chat");
-const logger = require("../../../logwrapper");
-const utils = require("../../../utils");
+const { TwitchApi } = require("../../streaming-platforms/twitch/api");
+const { ProfileManager } = require("../../common/profile-manager");
+const { SettingsManager } = require("../../common/settings-manager");
+const webhookManager = require("../../webhooks/webhook-config-manager");
+const twitchChat = require("../../chat/twitch-chat");
+const logger = require("../../logwrapper");
+const utils = require("../../utils");
 
 /**
  * Shim around the webhook manager to filter webhooks by script name and re-emit events
@@ -92,10 +92,10 @@ class ScriptWebhookManager extends EventEmitter {
     }
 }
 
-const { AccountAccess } = require("../../account-access");
+const { AccountAccess } = require("../../common/account-access");
 
 function buildModules(scriptId, scriptManifest) {
-    const notificationManager = require("../../../notifications/notification-manager").NotificationManager;
+    const notificationManager = require("../../notifications/notification-manager").NotificationManager;
 
     const scriptNameNormalized = scriptManifest.name.replace(/[#%&{}\\<>*?/$!'":@`|=\s-]+/g, "-").toLowerCase();
 
@@ -123,45 +123,45 @@ function buildModules(scriptId, scriptManifest) {
          */
         twitchChat: twitchChat,
         twitchApi: TwitchApi,
-        httpServer: require("../../../../server/http-server-manager").HttpServerManager,
-        effectManager: require("../../../effects/effect-manager").EffectManager,
-        effectRunner: require("../../effect-runner"),
-        conditionManager: require("../../../effects/builtin/conditional-effects/conditions/condition-manager"),
-        restrictionManager: require("../../../restrictions/restriction-manager").RestrictionsManager,
-        commandManager: require("../../../chat/commands/command-manager").CommandManager,
-        eventManager: require("../../../events/event-manager").EventManager,
-        eventFilterManager: require("../../../events/filters/filter-manager").FilterManager,
-        eventFilterFactory: require("../../../events/filters/filter-factory"),
-        replaceVariableManager: require("../../../variables/replace-variable-manager").ReplaceVariableManager,
-        replaceVariableFactory: require("../../../variables/variable-factory"),
-        integrationManager: require("../../../integrations/integration-manager"),
-        customVariableManager: require("../../../common/custom-variable-manager").CustomVariableManager,
-        customRolesManager: require("../../../roles/custom-roles-manager"),
-        firebotRolesManager: require("../../../roles/firebot-roles-manager"),
-        timerManager: require("../../../timers/timer-manager").TimerManager,
-        gameManager: require("../../../games/game-manager").GameManager,
+        httpServer: require("../../../server/http-server-manager").HttpServerManager,
+        effectManager: require("../../effects/effect-manager").EffectManager,
+        effectRunner: require("../../common/effect-runner"),
+        conditionManager: require("../../effects/builtin/conditional-effects/conditions/condition-manager"),
+        restrictionManager: require("../../restrictions/restriction-manager").RestrictionsManager,
+        commandManager: require("../../chat/commands/command-manager").CommandManager,
+        eventManager: require("../../events/event-manager").EventManager,
+        eventFilterManager: require("../../events/filters/filter-manager").FilterManager,
+        eventFilterFactory: require("../../events/filters/filter-factory"),
+        replaceVariableManager: require("../../variables/replace-variable-manager").ReplaceVariableManager,
+        replaceVariableFactory: require("../../variables/variable-factory"),
+        integrationManager: require("../../integrations/integration-manager"),
+        customVariableManager: require("../../common/custom-variable-manager").CustomVariableManager,
+        customRolesManager: require("../../roles/custom-roles-manager"),
+        firebotRolesManager: require("../../roles/firebot-roles-manager"),
+        timerManager: require("../../timers/timer-manager").TimerManager,
+        gameManager: require("../../games/game-manager").GameManager,
 
-        overlayWidgetsManager: require("../../../overlay-widgets/overlay-widgets-manager"),
-        overlayWidgetConfigManager: require("../../../overlay-widgets/overlay-widget-config-manager"),
+        overlayWidgetsManager: require("../../overlay-widgets/overlay-widgets-manager"),
+        overlayWidgetConfigManager: require("../../overlay-widgets/overlay-widget-config-manager"),
 
         /** @deprecated Use `currencyAccess`, `currencyManagerNew`, and `currencyCommandManager` instead */
-        currencyDb: require("../../../database/currencyDatabase"),
+        currencyDb: require("../../database/currencyDatabase"),
         /** @deprecated Use `currencyAccess`, `currencyManagerNew`, and `currencyCommandManager` instead */
-        currencyManager: require("../../../currency/currencyManager"),
+        currencyManager: require("../../currency/currencyManager"),
 
-        currencyAccess: require("../../../currency/currency-access").default,
-        currencyManagerNew: require("../../../currency/currency-manager"),
-        currencyCommandManager: require("../../../currency/currency-command-manager"),
+        currencyAccess: require("../../currency/currency-access").default,
+        currencyManagerNew: require("../../currency/currency-manager"),
+        currencyCommandManager: require("../../currency/currency-command-manager"),
 
         /** @deprecated Use `viewerDatabase`, `viewerMetadataManager`, and `viewerOnlineStatusManager` instead */
-        userDb: require("../../../database/userDatabase"),
-        viewerDatabase: require("../../../viewers/viewer-database"),
-        viewerMetadataManager: require("../../../viewers/viewer-metadata-manager"),
-        viewerOnlineStatusManager: require("../../../viewers/viewer-online-status-manager"),
+        userDb: require("../../database/userDatabase"),
+        viewerDatabase: require("../../viewers/viewer-database"),
+        viewerMetadataManager: require("../../viewers/viewer-metadata-manager"),
+        viewerOnlineStatusManager: require("../../viewers/viewer-online-status-manager"),
 
-        quotesManager: require("../../../quotes/quote-manager").QuoteManager,
-        frontendCommunicator: require("../../frontend-communicator"),
-        counterManager: require("../../../counters/counter-manager").CounterManager,
+        quotesManager: require("../../quotes/quote-manager").QuoteManager,
+        frontendCommunicator: require("../../common/frontend-communicator"),
+        counterManager: require("../../counters/counter-manager").CounterManager,
         utils: {
             ...utils,
             // These are for back-compat
@@ -170,7 +170,7 @@ function buildModules(scriptId, scriptManifest) {
             formattedSeconds: (secs, simpleOutput = false) =>
                 utils.humanizeTime(secs, simpleOutput === true ? "simple" : "default")
         },
-        resourceTokenManager: require("../../../resource-token-manager").ResourceTokenManager,
+        resourceTokenManager: require("../../resource-token-manager").ResourceTokenManager,
         webhookManager: new ScriptWebhookManager(scriptNameNormalized),
         notificationManager: {
             addNotification: (notificationBase, permanentlySave = true) => {
@@ -216,7 +216,7 @@ function buildModules(scriptId, scriptManifest) {
                     .forEach(n => notificationManager.deleteNotification(n.id));
             }
         },
-        uiExtensionManager: require("../../../ui-extensions/ui-extension-manager")
+        uiExtensionManager: require("../../ui-extensions/ui-extension-manager")
     };
 }
 

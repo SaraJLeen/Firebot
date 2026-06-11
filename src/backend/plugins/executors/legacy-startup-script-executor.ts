@@ -7,7 +7,7 @@ import {
     FirebotParameterArray
 } from "../../../types";
 import { IPluginExecutor, PluginExecutionResult } from "./plugin-executor.interface";
-import { buildRunRequest } from "../../common/handlers/custom-scripts/custom-script-helpers";
+import { buildRunRequest } from "../legacy-helpers/custom-script-helpers";
 import { wait } from "../../utils";
 import { LoggerCache } from "../../logger-cache";
 import { registerPluginLogName, unregisterPluginLogName } from "../../plugin-log-names";

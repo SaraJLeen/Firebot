@@ -14,7 +14,7 @@ import type { EffectScriptExecutionResult } from "./plugin-executor.interface";
 import {
     buildRunRequest,
     mapParameters
-} from "../../common/handlers/custom-scripts/custom-script-helpers";
+} from "../legacy-helpers/custom-script-helpers";
 import * as effectRunner from "../../common/effect-runner";
 import { LoggerCache } from "../../logger-cache";
 import { simpleClone, wait } from "../../utils";
