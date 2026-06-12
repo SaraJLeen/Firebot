@@ -201,11 +201,19 @@ body {
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.35);
     min-width: 0;
     min-height: 0;
+    container-type: size;
+    &.shell-none {
+        box-shadow: none;
+        background: transparent !important;
+    }
 }
 
-.deck-control:active {
-    transform: scale(0.94);
-    filter: brightness(1.25);
+.deck-control:not(.shell-none) {
+    &:active,
+    &.pressed {
+        transform: scale(0.94);
+        filter: brightness(1.25);
+    }
 }
 
 .deck-control.unknown {
@@ -272,6 +280,53 @@ body {
     font-weight: 600;
     text-align: center;
     word-break: break-word;
+}
+
+.deck-switch {
+    --switch-track-w: 90cqmin;
+    --switch-track-h: 48cqmin;
+    --switch-pad: 7cqmin;
+    --switch-knob: calc(min(var(--switch-track-w), var(--switch-track-h)) - var(--switch-pad) * 2);
+    --switch-travel: calc(var(--switch-track-w) - var(--switch-track-h));
+    pointer-events: none;
+}
+
+.deck-switch.vertical {
+    --switch-track-w: 43cqmin;
+    --switch-track-h: 83cqmin;
+    --switch-travel: calc(var(--switch-track-h) - var(--switch-track-w));
+}
+
+.deck-switch-track {
+    width: var(--switch-track-w);
+    height: var(--switch-track-h);
+    border-radius: 999px;
+    background: rgba(0, 0, 0, 0.35);
+    position: relative;
+    transition: background 0.15s ease;
+}
+
+.deck-switch-knob {
+    position: absolute;
+    top: var(--switch-pad);
+    left: var(--switch-pad);
+    width: var(--switch-knob);
+    height: var(--switch-knob);
+    border-radius: 50%;
+    background: #fff;
+    transition: transform 0.15s ease;
+}
+
+.deck-switch.on .deck-switch-knob {
+    transform: translateX(var(--switch-travel));
+}
+
+.deck-switch.vertical .deck-switch-knob {
+    transform: translateY(var(--switch-travel));
+}
+
+.deck-switch.vertical.on .deck-switch-knob {
+    transform: none;
 }
 
 /* Deck picker */

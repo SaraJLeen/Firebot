@@ -166,6 +166,9 @@ export async function whenReady() {
     ControlDeckControlTypeManager.registerBuiltInControlTypes();
     const { ControlDeckManager } = await import("../../../control-deck/control-deck-manager");
     ControlDeckManager.loadItems();
+    const { ControlDeckStateManager } = await import("../../../control-deck/control-deck-state-manager");
+    ControlDeckStateManager.loadItems();
+    await ControlDeckManager.initializeControlStates();
 
     windowManagement.updateSplashScreenStatus("Loading webhooks...");
     const webhookConfigManager = (await import("../../../webhooks/webhook-config-manager")).default;
