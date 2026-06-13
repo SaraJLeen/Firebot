@@ -33,6 +33,8 @@ class EventManager extends TypedEmitter<{
     constructor() {
         super();
 
+        this.setMaxListeners(0);
+
         frontendCommunicator.on("events:get-all-event-sources", () => {
             this.logger.info("got 'get all event sources' request");
             return simpleClone(this.getAllEventSources());
