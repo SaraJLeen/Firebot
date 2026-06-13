@@ -27,6 +27,7 @@ import OverlayWidgetManager from "../../overlay-widgets/overlay-widgets-manager"
 import { HttpServerManager } from "../../../server/http-server-manager";
 import { WebSocketServerManager } from "../../../server/websocket-server-manager";
 import webhookManager from "../../webhooks/webhook-config-manager";
+import frontendCommunicator from "../../common/frontend-communicator";
 import { resolvePluginManifestLinks } from "../plugin-manifest-utils";
 
 const logger = LoggerCache.getLogger("Plugins");
@@ -270,6 +271,23 @@ export class PluginExecutor extends IPluginExecutor {
             }
         }
 
+        if (Array.isArray(r.frontendListeners)) {
+            registrations.frontendListeners = [];
+            for (const entry of r.frontendListeners) {
+                const def = await resolve(entry);
+                if (!!def?.eventName?.length) {
+                    const id = def.useAsync === true
+                        ? frontendCommunicator.onAsync(def.eventName, def.handler)
+                        : frontendCommunicator.on(def.eventName, def.handler);
+
+                    registrations.frontendListeners.push({
+                        id,
+                        eventName: def.eventName
+                    });
+                }
+            }
+        }
+
         if (Array.isArray(r.uiExtensions)) {
             registrations.uiExtensionIds = [];
             for (const entry of r.uiExtensions) {
@@ -422,6 +440,14 @@ export class PluginExecutor extends IPluginExecutor {
                 GameManager.unregisterGame(id);
             } catch (e) {
                 logger.warn(`Failed to unregister game ${id}`, e);
+            }
+        }
+
+        for (const listener of registrations.frontendListeners ?? []) {
+            try {
+                frontendCommunicator.off(listener.eventName, listener.id);
+            } catch (e) {
+                logger.warn(`Failed to unregister frontend listener ${listener.eventName}`, e);
             }
         }
 

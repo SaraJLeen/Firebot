@@ -101,3 +101,9 @@ export type UIExtension = {
         parameters?: AngularJsFirebotParameterComponent[];
     };
 };
+
+export type FrontendListener = {
+    eventName: string;
+    useAsync?: boolean;
+    handler: <ExpectedArgs extends Array<unknown> = [], ReturnPayload = void>(...args: ExpectedArgs) => ReturnPayload;
+};
