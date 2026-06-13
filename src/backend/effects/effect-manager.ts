@@ -229,7 +229,6 @@ class EffectManager extends TypedEmitter<{
         return {
             definition: definition,
             optionsTemplate: e.optionsTemplate,
-            optionsTemplateUrl: e.optionsTemplateUrl,
             optionsControllerRaw: e.optionsController
                 ? e.optionsController.toString()
                 : "() => {}",

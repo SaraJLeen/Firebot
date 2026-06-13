@@ -11,7 +11,6 @@
                 return {
                     definition: effectDef.definition,
                     optionsTemplate: effectDef.optionsTemplate,
-                    optionsTemplateUrl: effectDef.optionsTemplateUrl,
                     optionsController: eval(effectDef.optionsControllerRaw), // eslint-disable-line no-eval
                     optionsValidator: eval(effectDef.optionsValidatorRaw), // eslint-disable-line no-eval
                     getDefaultLabel: effectDef.getDefaultLabelRaw ? eval(effectDef.getDefaultLabelRaw) : undefined // eslint-disable-line no-eval
