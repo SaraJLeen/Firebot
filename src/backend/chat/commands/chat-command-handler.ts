@@ -135,30 +135,22 @@ class CommandHandler {
                     chatMessage: firebotChatMessage
                 }
             };
-            try {
-                await RestrictionsManager.runRestrictionPredicates(triggerData, restrictionData, restrictionsAreInherited);
-                this.logger.debug("Restrictions passed!");
-                return true;
-            } catch (restrictionReason) {
-                let reason: string;
-                if (Array.isArray(restrictionReason)) {
-                    reason = restrictionReason.join(", ");
-                } else {
-                    reason = restrictionReason as string;
-                }
 
-                this.logger.debug(`${commandSender} could not use command '${command.trigger}' because: ${reason}`);
+            const restrictionResult = await RestrictionsManager.runRestrictionPredicates(triggerData, restrictionData, restrictionsAreInherited);
+
+            if (restrictionResult.success !== true) {
+                this.logger.debug(`${commandSender} could not use command '${command.trigger}' because: ${restrictionResult.failureReason}`);
+
                 if (restrictionData.sendFailMessage || restrictionData.sendFailMessage == null) {
-
-                    const restrictionMessage = restrictionData.useCustomFailMessage ?
-                        restrictionData.failMessage :
-                        DEFAULT_RESTRICTION_MESSAGE;
+                    const restrictionMessage = restrictionData.useCustomFailMessage
+                        ? restrictionData.failMessage
+                        : DEFAULT_RESTRICTION_MESSAGE;
 
                     if (sendFailureMessage === true) {
                         await TwitchApi.chat.sendChatMessage(
                             restrictionMessage
                                 .replaceAll("{user}", commandSender)
-                                .replaceAll("{reason}", reason),
+                                .replaceAll("{reason}", restrictionResult.failureReason),
                             restrictionData.sendAsReply === true ? firebotChatMessage.id : null,
                             true
                         );
@@ -167,7 +159,11 @@ class CommandHandler {
 
                 return false;
             }
+
+            this.logger.debug("Restrictions passed!");
+            return true;
         }
+
         return true;
     }
 
