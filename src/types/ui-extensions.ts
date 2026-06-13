@@ -1,4 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-function-type */
+
+import type { Awaitable } from "./util-types";
+
 export type BasePage = {
     id: string;
     name: string;
@@ -105,5 +108,5 @@ export type UIExtension = {
 export type FrontendListener = {
     eventName: string;
     useAsync?: boolean;
-    handler: <ExpectedArgs extends Array<unknown> = [], ReturnPayload = void>(...args: ExpectedArgs) => ReturnPayload;
+    handler: (...args: unknown[]) => Awaitable<unknown>;
 };
