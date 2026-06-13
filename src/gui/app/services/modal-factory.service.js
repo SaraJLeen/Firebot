@@ -477,7 +477,10 @@
                         index,
                         triggerType,
                         triggerMeta,
-                        objectCopyHelper
+                        objectCopyHelper,
+                        settingsService,
+                        $q,
+                        $injector
                     ) {
                         $scope.effect = JSON.parse(angular.toJson(effect));
                         $scope.triggerType = triggerType;
@@ -788,6 +791,63 @@
                                     }
                                 });
                         };
+
+                        $scope.defaultLabel = null;
+
+                        $scope.isUsingDefaultLabel = () => {
+                            return (
+                                !$scope.effect.effectLabel?.length && !!$scope.defaultLabel?.length && !$scope.isAddMode
+                            );
+                        };
+
+                        $scope.getEffectLabel = () => {
+                            if ($scope.effect.effectLabel?.length) {
+                                return $scope.effect.effectLabel;
+                            }
+
+                            if ($scope.effect?.id && settingsService.getSetting("DefaultEffectLabelsEnabled")) {
+                                if (isNew) {
+                                    return "[Not set - will use default]";
+                                }
+
+                                if ($scope.defaultLabel != null) {
+                                    return $scope.defaultLabel;
+                                }
+                            }
+                            return;
+                        };
+
+                        async function getDefaultLabel() {
+                            if (!$scope.effectDefinition) {
+                                return;
+                            }
+
+                            if (!$scope.effectDefinition?.getDefaultLabel) {
+                                return;
+                            }
+
+                            return Promise.resolve(
+                                $injector.invoke(
+                                    $scope.effectDefinition.getDefaultLabel,
+                                    {},
+                                    {
+                                        effect: $scope.effect
+                                    }
+                                )
+                            ).catch(() => {
+                                return null;
+                            });
+                        }
+
+                        function updateDefaultLabels() {
+                            $q.when(getDefaultLabel()).then((label) => {
+                                $scope.defaultLabel = label;
+                            });
+                        }
+
+                        $scope.$watch("effect", () => {
+                            updateDefaultLabels();
+                        }, true);
 
                         $scope.paste = async function() {
                             if ($scope.hasCopiedEffect()) {
