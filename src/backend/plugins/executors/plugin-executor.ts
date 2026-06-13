@@ -277,7 +277,7 @@ export class PluginExecutor extends IPluginExecutor {
                 const def = await resolve(entry);
                 if (!!def?.eventName?.length) {
                     const id = def.useAsync === true
-                        ? frontendCommunicator.onAsync(def.eventName, def.handler)
+                        ? frontendCommunicator.onAsync(def.eventName, def.handler as () => Promise<unknown>)
                         : frontendCommunicator.on(def.eventName, def.handler);
 
                     registrations.frontendListeners.push({
