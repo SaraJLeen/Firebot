@@ -57,6 +57,7 @@
                         <div ng-if="cell.control" class="cd-cell-content">
                             <i ng-if="cell.control._typeInfo.missing" class="fas fa-exclamation-triangle cd-cell-missing-glyph" uib-tooltip="This control's type ('{{cell.control.type}}') is not registered. It may belong to an uninstalled plugin." tooltip-append-to-body="true"></i>
                             <img ng-if="cell.control._previewIcon.kind === 'image'" class="cd-cell-icon" ng-src="{{cell.control._previewIcon.url}}" ng-style="cell.control._previewIcon.style" />
+                            <lucide-icon ng-if="cell.control._typeInfo.def.id === 'firebot:switch'" class="cd-cell-glyph" name="toggle-left" color="white" size="45"></lucide-icon>
                             <lucide-icon ng-if="cell.control._previewIcon.kind === 'glyph'" class="cd-cell-glyph" name="{{cell.control._previewIcon.name}}" color="{{cell.control._previewIcon.color}}" size="{{cell.control._previewIcon.size}}"></lucide-icon>
                             <span ng-if="cell.control._previewIcon.kind === 'emoji'" class="cd-cell-emoji" ng-style="cell.control._previewIcon.style">{{cell.control._previewIcon.emoji}}</span>
                             <div class="cd-cell-name" ng-style="cell.control._labelStyle">{{cell.control.label || cell.control.name}}</div>
@@ -101,7 +102,7 @@
                                     </ul>
                                 </span>
                             </div>
-                            <span ng-if="!cell.pinned" class="cd-resize-handle" uib-tooltip="Drag to resize" tooltip-append-to-body="true"></span>
+                            <span ng-if="!cell.pinned && cell.control._typeInfo.resizable" class="cd-resize-handle" uib-tooltip="Drag to resize" tooltip-append-to-body="true"></span>
                             <div ng-if="cell.pinned" class="cd-pinned-badge" uib-tooltip="Pinned control - click to override on this page" tooltip-append-to-body="true"><i class="fas fa-thumbtack"></i></div>
                             <div ng-if="cell.pinned" class="cd-pinned-add"><i class="fas fa-plus"></i></div>
                         </div>
@@ -167,7 +168,8 @@
                     control._typeInfo = {
                         def: typeDef,
                         missing: typeDef == null,
-                        isFolder: control.type === FOLDER_TYPE_ID
+                        isFolder: control.type === FOLDER_TYPE_ID,
+                        resizable: typeDef?.resizable !== false
                     };
 
                     const bg = control.background;

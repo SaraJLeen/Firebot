@@ -26,6 +26,7 @@ export interface PluginRegistrations {
     restrictionIds?: string[];
     integrationIds?: string[];
     gameIds?: string[];
+    frontendListeners?: Array<{ eventName: string, id: string }>;
     uiExtensionIds?: string[];
     overlayWidgetIds?: string[];
     httpRoutePrefix?: string;

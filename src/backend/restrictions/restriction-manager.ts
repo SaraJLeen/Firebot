@@ -1,6 +1,15 @@
 import { TypedEmitter } from "tiny-typed-emitter";
-import type { Restriction, RestrictionData, RestrictionType } from "../../types/restrictions";
-import type { Trigger, TriggerMeta, TriggerType } from "../../types/triggers";
+
+import type {
+    Restriction,
+    RestrictionData,
+    RestrictionResult,
+    RestrictionType,
+    Trigger,
+    TriggerMeta,
+    TriggerType
+} from "../../types";
+
 import frontendCommunicator from "../common/frontend-communicator";
 import { LoggerCache } from "../logger-cache";
 
@@ -118,12 +127,13 @@ class RestrictionsManager extends TypedEmitter<Events> {
     ): Promise<boolean> {
         if (restrictionData == null || restrictionData.restrictions == null ||
             restrictionData.restrictions.length < 1) {
-            return Promise.resolve(true);
+            return true;
         }
+
         const restrictions = restrictionData.restrictions;
         const permissions = restrictions.filter(r => r.type === "firebot:permissions");
         if (permissions == null) {
-            return Promise.resolve(true);
+            return true;
         }
 
         const permRestrictionData = {
@@ -138,8 +148,8 @@ class RestrictionsManager extends TypedEmitter<Events> {
                 userTwitchRoles: twitchRoles
             }
         };
-        return this.runRestrictionPredicates(triggerData, permRestrictionData)
-            .then(() => true, () => false);
+
+        return (await this.runRestrictionPredicates(triggerData, permRestrictionData)).success;
     }
 
     private async runPredicate(
@@ -147,41 +157,52 @@ class RestrictionsManager extends TypedEmitter<Events> {
         triggerData: Trigger,
         restriction: Restriction,
         restrictionsAreInherited: boolean
-    ) {
-        let restrictionPassed = false;
-        let failedReason: string = null;
+    ): Promise<RestrictionResult> {
+        let result: RestrictionResult = {
+            success: false,
+            failureReason: "You don't meet the requirements."
+        };
 
         try {
-            await restrictionDef.predicate(triggerData, restriction, restrictionsAreInherited);
-            restrictionPassed = true;
+            const evalResult = await restrictionDef.predicate(triggerData, restriction, restrictionsAreInherited);
+
+            // Back compat with old restriction format
+            if (typeof evalResult === "boolean") {
+                result = {
+                    success: evalResult,
+                    failureReason: undefined
+                };
+            } else {
+                result = evalResult;
+            }
         } catch (reason) {
-            failedReason = (reason instanceof Error ? reason.message : (reason as string))?.toLowerCase()
+            result.failureReason = (reason instanceof Error ? reason.message : (reason as string))?.toLowerCase()
                 ?? "You don't meet the requirements.";
         }
 
         if (restriction.invertCondition) {
-            restrictionPassed = !restrictionPassed;
-            if (restrictionPassed === false) {
-                failedReason = restrictionDef.failedReasonWhenInverted
+            result.success = !result.success;
+            if (result.success === false) {
+                result.failureReason = restrictionDef.failedReasonWhenInverted
                     ?? "You don't meet the requirements.";
             }
         }
 
-        if (!restrictionPassed) {
-            // eslint-disable-next-line @typescript-eslint/only-throw-error
-            throw failedReason;
-        }
+        return result;
     }
 
     async runRestrictionPredicates(
         triggerData: Trigger,
         restrictionData: RestrictionData,
         restrictionsAreInherited = false
-    ) {
+    ): Promise<RestrictionResult> {
         if (restrictionData == null || restrictionData.restrictions == null ||
             restrictionData.restrictions.length < 1) {
-            return Promise.resolve();
+            return {
+                success: true
+            };
         }
+
         const restrictions = restrictionData.restrictions;
 
         if (restrictionData.mode === "any" || restrictionData.mode === "none") {
@@ -190,37 +211,44 @@ class RestrictionsManager extends TypedEmitter<Events> {
             for (const restriction of restrictions) {
                 const restrictionDef = this.getRestrictionById(restriction.type);
                 if (restrictionDef && restrictionDef.predicate) {
-                    try {
-                        await this.runPredicate(restrictionDef, triggerData, restriction, restrictionsAreInherited);
+                    const result = await this.runPredicate(restrictionDef, triggerData, restriction, restrictionsAreInherited);
+                    if (result.success === true) {
                         restrictionPassed = true;
                         if (restrictionData.mode !== "none" && restrictionDef.onSuccessful) {
                             restrictionDef.onSuccessful(triggerData, restriction, restrictionsAreInherited);
                         }
                         break;
-                    } catch (reason) {
-                        if (reason) {
-                            reasons.push((reason as string).toLowerCase());
-                        }
+                    } else if (!!result.failureReason?.length) {
+                        reasons.push(result.failureReason.toLowerCase());
                     }
                 }
             }
 
             if (restrictionData.mode === "none") {
                 if (restrictionPassed) {
-                    // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors
-                    return Promise.reject(`You don't meet the requirements.`);
+                    return {
+                        success: false,
+                        failureReason: "You don't meet the requirements."
+                    };
                 }
-                return Promise.resolve();
+
+                return {
+                    success: true
+                };
             }
 
             if (!restrictionPassed) {
-                // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors
-                return Promise.reject(reasons.join(", or "));
+                return {
+                    success: false,
+                    failureReason: reasons.join(", or ")
+                };
             }
-            return Promise.resolve();
+            return {
+                success: true
+            };
 
         } else if (restrictionData.mode === "all" || restrictionData.mode == null) {
-            const predicatePromises = [];
+            const predicatePromises: Array<Promise<RestrictionResult>> = [];
             for (const restriction of restrictions) {
                 const restrictionDef = this.getRestrictionById(restriction.type);
                 if (restrictionDef && restrictionDef.predicate) {
@@ -228,17 +256,33 @@ class RestrictionsManager extends TypedEmitter<Events> {
                 }
             }
 
-            return Promise.all(predicatePromises).then(() => {
+            const promiseResult = await Promise.all(predicatePromises);
+            if (promiseResult.every(p => p.success === true)) {
                 for (const restriction of restrictions) {
                     const restrictionDef = this.getRestrictionById(restriction.type);
                     if (restrictionDef && restrictionDef.onSuccessful) {
                         restrictionDef.onSuccessful(triggerData, restriction, restrictionsAreInherited);
                     }
                 }
-            });
+
+                return {
+                    success: true
+                };
+            }
+
+            return {
+                success: false,
+                failureReason: promiseResult.map(p => p.failureReason)
+                    .filter(r => !!r?.length)
+                    .join(", or ")
+            };
         }
-        // eslint-disable-next-line @typescript-eslint/prefer-promise-reject-errors, @typescript-eslint/restrict-template-expressions
-        return Promise.reject(`Invalid restriction mode '${restrictionData.mode}'`);
+
+        return {
+            success: false,
+            // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+            failureReason: `Invalid restriction mode '${restrictionData.mode}'`
+        };
     }
 
     private mapRestrictionForFrontEnd(restriction: RestrictionType) {

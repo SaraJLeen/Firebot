@@ -369,43 +369,28 @@ class ChannelRewardManager {
                 !savedReward.twitchData.shouldRedemptionsSkipRequestQueue &&
                 savedReward.autoApproveRedemptions;
 
-            try {
-                await RestrictionsManager.runRestrictionPredicates(triggerData, savedReward.restrictionData);
-                this.logger.debug("Restrictions passed!");
-                if (shouldAutoApproveOrReject) {
-                    this.logger.debug("auto accepting redemption");
-                    void this.approveOrRejectChannelRewardRedemptions({
-                        rewardId,
-                        redemptionIds: [metadata.redemptionId],
-                        approve: true
-                    });
-                }
-            } catch (restrictionReason) {
-                let reason: string;
-                if (Array.isArray(restrictionReason)) {
-                    reason = restrictionReason.join(", ");
-                } else {
-                    reason = restrictionReason as string;
-                }
+            const restrictionResult = await RestrictionsManager.runRestrictionPredicates(triggerData, savedReward.restrictionData);
 
-                this.logger.debug(`${metadata.username} could not use Reward '${savedReward.twitchData.title}' because: ${reason}`);
+            if (restrictionResult.success !== true) {
+                this.logger.debug(`${metadata.username} could not use Reward '${savedReward.twitchData.title}' because: ${restrictionResult.failureReason}`);
+
                 if (restrictionData.sendFailMessage || restrictionData.sendFailMessage == null) {
-
-                    const restrictionMessage = restrictionData.useCustomFailMessage ?
-                        restrictionData.failMessage :
-                        "Sorry @{user}, you cannot use this channel reward because: {reason}";
+                    const restrictionMessage = restrictionData.useCustomFailMessage
+                        ? restrictionData.failMessage
+                        : "Sorry @{user}, you cannot use this channel reward because: {reason}";
 
                     await TwitchApi.chat.sendChatMessage(
                         restrictionMessage
                             .replaceAll("{user}", metadata.username)
-                            .replaceAll("{reason}", reason),
+                            .replaceAll("{reason}", restrictionResult.failureReason),
                         null,
                         true
                     );
                 }
 
                 if (shouldAutoApproveOrReject) {
-                    this.logger.debug("auto rejecting redemption");
+                    this.logger.debug("Auto rejecting redemption");
+
                     void this.approveOrRejectChannelRewardRedemptions({
                         rewardId,
                         redemptionIds: [metadata.redemptionId],
@@ -414,6 +399,18 @@ class ChannelRewardManager {
                 }
 
                 return false;
+            }
+
+            this.logger.debug("Restrictions passed!");
+
+            if (shouldAutoApproveOrReject) {
+                this.logger.debug("Auto approving redemption");
+
+                void this.approveOrRejectChannelRewardRedemptions({
+                    rewardId,
+                    redemptionIds: [metadata.redemptionId],
+                    approve: true
+                });
             }
         }
 

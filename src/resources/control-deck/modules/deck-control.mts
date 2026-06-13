@@ -1,7 +1,9 @@
 import { defineComponent, computed, type Component, type PropType } from "vue";
 
 import { FOLDER_CONTROL_TYPE_ID } from "./control-types/index.mjs";
+import { usePressed } from "./use-pressed.mjs";
 import type { ControlDeckControlView, ControlInteraction } from "./types.mjs";
+
 
 // Thin shell for a control on the deck grid: renders the control's background
 // and hosts the control type's component, which owns the content + gestures.
@@ -32,13 +34,16 @@ export const deckControl = defineComponent({
 
         const onInteract = (interaction: ControlInteraction): void => emit("interact", interaction);
 
-        return { isFolder, style, onInteract };
+        const { pressed, pressedHandlers } = usePressed();
+
+        return { isFolder, style, onInteract, pressed, pressedHandlers };
     },
     template: /* html */`
         <div
             class="deck-control"
-            :class="{ folder: isFolder, unknown: !typeComponent }"
+            :class="{ folder: isFolder, unknown: !typeComponent, pressed, [\`shell-\${control.shell}\`]: true }"
             :style="style"
+            v-bind="pressedHandlers"
         >
             <component
                 v-if="typeComponent"

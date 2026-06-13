@@ -99,12 +99,6 @@ export async function whenReady() {
     const { loadFilters } = await import("../../../events/filters/builtin-filter-loader");
     loadFilters();
 
-    // load integrations
-    logger.debug("Loading integrations...");
-    windowManagement.updateSplashScreenStatus("Loading integrations...");
-    const { loadIntegrations } = await import("../../../integrations/builtin-integration-loader");
-    loadIntegrations();
-
     // load variables
     logger.debug("Loading variables...");
     windowManagement.updateSplashScreenStatus("Loading variables...");
@@ -172,6 +166,9 @@ export async function whenReady() {
     ControlDeckControlTypeManager.registerBuiltInControlTypes();
     const { ControlDeckManager } = await import("../../../control-deck/control-deck-manager");
     ControlDeckManager.loadItems();
+    const { ControlDeckStateManager } = await import("../../../control-deck/control-deck-state-manager");
+    ControlDeckStateManager.loadItems();
+    await ControlDeckManager.initializeControlStates();
 
     windowManagement.updateSplashScreenStatus("Loading webhooks...");
     const webhookConfigManager = (await import("../../../webhooks/webhook-config-manager")).default;
@@ -271,7 +268,7 @@ export async function whenReady() {
     const { HttpServerManager } = (await import("../../../../server/http-server-manager"));
     HttpServerManager.start();
 
-    const { BonjourManager } = (await import("../../../bonjour-manager"));
+    const { BonjourManager } = (await import("../../../../server/bonjour-manager"));
     BonjourManager.start();
 
     // register websocket event handlers
@@ -306,6 +303,12 @@ export async function whenReady() {
 
     // start crowbar relay websocket
     await import("../../../crowbar-relay/crowbar-relay-websocket");
+
+    // load integrations
+    logger.debug("Loading integrations...");
+    windowManagement.updateSplashScreenStatus("Loading integrations...");
+    const { loadIntegrations } = await import("../../../integrations/builtin-integration-loader");
+    loadIntegrations();
 
     const countdownManager = (await import("../../../overlay-widgets/builtin-types/countdown/countdown-manager"))
         .default;

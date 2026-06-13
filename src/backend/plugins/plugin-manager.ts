@@ -388,30 +388,18 @@ class PluginManager {
         const installedPlugins: InstalledPlugin[] = [];
 
         for (const pluginConfig of pluginConfigs) {
-            const pluginFilePath = this.getPluginFilePath(pluginConfig.fileName);
-            // Use the isolated loader so inspecting a plugin (e.g. for the list UI)
-            // cannot disturb the cached module a running plugin is holding.
-            const plugin = this.loadPluginIsolated(pluginFilePath);
-
-            if (!plugin || !(await this.isValidPlugin(plugin))) {
-                if (plugin) {
-                    logger.warn(`Plugin ${pluginConfig.fileName} is not a valid plugin.`);
-                }
-                continue;
-            }
-
-            const executor = await this.findPluginExecutor(plugin);
-            if (!executor) {
-                continue;
-            }
-
             try {
-                const details = await executor.getPluginDetails(plugin);
-                if (details) {
-                    installedPlugins.push({ config: pluginConfig, details });
+                const result = await this.getPluginDetailsByFileName(pluginConfig.fileName, "plugin");
+
+                if (result.success === false) {
+                    logger.warn(`Could not get details for plugin ${pluginConfig.fileName}: ${result.error}`);
+                    continue;
                 }
+
+                installedPlugins.push({ config: pluginConfig, details: result.details });
             } catch (error) {
-                logger.warn(`Error reading details for ${pluginConfig.fileName}`, error);
+                logger.warn(`Error getting details for plugin ${pluginConfig.fileName}`, error);
+                continue;
             }
         }
 
@@ -903,9 +891,7 @@ class PluginManager {
 
     private loadPlugin(pluginFilePath: string): LoadedPlugin | null {
         try {
-            if (SettingsManager.getSetting("ClearCustomScriptCache")) {
-                delete require.cache[require.resolve(pluginFilePath)];
-            }
+            delete require.cache[require.resolve(pluginFilePath)];
 
             const loadedPlugin = require(pluginFilePath) as { default: unknown };
 

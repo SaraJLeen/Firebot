@@ -1,8 +1,8 @@
 import { Bonjour, Service } from "bonjour-service";
 
-import { SettingsManager } from "./common/settings-manager";
-import frontendCommunicator from "./common/frontend-communicator";
-import { LoggerCache } from "./logger-cache";
+import { SettingsManager } from "../backend/common/settings-manager";
+import frontendCommunicator from "../backend/common/frontend-communicator";
+import { LoggerCache } from "../backend/logger-cache";
 
 // The hostname that the Firebot web server is advertised under via mDNS/Bonjour.
 // This allows modern devices on the local network to reach Firebot at http://firebot.local

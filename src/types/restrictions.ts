@@ -11,6 +11,11 @@ interface RestrictionScope<RestrictionModel> extends ng.IScope {
 
 export type RestrictionMode = "all" | "any" | "none";
 
+export type RestrictionResult = {
+    success: boolean;
+    failureReason?: string;
+};
+
 export type RestrictionType<RestrictionModel = unknown> = {
     definition: {
         id: string;
@@ -32,7 +37,7 @@ export type RestrictionType<RestrictionModel = unknown> = {
         triggerData: Trigger,
         restrictionData: RestrictionModel,
         inherited?: boolean
-    ): Awaitable<boolean>;
+    ): Awaitable<RestrictionResult>;
     onSuccessful?: (
         triggerData: Trigger,
         restrictionData: RestrictionModel,

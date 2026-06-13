@@ -431,6 +431,14 @@ const rootComponent = defineComponent({
                     currentPageId.value = pageId ?? null;
                     void refreshCurrentDeck();
                 }
+            } else if (name === "control-deck:control-state-updated") {
+                const { deckId, controlId, state } = data as { deckId: string, controlId: string, state: unknown };
+                if (deckId === currentDeckId.value && currentDeck.value) {
+                    const control = currentDeck.value.controls.find(c => c.id === controlId);
+                    if (control) {
+                        control.state = state;
+                    }
+                }
             }
         }
 

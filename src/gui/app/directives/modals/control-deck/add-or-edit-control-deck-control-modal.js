@@ -17,10 +17,11 @@
                 </firebot-form-group>
 
                 <firebot-form-group name="control-type" label="Type">
-                    <firebot-radio-cards
-                        options="$ctrl.controlTypeOptions"
+                    <firebot-searchable-select
+                        name="type"
                         ng-model="$ctrl.control.type"
-                        grid-columns="2"
+                        placeholder="Select type"
+                        items="$ctrl.controlTypeOptions"
                     />
                     <div ng-if="!$ctrl.selectedType" class="alert alert-warning" style="margin-top:10px;margin-bottom:0;">
                         <i class="fas fa-exclamation-triangle mr-2"></i>
@@ -241,8 +242,8 @@
             };
 
             $ctrl.controlTypeOptions = controlDeckService.controlTypes.map(t => ({
-                value: t.id,
-                label: t.name,
+                id: t.id,
+                name: t.name,
                 iconClass: t.icon,
                 description: t.description
             }));

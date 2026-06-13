@@ -82,6 +82,35 @@ class ControlDeckManager extends JsonDbManager<ControlDeck> {
         return deck.controls?.find(c => c.id === controlId) ?? null;
     }
 
+    private buildTriggerEffectList(
+        deckId: string,
+        control: ControlDeckControl,
+        inputValues: Record<string, string | number | boolean> = {}
+    ): (effectList: EffectList, extraMetadata?: Record<string, unknown>) => Promise<void> {
+        const deck = this.getItem(deckId);
+        return async (effectList: EffectList, extraMetadata?: Record<string, unknown>): Promise<void> => {
+            if (effectList == null) {
+                return;
+            }
+            const request = {
+                trigger: {
+                    type: "control_deck",
+                    metadata: {
+                        username: AccountAccess.getAccounts().streamer.username,
+                        deckId: deckId,
+                        deckName: deck?.name,
+                        controlId: control.id,
+                        controlName: control.name,
+                        inputValues: inputValues,
+                        ...(extraMetadata ?? {})
+                    }
+                } as Trigger,
+                effects: effectList
+            };
+            await effectRunner.processEffects(request);
+        };
+    }
+
     /**
      * Routes a hosted-page interaction to the control's type handler. Returns
      * false when the control or its type can't be resolved.
@@ -101,6 +130,8 @@ class ControlDeckManager extends JsonDbManager<ControlDeck> {
         // Lazy require to avoid a circular dep at module load
         const { ControlDeckControlTypeManager } =
             require("./control-type-manager") as typeof import("./control-type-manager");
+        const { ControlDeckStateManager } =
+            require("./control-deck-state-manager") as typeof import("./control-deck-state-manager");
 
         const controlType = ControlDeckControlTypeManager.getControlType(control.type);
         if (controlType == null) {
@@ -108,33 +139,8 @@ class ControlDeckManager extends JsonDbManager<ControlDeck> {
             return false;
         }
 
-        const deck = this.getItem(deckId);
         const resolvedInputValues = inputValues ?? {};
-
-        const triggerEffectList = async (
-            effectList: EffectList,
-            extraMetadata?: Record<string, unknown>
-        ): Promise<void> => {
-            if (effectList == null) {
-                return;
-            }
-            const request = {
-                trigger: {
-                    type: "control_deck",
-                    metadata: {
-                        username: AccountAccess.getAccounts().streamer.username,
-                        deckId: deckId,
-                        deckName: deck?.name,
-                        controlId: control.id,
-                        controlName: control.name,
-                        inputValues: resolvedInputValues,
-                        ...(extraMetadata ?? {})
-                    }
-                } as Trigger,
-                effects: effectList
-            };
-            await effectRunner.processEffects(request);
-        };
+        const triggerEffectList = this.buildTriggerEffectList(deckId, control, resolvedInputValues);
 
         try {
             await controlType.onInteraction(
@@ -145,7 +151,14 @@ class ControlDeckManager extends JsonDbManager<ControlDeck> {
                     data,
                     inputValues: resolvedInputValues
                 },
-                { triggerEffectList }
+                {
+                    triggerEffectList,
+                    getState: () => ControlDeckStateManager.getControlState(control.id),
+                    // eslint-disable-next-line @typescript-eslint/require-await
+                    setState: async (newState: unknown) => {
+                        ControlDeckStateManager.setControlState(deckId, control.id, newState);
+                    }
+                }
             );
         } catch (error) {
             this.logger.error(`Error handling "${action}" interaction for control "${control.name}" (type ${control.type})`, error);
@@ -154,9 +167,36 @@ class ControlDeckManager extends JsonDbManager<ControlDeck> {
         return true;
     }
 
+    async initializeControlStates(): Promise<void> {
+        const { ControlDeckControlTypeManager } =
+            require("./control-type-manager") as typeof import("./control-type-manager");
+        const { ControlDeckStateManager } =
+            require("./control-deck-state-manager") as typeof import("./control-deck-state-manager");
+
+        for (const deck of this.getAllItems()) {
+            for (const control of deck.controls ?? []) {
+                const controlType = ControlDeckControlTypeManager.getControlType(control.type);
+                if (controlType?.state == null) {
+                    continue;
+                }
+
+                try {
+                    const persistedState = ControlDeckStateManager.getControlState(control.id);
+                    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+                    const initialState = await controlType.state.getInitialState(
+                        { control, persistedState },
+                        { triggerEffectList: this.buildTriggerEffectList(deck.id, control) }
+                    );
+                    ControlDeckStateManager.setControlState(deck.id, control.id, initialState, { broadcast: false });
+                } catch (error) {
+                    this.logger.error(`Error initializing state for control "${control.name}" (type ${control.type})`, error);
+                }
+            }
+        }
+    }
+
     private broadcastToControlDecks(eventName: string, data: unknown): void {
         try {
-            // Lazy require to avoid a circular dep
             // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
             const { HttpServerManager } = require("../../server/http-server-manager");
 

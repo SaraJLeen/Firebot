@@ -165,17 +165,14 @@ export type ControlDeckResolvedBackground =
     | { type: "color", color: string }
     | { type: "image", url: string };
 
-/**
- * A control as projected to the hosted Control Deck page. Server-only fields
- * are removed: the icon/background are resolved to renderable values, and the
- * type-specific settings are filtered per the type's settingsSchema (effect
- * lists, passwords, and hosted-hidden params stripped; file paths tokenized).
- */
 export type ControlDeckControlView =
     Omit<ControlDeckControl, "icon" | "background" | "settings"> & {
         icon?: ControlDeckResolvedIcon;
         background?: ControlDeckResolvedBackground;
         resolvedSettings: Record<string, unknown>;
+        /** Current runtime state for stateful control types (e.g. a Switch's on/off value) */
+        state?: unknown;
+        shell: "standard" | "none";
     };
 
 /** A deck as projected to the hosted Control Deck page. */
@@ -194,16 +191,38 @@ export type ControlDeckInteractionEvent<Params extends FirebotParams = FirebotPa
     inputValues: Record<string, string | number | boolean>;
 };
 
-export type ControlDeckInteractionContext = {
+export type ControlDeckInteractionContext<State = unknown> = {
     /**
-     * Runs an effect list with the standard control_deck trigger metadata
-     * (username, deck/control ids + names, inputValues) pre-filled. Extra
+     * Runs an effect list with the standard control_deck trigger metadata.
      * metadata is merged into the trigger metadata.
      */
     triggerEffectList: (effectList: EffectList, extraMetadata?: Record<string, unknown>) => Promise<void>;
+    /** The control's current runtime state (stateful types only) */
+    getState: () => State;
+    /**
+     * Sets the control's runtime state. The central store persists it and
+     * broadcasts the change to connected devices.
+     */
+    setState: (newState: State) => Promise<void>;
 };
 
-export type ControlDeckControlType<Params extends FirebotParams = FirebotParams> = {
+/** Context provided when a stateful control type computes its initial state */
+export type ControlDeckStateInitContext = {
+    triggerEffectList: (effectList: EffectList, extraMetadata?: Record<string, unknown>) => Promise<void>;
+};
+
+export type ControlDeckControlTypeState<Params extends FirebotParams = FirebotParams, State = unknown> = {
+    /**
+     * Called on Firebot startup (and when a control is first added) to compute
+     * the state the control should initialize to
+     */
+    getInitialState: (
+        event: { control: ControlDeckControl<Params>, persistedState: State | undefined },
+        context: ControlDeckStateInitContext
+    ) => Awaitable<State>;
+};
+
+export type ControlDeckControlType<Params extends FirebotParams = FirebotParams, State = void> = {
     id: string;
     /** Display name shown in the Add Control picker, e.g. "Slider" */
     name: string;
@@ -215,6 +234,8 @@ export type ControlDeckControlType<Params extends FirebotParams = FirebotParams>
     defaultSize?: ControlDeckControlSize;
     minSize?: ControlDeckControlSize;
     maxSize?: ControlDeckControlSize;
+    /** When false, the control cannot be resized in the editor. Defaults to true. */
+    resizable?: boolean;
 
     /** When true, the standard icon config is shown for controls of this type */
     enableIcon?: boolean;
@@ -229,12 +250,18 @@ export type ControlDeckControlType<Params extends FirebotParams = FirebotParams>
     /** When true, the optional label (+ label font) config is shown for controls of this type */
     enableLabel?: boolean;
 
+    /** The shell style for the control. "standard" uses the default shell and click animation, "none" removes it. */
+    shell?: "standard" | "none";
+
     /** Schema for the type-specific settings shown in the control edit modal */
     settingsSchema: FirebotParameterArray<Params>;
+
+    /** Declares this control type as stateful. */
+    state?: ControlDeckControlTypeState<Params, State>;
 
     /** Called when a device interacts with a control of this type */
     onInteraction: (
         event: ControlDeckInteractionEvent<Params>,
-        context: ControlDeckInteractionContext
+        context: ControlDeckInteractionContext<State>
     ) => Awaitable<void>;
 };

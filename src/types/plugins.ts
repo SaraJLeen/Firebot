@@ -9,7 +9,7 @@ import type { RestrictionType } from "./restrictions";
 import type { FirebotParams, FirebotParameterArray } from "./parameters";
 import type { FirebotGame } from "./games";
 import type { Integration } from "./integrations";
-import type { UIExtension } from "./ui-extensions";
+import type { FrontendListener, UIExtension } from "./ui-extensions";
 import type { OverlayWidgetType } from "./overlay-widgets";
 import type { PluginHttpRouteDefinition } from "./http-server";
 import type { CustomWebSocketHandler } from "./websocket";
@@ -137,6 +137,7 @@ export interface Plugin<Params extends FirebotParams = FirebotParams> extends Pl
         restrictions?: DynamicArray<RestrictionType<any>>;
         systemCommands?: DynamicArray<SystemCommand<any>>;
         games?: DynamicArray<FirebotGame>;
+        frontendListeners?: DynamicArray<FrontendListener>;
         uiExtensions?: DynamicArray<UIExtension>;
         overlayWidgets?: DynamicArray<OverlayWidgetType<any, any>>;
         httpRoutes?: DynamicObject<PluginHttpRouteDefinition>;

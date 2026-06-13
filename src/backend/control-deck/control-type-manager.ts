@@ -4,6 +4,7 @@ import frontendCommunicator from "../common/frontend-communicator";
 import { LoggerCache } from "../logger-cache";
 import { buttonControlType } from "./builtin-control-types/button";
 import { folderControlType } from "./builtin-control-types/folder";
+import { switchControlType } from "./builtin-control-types/switch";
 
 const CONTROL_TYPE_ID_REGEX = /^[a-z0-9_-]+:[a-z0-9_-]+$/i;
 
@@ -11,7 +12,7 @@ class ControlDeckControlTypeManager {
     private logger = LoggerCache.getLogger("Control Deck");
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    private controlTypes: Map<string, ControlDeckControlType<any>> = new Map();
+    private controlTypes: Map<string, ControlDeckControlType<any, any>> = new Map();
 
     constructor() {
         frontendCommunicator.on("control-deck:get-control-types",
@@ -22,10 +23,11 @@ class ControlDeckControlTypeManager {
     registerBuiltInControlTypes(): void {
         this.registerControlType(buttonControlType);
         this.registerControlType(folderControlType);
+        this.registerControlType(switchControlType);
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    private registerControlType(controlType: ControlDeckControlType<any>): void {
+    private registerControlType(controlType: ControlDeckControlType<any, any>): void {
         if (controlType?.id == null || !CONTROL_TYPE_ID_REGEX.test(controlType.id)) {
             throw new Error(`Control type id "${controlType?.id}" is invalid. Ids must be in the form "namespace:name".`);
         }
@@ -40,12 +42,12 @@ class ControlDeckControlTypeManager {
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    getControlType(id: string): ControlDeckControlType<any> | null {
+    getControlType(id: string): ControlDeckControlType<any, any> | null {
         return this.controlTypes.get(id) ?? null;
     }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    getAllControlTypes(): ControlDeckControlType<any>[] {
+    getAllControlTypes(): ControlDeckControlType<any, any>[] {
         return Array.from(this.controlTypes.values());
     }
 
@@ -58,6 +60,7 @@ class ControlDeckControlTypeManager {
             defaultSize: controlType.defaultSize,
             minSize: controlType.minSize,
             maxSize: controlType.maxSize,
+            resizable: controlType.resizable !== false,
             enableIcon: controlType.enableIcon === true,
             defaultIcon: controlType.defaultIcon,
             enableBackground: controlType.enableBackground === true,

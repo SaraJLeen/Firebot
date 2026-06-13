@@ -158,14 +158,19 @@ type ContextMenuItemScope = {
                                         <i class="fas fa-grip-vertical"></i>
                                     </div>
                                     <effect-icon effect-id="effect.type" effect-definition="$ctrl.getEffectDefinitionById(effect.type)"></effect-icon>
-                                    <div class="pr-4 flex flex-col justify-center" style="text-overflow: ellipsis;overflow: hidden;flex-grow: 1;">
+                                    <div
+                                        class="pr-4 flex flex-col justify-center"
+                                        style="text-overflow: ellipsis;overflow: hidden;flex-grow: 1;"
+                                    >
                                         <div class="flex items-center">
-                                            <div class="effect-name truncate">
+                                            <div class="effect-name truncate" ng-dblclick="$ctrl.editLabelForEffectAtIndex($index)">
                                                 {{$ctrl.getEffectNameById(effect.type)}}
                                             </div>
                                             <span ng-if="!effect.active" class="effect-disabled-label">Disabled</span>
                                         </div>
-                                        <div ng-if="$ctrl.getEffectLabel(effect)" class="muted truncate" style="font-size: 12px;">{{$ctrl.getEffectLabel(effect)}}</div>
+                                        <div ng-if="$ctrl.getEffectLabel(effect)" class="muted truncate" style="font-size: 12px;">
+                                            <span ng-dblclick="$ctrl.editLabelForEffectAtIndex($index)">{{$ctrl.getEffectLabel(effect)}}</span>
+                                        </div>
                                     </div>
                                     <span class="flex-row-center" style="flex-shrink: 0;">
                                         <div

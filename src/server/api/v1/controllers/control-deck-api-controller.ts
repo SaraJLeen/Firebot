@@ -9,6 +9,7 @@ import type {
 import crypto from "crypto";
 import { ControlDeckManager } from "../../../../backend/control-deck/control-deck-manager";
 import { ControlDeckControlTypeManager } from "../../../../backend/control-deck/control-type-manager";
+import { ControlDeckStateManager } from "../../../../backend/control-deck/control-deck-state-manager";
 import { ResourceTokenManager } from "../../../../backend/resource-token-manager";
 import { SettingsManager } from "../../../../backend/common/settings-manager";
 
@@ -36,7 +37,7 @@ function controlDeckPinMatches(providedPin: unknown): boolean {
 
 function resolveSettingsForView(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    controlType: ControlDeckControlType<any> | null,
+    controlType: ControlDeckControlType<any, any> | null,
     settings: Record<string, unknown> | undefined
 ): Record<string, unknown> {
     const resolved: Record<string, unknown> = {};
@@ -125,7 +126,9 @@ function mapControlDeckDeckView(deck: ControlDeck): ControlDeckView {
             icon,
             iconSize: control.iconSize,
             background,
-            resolvedSettings: resolveSettingsForView(controlType, control.settings)
+            shell: controlType.shell ?? "standard",
+            resolvedSettings: resolveSettingsForView(controlType, control.settings),
+            state: controlType?.state != null ? ControlDeckStateManager.getControlState(control.id) : undefined
         };
     });
 

@@ -133,24 +133,6 @@ export interface PluginFrontendCommunicatorApi {
         eventName: string,
         data?: ExpectedArg
     ): Promise<ReturnPayload>;
-
-    /**
-     * Handle a synchronous event triggered by the frontend. Returns an
-     * `unsubscribe` function.
-     */
-    on<ExpectedArgs extends Array<unknown> = [], ReturnPayload = void>(
-        eventName: string,
-        callback: (...args: ExpectedArgs) => ReturnPayload
-    ): () => void;
-
-    /**
-     * Handle an asynchronous event triggered by the frontend. Returns an
-     * `unsubscribe` function.
-     */
-    onAsync<ExpectedArgs extends Array<unknown> = [], ReturnPayload = void>(
-        eventName: string,
-        callback: (...args: ExpectedArgs) => Promise<ReturnPayload>
-    ): () => void;
 }
 
 export interface PluginSettingsApi {
