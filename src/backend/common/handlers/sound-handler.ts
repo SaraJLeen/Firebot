@@ -99,7 +99,7 @@ export async function playSound(soundData: {
 
     if (soundData.waitForSound) {
         try {
-            const duration = await frontendCommunicator.fireEventAsync<number>("getSoundDuration", {
+            const duration: number = await frontendCommunicator.fireEventAsync("getSoundDuration", {
                 path: data.isUrl ? data.url : data.filepath
             });
 

@@ -146,7 +146,6 @@ export type EffectInstance<EffectModel = unknown> = {
 export type EffectType<EffectModel = unknown, OverlayData = unknown> = {
     definition: EffectDefinition<EffectModel>;
     optionsTemplate: string;
-    optionsTemplateUrl?: string;
     optionsController?: ($scope: EffectScope<EffectModel>, ...args: any[]) => void;
     optionsValidator?: (effect: EffectModel, $scope: EffectScope<EffectModel>) => string[];
     getDefaultLabel?: (effect: EffectModel, ...args: any[]) => Awaitable<string | undefined>;
