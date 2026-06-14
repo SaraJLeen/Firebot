@@ -7,6 +7,7 @@ const path = require("path");
 const { TwitchApi } = require("../../streaming-platforms/twitch/api");
 const { ProfileManager } = require("../../common/profile-manager");
 const { SettingsManager } = require("../../common/settings-manager");
+const { UIExtensionManager } = require("../../ui-extensions/ui-extension-manager");
 const webhookManager = require("../../webhooks/webhook-config-manager");
 const twitchChat = require("../../chat/twitch-chat");
 const logger = require("../../logwrapper");
@@ -216,7 +217,11 @@ function buildModules(scriptId, scriptManifest) {
                     .forEach(n => notificationManager.deleteNotification(n.id));
             }
         },
-        uiExtensionManager: require("../../ui-extensions/ui-extension-manager")
+        uiExtensionManager: {
+            registerUIExtension: (extension) => {
+                UIExtensionManager.registerUIExtension(extension, scriptId);
+            }
+        }
     };
 }
 
