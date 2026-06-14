@@ -4,9 +4,9 @@ export interface FrontendCommunicatorModule {
      * @param eventName The name of the event to send.
      * @param data Data to provide to the event handler.
      */
-    send<ExpectedArg = unknown>(
+    send<ExpectedArgs extends Array<unknown> = []>(
         eventName: string,
-        data?: ExpectedArg
+        ...data: ExpectedArgs
     ): void;
 
     /** Handle a synchronous event triggered by the frontend.
@@ -39,9 +39,9 @@ export interface FrontendCommunicatorModule {
      * @param eventName The name of the event to send.
      * @param data The data to provide with the event.
      */
-    fireEventAsync<ReturnPayload = void, ExpectedArg = unknown>(
+    fireEventAsync<ReturnPayload = void, ExpectedArgs extends Array<unknown> = []>(
         eventName: string,
-        data?: ExpectedArg
+        ...data: ExpectedArgs
     ): Promise<ReturnPayload>;
 
     /**

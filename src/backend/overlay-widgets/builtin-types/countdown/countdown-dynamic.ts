@@ -113,7 +113,7 @@ export const dynamicCountdown: OverlayWidgetType<Settings, State> = {
             label: "Add Time",
             icon: "fa-plus-circle",
             click: async (config) => {
-                const seconds = await frontendCommunicator.fireEventAsync<number>("openGetInputModal", {
+                const seconds: number = await frontendCommunicator.fireEventAsync("openGetInputModal", {
                     config: {
                         model: config.state?.remainingSeconds ?? 0,
                         inputType: "number",
