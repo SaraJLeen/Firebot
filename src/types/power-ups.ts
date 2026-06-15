@@ -13,8 +13,10 @@ export type PowerUpRedemptionMetadata = {
     userId: string;
     userDisplayName: string;
     messageText: string;
+    args: string[];
     powerUpId: string;
     powerUpImage: string;
     powerUpName: string;
+    powerUpDescription: string;
     bits: number;
 };

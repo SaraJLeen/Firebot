@@ -22,7 +22,7 @@ import { RestrictionsManager } from "../../restrictions/restriction-manager";
 import { GameManager } from "../../games/game-manager";
 import { LoggerCache } from "../../logger-cache";
 import IntegrationManager from "../../integrations/integration-manager";
-import UIExtensionManager from "../../ui-extensions/ui-extension-manager";
+import { UIExtensionManager } from "../../ui-extensions/ui-extension-manager";
 import OverlayWidgetManager from "../../overlay-widgets/overlay-widgets-manager";
 import { HttpServerManager } from "../../../server/http-server-manager";
 import { WebSocketServerManager } from "../../../server/websocket-server-manager";
@@ -82,7 +82,7 @@ export class PluginExecutor extends IPluginExecutor {
             await plugin.onLoad?.(context, isInstalling);
         } catch (error) {
             // best-effort rollback of anything we did register
-            this.runUnregistrations(registrations);
+            this.runUnregistrations(plugin, registrations);
             return {
                 success: false,
                 error: (error as Error)?.message ?? "Error while loading plugin"
@@ -106,7 +106,7 @@ export class PluginExecutor extends IPluginExecutor {
         }
 
         if (registrations) {
-            this.runUnregistrations(registrations);
+            this.runUnregistrations(plugin, registrations);
         }
 
         const context: PluginContext = {
@@ -288,17 +288,6 @@ export class PluginExecutor extends IPluginExecutor {
             }
         }
 
-        if (Array.isArray(r.uiExtensions)) {
-            registrations.uiExtensionIds = [];
-            for (const entry of r.uiExtensions) {
-                const def = await resolve(entry);
-                if (def?.id) {
-                    UIExtensionManager.registerUIExtension(def);
-                    registrations.uiExtensionIds.push(def.id);
-                }
-            }
-        }
-
         if (Array.isArray(r.overlayWidgets)) {
             registrations.overlayWidgetIds = [];
             for (const entry of r.overlayWidgets) {
@@ -383,9 +372,21 @@ export class PluginExecutor extends IPluginExecutor {
                 }
             }
         }
+
+        if (Array.isArray(r.uiExtensions)) {
+            registrations.uiExtensionIds = [];
+            for (const entry of r.uiExtensions) {
+                const def = await resolve(entry);
+                if (def?.id) {
+                    if (UIExtensionManager.registerUIExtension(def, config.id) === true) {
+                        registrations.uiExtensionIds.push(def.id);
+                    }
+                }
+            }
+        }
     }
 
-    private runUnregistrations(registrations: PluginRegistrations) {
+    private runUnregistrations(plugin: PluginBase, registrations: PluginRegistrations) {
         for (const id of registrations.effectIds ?? []) {
             try {
                 EffectManager.unregisterEffect(id);
@@ -393,6 +394,7 @@ export class PluginExecutor extends IPluginExecutor {
                 logger.warn(`Failed to unregister effect ${id}`, e);
             }
         }
+
         for (const handle of registrations.variableHandles ?? []) {
             try {
                 ReplaceVariableManager.unregisterReplaceVariable(handle);
@@ -400,6 +402,7 @@ export class PluginExecutor extends IPluginExecutor {
                 logger.warn(`Failed to unregister variable ${handle}`, e);
             }
         }
+
         for (const id of registrations.eventSourceIds ?? []) {
             try {
                 EventManager.unregisterEventSource(id);
@@ -407,6 +410,7 @@ export class PluginExecutor extends IPluginExecutor {
                 logger.warn(`Failed to unregister event source ${id}`, e);
             }
         }
+
         for (const id of registrations.filterIds ?? []) {
             try {
                 FilterManager.unregisterFilter(id);
@@ -414,6 +418,7 @@ export class PluginExecutor extends IPluginExecutor {
                 logger.warn(`Failed to unregister filter ${id}`, e);
             }
         }
+
         for (const id of registrations.systemCommandIds ?? []) {
             try {
                 CommandManager.unregisterSystemCommand(id);
@@ -421,6 +426,7 @@ export class PluginExecutor extends IPluginExecutor {
                 logger.warn(`Failed to unregister system command ${id}`, e);
             }
         }
+
         for (const id of registrations.restrictionIds ?? []) {
             try {
                 RestrictionsManager.unregisterRestriction(id);
@@ -428,6 +434,7 @@ export class PluginExecutor extends IPluginExecutor {
                 logger.warn(`Failed to unregister restriction ${id}`, e);
             }
         }
+
         for (const id of registrations.integrationIds ?? []) {
             try {
                 IntegrationManager.unregisterIntegration(id);
@@ -450,8 +457,6 @@ export class PluginExecutor extends IPluginExecutor {
                 logger.warn(`Failed to unregister frontend listener ${listener.eventName}`, e);
             }
         }
-
-        // UI Extensions can't be dynamically unregistered. Users will need to restart Firebot to fully remove.
 
         for (const id of registrations.overlayWidgetIds ?? []) {
             try {
@@ -491,6 +496,15 @@ export class PluginExecutor extends IPluginExecutor {
             } catch (e) {
                 logger.warn(`Failed to unregister event ${varEvent.eventSourceId}:${varEvent.eventId} for effect ${varEvent.effectId}`, e);
             }
+        }
+
+        // UI Extensions can't be dynamically unregistered. Users will need to restart Firebot to fully remove.
+        if (!!registrations.uiExtensionIds?.length) {
+            frontendCommunicator.send("showToast", {
+                content: `You must restart Firebot to fully update, disable, or uninstall the ${plugin.manifest.name} plugin.`,
+                className: "warning",
+                dismissOnTimeout: false
+            });
         }
     }
 

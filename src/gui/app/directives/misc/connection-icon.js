@@ -18,7 +18,8 @@
             $timeout,
             connectionManager,
             connectionService,
-            integrationService
+            integrationService,
+            logger
         ) {
             const ctrl = this;
 
@@ -145,7 +146,7 @@
                     shouldUpdate = true;
                 } else if (data.status === ConnectionStatus.CONNECTED || data.status === ConnectionStatus.DISCONNECTED) {
                     ctrl.connectionStatus = data.status;
-                    console.log(`Set status "${ctrl.connectionStatus}" for connection type "${ctrl.type}"`);
+                    logger.debug(`Set status "${ctrl.connectionStatus}" for connection type "${ctrl.type}"`);
                     shouldUpdate = true;
                 }
 
