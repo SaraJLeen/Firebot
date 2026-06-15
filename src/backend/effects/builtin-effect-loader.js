@@ -76,6 +76,7 @@ exports.loadEffects = () => {
         'update-role',
         'update-viewer-rank',
 
+        'overlay-widgets/clear-chat-widget',
         'overlay-widgets/update-overlay-widget-settings',
         'overlay-widgets/update-progress-bar',
         'overlay-widgets/update-dynamic-countdown',
