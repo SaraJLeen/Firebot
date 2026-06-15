@@ -44,16 +44,19 @@ class PowerUpsManager {
             }
 
             // Manually triggered by streamer, must pass in userId and userDisplayName can be falsy
+            const messageText = "Testing power-up";
             void this.triggerPowerUp(
                 powerUpId,
                 {
-                    messageText: "Testing power-up",
+                    messageText: messageText,
+                    args: messageText.split(" "),
                     powerUpId: savedPowerUp.id,
                     bits: savedPowerUp.twitchData.bits,
                     powerUpImage: savedPowerUp.twitchData.image
                         ? savedPowerUp.twitchData.image.url4x
                         : savedPowerUp.twitchData.defaultImage.url4x,
                     powerUpName: savedPowerUp.twitchData.title,
+                    powerUpDescription: savedPowerUp.twitchData.prompt,
                     username: AccountAccess.getAccounts().streamer.displayName,
                     userId: "",
                     userDisplayName: ""
