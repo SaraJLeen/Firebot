@@ -153,9 +153,11 @@ export function handleCustomPowerUpRedemption(
             userId,
             userDisplayName,
             messageText,
+            args: redemptionMeta.args,
             powerUpId,
             powerUpImage: powerUpImageUrl,
             powerUpName: powerUpTitle,
+            powerUpDescription: powerUpPrompt,
             bits: powerUpCost
         });
     }, 100);
