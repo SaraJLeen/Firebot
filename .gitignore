@@ -96,3 +96,5 @@ secrets.json
 /build.bat
 /update_dependencies.bat
 /update_source.bat
+/build_full_and_launch.bat
+/v5
