@@ -171,7 +171,7 @@ class ViewerDatabase extends TypedEmitter<{
     }
 
     async connectViewerDatabase(): Promise<void> {
-        this.logger.info('ViewerDB: Trying to connect to viewer database...');
+        this.logger.info('Trying to connect to viewer database...');
         if (this.isViewerDBOn() !== true) {
             return;
         }
@@ -181,17 +181,17 @@ class ViewerDatabase extends TypedEmitter<{
         try {
             await this._db.loadDatabaseAsync();
         } catch (error) {
-            this.logger.info("ViewerDB: Error Loading Database: ", (error as Error).message);
-            this.logger.info("ViewerDB: Failed Database Path: ", path);
+            this.logger.info("Error Loading Database: ", (error as Error).message);
+            this.logger.info("Failed Database Path: ", path);
         }
 
         // Setup our automatic compaction interval to shrink filesize.
         this._db.setAutocompactionInterval(this._dbCompactionInterval);
         setInterval(() => {
-            this.logger.debug(`ViewerDB: Compaction should be happening now. Compaction Interval: ${this._dbCompactionInterval}`);
+            this.logger.debug(`Compaction should be happening now. Compaction Interval: ${this._dbCompactionInterval / 1000} seconds`);
         }, this._dbCompactionInterval);
 
-        this.logger.info("ViewerDB: Viewer Database Loaded: ", path);
+        this.logger.info("Viewer Database Loaded: ", path);
         this.emit("viewer-database-loaded");
     }
 
@@ -252,7 +252,7 @@ class ViewerDatabase extends TypedEmitter<{
 
             return newViewer;
         } catch (error) {
-            this.logger.error("ViewerDB: Error adding viewer", error);
+            this.logger.error("Error adding viewer", error);
         }
     }
 

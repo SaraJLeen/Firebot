@@ -166,9 +166,9 @@ class ViewerOnlineStatusManager {
 
             await viewerDatabase.getViewerDb().updateAsync({ _id: viewer._id }, { $set: { online: false } });
 
-            this.logger.debug(`ViewerDB: Set ${viewer.username} (${viewer._id}) to offline.`);
+            this.logger.debug(`Set ${viewer.username} (${viewer._id}) to offline.`);
         } catch (error) {
-            this.logger.error("ViewerDB: Error setting viewer to offline.", error);
+            this.logger.error("Error setting viewer to offline.", error);
         }
     }
 
@@ -177,14 +177,14 @@ class ViewerOnlineStatusManager {
             return;
         }
 
-        this.logger.debug('ViewerDB: Trying to set all viewers to offline.');
+        this.logger.debug('Trying to set all viewers to offline.');
 
         const { numAffected } = await viewerDatabase.getViewerDb().updateAsync({ online: true }, { $set: { online: false } }, { multi: true });
 
         if (numAffected > 0) {
-            this.logger.debug(`ViewerDB: Set ${numAffected} viewers to offline.`);
+            this.logger.debug(`Set ${numAffected} viewers to offline.`);
         } else {
-            this.logger.debug('ViewerDB: No viewers were set to offline.');
+            this.logger.debug('No viewers were set to offline.');
         }
     }
 
@@ -199,9 +199,9 @@ class ViewerOnlineStatusManager {
         try {
             const { numAffected } = await viewerDatabase.getViewerDb().updateAsync({ online: true }, { $set: { lastSeen: Date.now() } }, { multi: true });
 
-            this.logger.debug(`ViewerDB: Setting last seen date for ${numAffected} viewers`);
+            this.logger.debug(`Setting last seen date for ${numAffected} viewers`);
         } catch {
-            this.logger.debug("ViewerDB: Error setting last seen");
+            this.logger.debug("Error setting last seen");
         }
     }
 
@@ -234,12 +234,12 @@ class ViewerOnlineStatusManager {
                 .updateAsync({ _id: viewer._id }, { $set: { minutesInChannel: newTotalMinutes } });
 
             if (numAffected === 0) {
-                this.logger.debug(`ViewerDB: Couldnt update viewer's online minutes. viewerId: ${viewer._id}`);
+                this.logger.debug(`Couldnt update viewer's online minutes. viewerId: ${viewer._id}`);
             } else {
                 this.viewerViewTimeUpdate(viewer, previousTotalMinutes, newTotalMinutes);
             }
         } catch (error) {
-            this.logger.debug(`ViewerDB: Couldnt update viewer's online minutes because of an error. viewerId: ${viewer._id}`, error);
+            this.logger.debug(`Couldnt update viewer's online minutes because of an error. viewerId: ${viewer._id}`, error);
         }
     }
 
