@@ -7,7 +7,6 @@ import connectionManager from "../common/connection-manager";
 import { EventManager } from "../events/event-manager";
 import twitchChat from "../chat/twitch-chat";
 import twitchChatterPoll from "../streaming-platforms/twitch/chatter-poll";
-import frontendCommunicator from "../common/frontend-communicator";
 import { ActiveUserHandler } from "../chat/active-user-handler";
 import { LoggerCache } from "../logger-cache";
 
@@ -26,18 +25,6 @@ class ViewerOnlineStatusManager {
 
             // Update online viewer minutes every 15 minutes.
             this._updateTimeIntervalId = setInterval(async () => await this.calcAllViewersOnlineMinutes(), 900000);
-        });
-
-        frontendCommunicator.onAsync("disconnect-viewer-db", async () => {
-            await this.setAllViewersOffline();
-
-            // Clear the online time calc interval.
-            clearInterval(this._updateTimeIntervalId);
-            clearInterval(this._updateLastSeenIntervalId);
-
-            viewerDatabase.disconnectViewerDatabase();
-
-            this.logger.debug("Disconnecting from viewer database.");
         });
 
         ActiveUserHandler.on("user:online", (user) => {
